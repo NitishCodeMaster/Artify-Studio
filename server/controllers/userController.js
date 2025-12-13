@@ -71,7 +71,7 @@ module.exports.loginUser = async (req, res) => {
         }
 
         const token = jwt.sign(
-            { id: user._id },
+            { id: user._id, role: user.role },
             process.env.JWT_SECRET,
             { expiresIn: '7d' }
         );
@@ -150,4 +150,3 @@ module.exports.updateUserProfile = async (req, res) => {
         res.status(500).json({ message: "Server error", error: error.message });
     }
 }
- 

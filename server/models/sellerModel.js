@@ -64,16 +64,16 @@ const SellerSchema = new mongoose.Schema({
         },
         coordinates: {
             type: [Number],  // [longitude, latitude]
-            required: true
+            required: true,
+            default: [0, 0]
         }
     },
 }, { timestamps: true });
 
-SellerSchema.pre('save', async function (next) {
-    if (!this.isModified('password')) return next();
+SellerSchema.pre('save', async function () {
+    if (!this.isModified('password')) return;
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
-    next();
 });
 
 

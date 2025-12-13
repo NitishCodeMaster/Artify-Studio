@@ -54,16 +54,18 @@ module.exports.loginSeller = async (req, res) => {
             return res.status(400).json({ errors: errors.array() });
         }
         const { email, password } = req.body;
+
         const seller = await sellerModel.findOne({ email }).select('+password');
         if (!seller) {
-            return res.status(400).json({ message: 'Invalid email or password' });
+            return res.status(400).json({ message: 'seller not found' });
         }
         const isMatch = await seller.matchPassword(password);
         if (!isMatch) {
-            return res.status(400).json({ message: 'Invalid email or password' });
+            return res.status(400).json({ message: 'Invalid password' });
         }
+
         const token = jwt.sign(
-            { id: seller._id, role: 'seller' },
+            { id: seller._id, role: seller.role },
             process.env.JWT_SECRET,
             { expiresIn: '7d' }
         );
