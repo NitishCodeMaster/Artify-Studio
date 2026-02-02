@@ -1,13 +1,13 @@
 import { ArrowRight, Play } from 'lucide-react';
-import { PerformerPanel } from '../components/PerformerPanel';
-import { Features } from '../components/Features';
-import { Events } from '../components/Events';
-import { MarketPlace } from '../components/MarketPlace';
-import { ArtistSpotlight } from '../components/ArtistSpotlight';
-import { MentorshipSection } from '../components/MentorshipSection';
-import { CTA } from '../components/CTA';
+import ArtistSpotlight from '../components/Home/ArtistSpotlight';
+import PerformerPanel from '../components/Home/PerformerPanel';
+import Features from '../components/Home/Features';
+import Events from '../components/Home/Events';
+import MarketPlace from '../components/Home/MarketPlace';
+import MentorshipSection from '../components/Home/MentorshipSection';
+import CTA from '../components/Home/CTA';
 import { Footer } from '../components/Footer';
-import { Testimonials } from '../components/Testimonials'; 
+import Testimonials from '../components/Home/Testimonials';
 
 const Home = () => {
     return (
@@ -15,23 +15,23 @@ const Home = () => {
 
             <section className="relative min-h-screen flex items-center overflow-hidden pt-20 pb-20 bg-black">
 
-                 <div className="absolute inset-0 pointer-events-none">
-                    
-                     <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-600/20 rounded-full blur-[120px] opacity-50"></div>
+                <div className="absolute inset-0 pointer-events-none">
+
+                    <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-600/20 rounded-full blur-[120px] opacity-50"></div>
                     <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[120px] opacity-50"></div>
 
-                     <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:50px_50px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
+                    <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:50px_50px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
 
-                     <div className="absolute top-1/4 -left-20 w-[600px] h-[600px] rounded-full border border-white/5 border-t-white/10 animate-[spin_20s_linear_infinite] pointer-events-none"></div>
-                    
-                     <div className="absolute top-1/3 -left-10 w-[400px] h-[400px] rounded-full border border-white/5 border-b-indigo-500/30 animate-[spin_15s_linear_infinite] pointer-events-none" style={{ animationDirection: 'reverse' }}></div>
+                    <div className="absolute top-1/4 -left-20 w-[600px] h-[600px] rounded-full border border-white/5 border-t-white/10 animate-[spin_20s_linear_infinite] pointer-events-none"></div>
+
+                    <div className="absolute top-1/3 -left-10 w-[400px] h-[400px] rounded-full border border-white/5 border-b-indigo-500/30 animate-[spin_15s_linear_infinite] pointer-events-none" style={{ animationDirection: 'reverse' }}></div>
                 </div>
 
                 <div className="relative z-10 w-full mx-auto px-6 lg:px-24">
                     <div className="grid lg:grid-cols-2 gap-16 items-center">
                         <div className="space-y-8">
-                            
-                             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 shadow-sm cursor-default">
+
+                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 shadow-sm cursor-default">
                                 <span className="relative flex h-2 w-2">
                                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
                                     <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
@@ -39,7 +39,7 @@ const Home = () => {
                                 <span className="text-white/70 tracking-wide text-sm font-medium">Where Artists Connect & Create</span>
                             </div>
 
-                             <h1 className="text-5xl lg:text-7xl text-white leading-[1.1] font-bold font-playfair tracking-tight">
+                            <h1 className="text-5xl lg:text-7xl text-white leading-[1.1] font-bold font-playfair tracking-tight">
                                 Unleash Your <br />
                                 <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent drop-shadow-2xl">
                                     Creative Spirit
@@ -61,7 +61,7 @@ const Home = () => {
                                 </button>
                             </div>
 
-                             <div className="flex gap-12 pt-8 border-t border-white/10 mt-8">
+                            <div className="flex gap-12 pt-8 border-t border-white/10 mt-8">
                                 {[
                                     { label: "Artists Joined", value: "50K+" },
                                     { label: "Live Events", value: "10K+" },
@@ -75,17 +75,17 @@ const Home = () => {
                             </div>
                         </div>
 
-                         <div className="flex items-center justify-center h-full relative">
+                        <div className="flex items-center justify-center h-full relative">
                             <PerformerPanel />
                         </div>
                     </div>
                 </div>
 
-                 <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-b from-transparent to-black z-20"></div>
+                <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-b from-transparent to-black z-20"></div>
             </section>
 
 
-             <div className="bg-black relative z-20">
+            <div className="bg-black relative z-20">
                 <ArtistSpotlight />
             </div>
 

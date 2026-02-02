@@ -40,8 +40,7 @@ const Sidebar = ({ categories, activeCategory, setActiveCategory, setSearchQuery
                     </div>
                 </div>
 
-                {/* Ticket Widget */}
-                <div className="relative group cursor-pointer perspective-1000">
+                 <div className="relative group cursor-pointer perspective-1000">
                     <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-500 to-indigo-500 rounded-[2rem] blur opacity-20 group-hover:opacity-60 transition duration-500"></div>
                     <div className="relative bg-[#0F0F0F] border border-white/10 rounded-[2rem] p-1 overflow-hidden">
                         <div className="relative h-32 rounded-[1.8rem] overflow-hidden mb-2">

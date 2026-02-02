@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, ChevronRight, Frown, Filter, TrendingUp, MapPin, Award, ShieldCheck, Zap, Disc, Music, Camera } from 'lucide-react';
 import { StandardCard, EventCard } from './Cards';
 
- import img1 from '../../assets/Images/PerformerPanel/image1.jpeg';
+import img1 from '../../assets/Images/PerformerPanel/image1.jpeg';
 import img2 from '../../assets/Images/PerformerPanel/image2.jpeg';
 import img3 from '../../assets/Images/PerformerPanel/image3.jpeg';
 import spot1 from '../../assets/Images/ArtistSpotlight/acoustic.jpeg';
@@ -21,7 +21,7 @@ const bentoItems = [
     { id: 8, type: "event", category: "Musicians", name: "Drum Circle", role: "Workshop", loc: "Manali", img: img2, date: "Sat, 24th", time: "10:00 AM" },
 ];
 
- const Section = ({ title, items, type = "standard", onSeeAll }) => {
+const Section = ({ title, items, type = "standard", onSeeAll }) => {
     if (!items?.length) return null;
     return (
         <div className="mb-16">
@@ -47,13 +47,12 @@ const bentoItems = [
     )
 };
 
-// --- MAIN COMPONENT ---
-const ContentFeed = ({ activeCategory, searchQuery, setActiveCategory }) => {
+ const ContentFeed = ({ activeCategory, searchQuery, setActiveCategory }) => {
     const getCategoryItems = (cat) => bentoItems.filter(i => i.category === cat);
     const getEventItems = () => bentoItems.filter(i => i.type === "event");
 
     const renderContent = () => {
-         if (searchQuery) {
+        if (searchQuery) {
             const results = bentoItems.filter(i => i.name.toLowerCase().includes(searchQuery.toLowerCase()) || i.role.toLowerCase().includes(searchQuery.toLowerCase()));
             return (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -62,12 +61,11 @@ const ContentFeed = ({ activeCategory, searchQuery, setActiveCategory }) => {
             )
         }
 
-        // B. Dashboard (All)
-        if (activeCategory === "All") {
+         if (activeCategory === "All") {
             return (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className="space-y-12">
 
-                     <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
+                    <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
                         {[
                             { label: "Trending", icon: TrendingUp, color: "text-orange-400", border: "group-hover:border-orange-500/50" },
                             { label: "New Arrivals", icon: Sparkles, color: "text-cyan-400", border: "group-hover:border-cyan-500/50" },
@@ -82,8 +80,8 @@ const ContentFeed = ({ activeCategory, searchQuery, setActiveCategory }) => {
                         ))}
                     </div>
 
-                     <div className="relative w-full h-[400px] md:h-[350px] rounded-[2.5rem] overflow-hidden group cursor-pointer border border-white/10 shadow-2xl">
-                         <img src={img1} className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" alt="Spotlight" />
+                    <div className="relative w-full h-[400px] md:h-[350px] rounded-[2.5rem] overflow-hidden group cursor-pointer border border-white/10 shadow-2xl">
+                        <img src={img1} className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" alt="Spotlight" />
                         <div className="absolute inset-0 bg-gradient-to-r from-black via-black/60 to-transparent"></div>
 
                         {/* Content */}
@@ -112,7 +110,7 @@ const ContentFeed = ({ activeCategory, searchQuery, setActiveCategory }) => {
                         </div>
                     </div>
 
-                     <div className="space-y-2">
+                    <div className="space-y-2">
                         <Section title="Live Events & Gigs" items={getEventItems()} type="event" />
                         <Section title="Trending Musicians" items={getCategoryItems("Musicians")} onSeeAll={() => setActiveCategory("Musicians")} />
                         <Section title="Visual Arts Gallery" items={getCategoryItems("Visual Artists")} onSeeAll={() => setActiveCategory("Visual Artists")} />
@@ -123,7 +121,7 @@ const ContentFeed = ({ activeCategory, searchQuery, setActiveCategory }) => {
             )
         }
 
-         return (
+        return (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {getCategoryItems(activeCategory).length > 0 ? getCategoryItems(activeCategory).map(item => <StandardCard key={item.id} item={item} />) : <div className="col-span-full py-20 flex flex-col items-center justify-center text-center text-white/40"><Frown size={32} className="mb-4 opacity-50" /><h3 className="text-lg font-bold text-white">No results in {activeCategory}</h3></div>}
             </motion.div>
@@ -133,8 +131,8 @@ const ContentFeed = ({ activeCategory, searchQuery, setActiveCategory }) => {
     return (
         <div className="flex-1 min-h-[800px] relative">
 
-             <div className="flex items-end justify-between mb-10 pb-6 border-b border-white/5 relative">
-                 <div className="absolute -top-20 -left-20 w-64 h-64 bg-indigo-600/10 blur-[100px] pointer-events-none"></div>
+            <div className="flex items-end justify-between mb-10 pb-6 border-b border-white/5 relative">
+                <div className="absolute -top-20 -left-20 w-64 h-64 bg-indigo-600/10 blur-[100px] pointer-events-none"></div>
 
                 <div className="relative z-10">
                     <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-[0.2em] mb-2 flex items-center gap-2">
@@ -152,7 +150,7 @@ const ContentFeed = ({ activeCategory, searchQuery, setActiveCategory }) => {
                 )}
             </div>
 
-             <AnimatePresence mode="wait">
+            <AnimatePresence mode="wait">
                 <motion.div
                     key={activeCategory + searchQuery}
                     initial={{ opacity: 0, y: 10 }}

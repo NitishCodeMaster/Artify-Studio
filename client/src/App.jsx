@@ -9,6 +9,8 @@ import Home from './pages/Home';
 import Learn from './pages/Learn';
 import Login from './pages/Login'; 
 import Signup from './pages/Signup';
+import Events from './pages/Events';
+import MarketPlace from './pages/MarketPlace';
 
 const App = () => {
   return (
@@ -20,8 +22,11 @@ const App = () => {
           <Route path="/discover" element={<Discover />} />
           <Route path="/learn" element={<Learn />} />
           <Route path="/" element={<Home />} />
+          <Route path="*" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} /> 
+          <Route path="/events" element={<Events />} />
+          <Route path="/marketplace" element={<MarketPlace />} />
         </Routes>
       </div>
     </>

@@ -3,7 +3,7 @@ import { Layers, Music, Palette, Zap, Disc, Camera } from 'lucide-react';
 import { Footer } from '../components/Footer';
 
 import HeroSection from '../components/Discover/HeroSection';
-import Sidebar from '../components/Discover/Sidebar';
+import Sidebar from '../components/Discover/SideBar';
 import ContentFeed from '../components/Discover/ContentFeed';
 
 const categories = [
@@ -24,16 +24,14 @@ const Discover = () => {
              <HeroSection searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
 
             <div className="max-w-[1400px] mx-auto px-6 py-12 flex flex-col lg:flex-row gap-12 relative z-20">
-                {/* 2. SIDEBAR (Navigation) */}
-                <Sidebar
+                 <Sidebar
                     categories={categories}
                     activeCategory={activeCategory}
                     setActiveCategory={setActiveCategory}
                     setSearchQuery={setSearchQuery}
                 />
 
-                {/* 3. CONTENT FEED (Grid & Lists) */}
-                <ContentFeed
+                 <ContentFeed
                     activeCategory={activeCategory}
                     searchQuery={searchQuery}
                     setActiveCategory={setActiveCategory}
