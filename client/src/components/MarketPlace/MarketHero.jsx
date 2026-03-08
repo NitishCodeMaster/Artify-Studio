@@ -6,14 +6,12 @@ const MarketHero = () => {
     return (
         <div className="relative w-full h-[450px] flex flex-col items-center justify-center bg-[#050505] overflow-hidden">
 
-            {/* 1. Classy Background Mesh */}
-            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
+             <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-indigo-500/10 rounded-full blur-[120px]" />
 
             <div className="relative z-10 text-center px-6 max-w-2xl">
 
-                {/* Small Tag */}
-                <motion.div
+                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 mb-6 backdrop-blur-md"
@@ -32,8 +30,7 @@ const MarketHero = () => {
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 to-purple-300">Vintage Gear.</span>
                 </motion.h1>
 
-                {/* Elegant Search Bar */}
-                <motion.div
+                 <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.2 }}

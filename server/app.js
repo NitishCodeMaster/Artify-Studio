@@ -8,6 +8,7 @@ const cookieParser = require('cookie-parser');
 
 const userRoutes = require('./routes/userRoutes');
 const sellerRoutes = require('./routes/sellerRoutes');
+const productRoutes = require('./routes/productRoutes');
 
 app.use(cors({
     origin: "http://localhost:5173",
@@ -25,5 +26,6 @@ app.get("/", (req, res) => {
 
 app.use('/users', userRoutes);
 app.use('/sellers', sellerRoutes);
+app.use('/products', productRoutes);
 
 module.exports = app;
