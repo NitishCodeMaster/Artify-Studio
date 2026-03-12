@@ -1,0 +1,5 @@
+$kind: http-request
+name: Get All Posts
+url: "{{baseurl}}/posts/all"
+method: GET
+order: 167349544894529

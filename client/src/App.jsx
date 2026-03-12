@@ -3,6 +3,7 @@ import { Routes, Route, useLocation } from "react-router-dom";
 import { Loader2 } from 'lucide-react';
 import Navbar from './components/Navbar';
 import PrivateRoute from './components/PrivateRoute';
+import NotFound from './pages/NotFound';
 
 const Home = lazy(() => import('./pages/Home'));
 const Discover = lazy(() => import('./pages/Discover'));
@@ -13,6 +14,9 @@ const Learn = lazy(() => import('./pages/Learn'));
 const Login = lazy(() => import('./pages/Login'));
 const Signup = lazy(() => import('./pages/Signup'));
 const AddProduct = lazy(() => import('./pages/AddProduct'));
+const ProductDetails = lazy(() => import('./pages/ProductDetails')); 
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -45,7 +49,9 @@ const App = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/add-product" element={<AddProduct />} />
-            <Route path="*" element={<Home />} />
+            <Route path="/product/:id" element={<ProductDetails />} /> 
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
       </div>

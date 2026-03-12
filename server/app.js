@@ -1,14 +1,15 @@
 const dotenv = require('dotenv');
-dotenv.config(); 
+dotenv.config();
 
 const cors = require('cors');
-const express = require('express'); 
+const express = require('express');
 const app = express();
 const cookieParser = require('cookie-parser');
 
 const userRoutes = require('./routes/userRoutes');
 const sellerRoutes = require('./routes/sellerRoutes');
 const productRoutes = require('./routes/productRoutes');
+const postRoutes = require('./routes/postRoutes');
 
 app.use(cors({
     origin: "http://localhost:5173",
@@ -16,8 +17,8 @@ app.use(cors({
     credentials: true
 }));
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(cookieParser());
 
 app.get("/", (req, res) => {
@@ -27,5 +28,6 @@ app.get("/", (req, res) => {
 app.use('/users', userRoutes);
 app.use('/sellers', sellerRoutes);
 app.use('/products', productRoutes);
+app.use('/posts', postRoutes);
 
 module.exports = app;

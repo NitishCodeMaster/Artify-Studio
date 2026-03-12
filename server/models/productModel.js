@@ -9,28 +9,32 @@ const productSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    originalPrice: {
+        type: Number,
+        required: true
+    },
     price: {
         type: Number,
         required: true
     },
     category: {
         type: String,
-        required: true,
-        enum: ['gear', 'tribal', 'digital', 'instrument', 'other'],
-        default: 'other'
+        required: true
+    },
+    condition: {
+        type: String,
+        default: 'good'
     },
     images: [
         {
-            url: {
-                type: String,
-                required: true
-            }
+            public_id: { type: String },
+            url: { type: String, required: true }
         }
     ],
-    // Ye batayega ki kis seller ne upload kiya
     seller: {
         type: mongoose.Schema.ObjectId,
-        ref: "Seller"
+        ref: 'User',
+        required: true
     },
     createdAt: {
         type: Date,
@@ -38,4 +42,4 @@ const productSchema = new mongoose.Schema({
     }
 });
 
-module.exports = mongoose.model("Product", productSchema);
+module.exports = mongoose.model('Product', productSchema);

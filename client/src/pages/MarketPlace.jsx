@@ -4,17 +4,37 @@ import Navbar from '../components/Navbar';
 import { Footer } from '../components/Footer';
 import MarketHero from '../components/MarketPlace/MarketHero';
 import ProductCard from '../components/MarketPlace/ProductCard';
-import { Loader2 } from 'lucide-react';
+import { Search, PackageX, Sparkles, Filter } from 'lucide-react';
+import toast, { Toaster } from 'react-hot-toast';
+import { motion } from 'framer-motion';
 
+const ProductSkeleton = () => (
+    <div className="bg-white/[0.02] border border-white/[0.05] rounded-3xl overflow-hidden animate-pulse backdrop-blur-sm">
+        <div className="aspect-[4/5] bg-white/[0.03]"></div>
+        <div className="p-6 space-y-4">
+            <div className="w-24 h-3 bg-white/10 rounded-full"></div>
+            <div className="w-full h-6 bg-white/10 rounded-md"></div>
+            <div className="w-2/3 h-4 bg-white/10 rounded-md"></div>
+            <div className="pt-4 mt-4 border-t border-white/5 flex justify-between items-center">
+                <div className="w-20 h-6 bg-white/10 rounded-md"></div>
+                <div className="w-8 h-8 bg-white/10 rounded-full"></div>
+            </div>
+        </div>
+    </div>
+);
+
+// 👇 NAYA: Aapke Market Gap aur Vision ke hisaab se Authentic Categories 👇
 const categories = [
-    { id: 'all', label: 'All Collection' },
-    { id: 'gear', label: 'Vintage Gear' },
-    { id: 'tribal', label: 'Tribal Artifacts' },
-    { id: 'digital', label: 'Studio Assets' },
+    { id: 'all', label: 'Explore All' },
+    { id: 'traditional_art', label: 'Madhubani & Folk Art' }, // For local paintings
+    { id: 'tribal_instruments', label: 'Tribal Instruments' }, // For rare/folk instruments
+    { id: 'used_gear', label: 'Vintage & Used Gear' }, // For second-hand instruments
+    { id: 'handcrafted', label: 'Handmade Crafts' }, // For unique unavailable items
 ];
 
 const Marketplace = () => {
     const [activeCategory, setActiveCategory] = useState('all');
+    const [searchQuery, setSearchQuery] = useState('');
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -28,60 +48,130 @@ const Marketplace = () => {
             } catch (err) {
                 console.error("Error fetching products:", err);
                 setError("Failed to load products. Server might be down.");
+                toast.error("Failed to load marketplace!");
                 setLoading(false);
             }
         };
         fetchProducts();
     }, []);
 
-    const filteredProducts = activeCategory === 'all'
-        ? products
-        : products.filter(p => p.category === activeCategory);
+    const handleDelete = async (id) => {
+        const confirmDelete = window.confirm("Are you sure you want to delete this unique piece?");
+        if (confirmDelete) {
+            try {
+                await axios.delete(`http://localhost:5000/products/${id}`);
+                setProducts(products.filter(product => product._id !== id));
+                toast.success("Item removed from marketplace! 🗑️");
+            } catch (err) {
+                console.error("Error deleting product", err);
+                toast.error("Failed to remove item!");
+            }
+        }
+    };
+
+    const filteredProducts = products.filter(product => {
+        const matchesSearch = product.name?.toLowerCase().includes(searchQuery.toLowerCase()) || false;
+        const matchesCategory = activeCategory === 'all' || product.category === activeCategory;
+        return matchesSearch && matchesCategory;
+    });
 
     return (
-        <div className="bg-[#050505] min-h-screen text-white font-sans selection:bg-indigo-500/30">
+        <div className="bg-[#030303] min-h-screen text-white font-sans selection:bg-indigo-500/30 relative overflow-hidden">
+
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-amber-600/10 blur-[120px] pointer-events-none rounded-full"></div>
+
+            <Toaster position="bottom-right" toastOptions={{
+                style: { background: '#111', color: '#fff', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }
+            }} />
+
             <Navbar />
-            <MarketHero />
+            <div className="relative z-10">
+                <MarketHero />
+            </div>
 
-            <div className="max-w-[1280px] mx-auto px-6 pb-20">
+            <div className="max-w-[1320px] mx-auto px-6 pb-24 relative z-10">
 
-                <div className="flex justify-center mb-12 mt-5">
-                    <div className="bg-white/5 p-1 rounded-full border border-white/10 backdrop-blur-md inline-flex">
-                        {categories.map(cat => (
-                            <button
-                                key={cat.id}
-                                onClick={() => setActiveCategory(cat.id)}
-                                className={`px-6 py-2 rounded-full text-xs font-bold transition-all duration-300 ${activeCategory === cat.id
-                                    ? 'bg-white text-black shadow-lg'
-                                    : 'text-white/50 hover:text-white'
-                                    }`}
-                            >
-                                {cat.label}
-                            </button>
-                        ))}
+                <div className="sticky top-24 z-30 bg-[#030303]/80 backdrop-blur-xl border-b border-white/5 pt-4 pb-6 mb-12 -mx-6 px-6 lg:mx-0 lg:px-0 lg:rounded-b-3xl">
+                    <div className="flex flex-col lg:flex-row justify-between items-center gap-6">
+
+                        <div className="flex overflow-x-auto hide-scrollbar w-full lg:w-auto gap-8 border-b border-white/5 pb-1">
+                            {categories.map(cat => (
+                                <button
+                                    key={cat.id}
+                                    onClick={() => setActiveCategory(cat.id)}
+                                    className={`relative pb-3 text-sm font-bold tracking-wide transition-colors whitespace-nowrap ${activeCategory === cat.id ? 'text-white' : 'text-white/40 hover:text-white/80'
+                                        }`}
+                                >
+                                    {cat.label}
+                                    {activeCategory === cat.id && (
+                                        <motion.div
+                                            layoutId="activeCategoryLine"
+                                            className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-amber-500 to-orange-500 shadow-[0_0_10px_rgba(245,158,11,0.5)]"
+                                        />
+                                    )}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Search Bar */}
+                        <div className="relative group w-full lg:w-[350px]">
+                            <div className="absolute inset-0 bg-gradient-to-r from-amber-500/20 to-orange-500/20 rounded-full blur-md opacity-0 group-focus-within:opacity-100 transition-opacity duration-500"></div>
+                            <div className="relative flex items-center bg-white/[0.03] border border-white/10 hover:border-white/20 rounded-full p-1 transition-colors">
+                                <div className="pl-4 pr-2 text-white/40 group-focus-within:text-amber-400 transition-colors">
+                                    <Search size={18} />
+                                </div>
+                                <input
+                                    type="text"
+                                    placeholder="Search rare art, instruments..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="w-full bg-transparent py-2.5 pr-4 text-sm text-white placeholder-white/30 focus:outline-none"
+                                />
+                                <div className="p-2 bg-white/5 rounded-full mr-1">
+                                    <Filter size={14} className="text-white/50" />
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
 
+                {/* Content Area */}
                 {loading ? (
-                    <div className="flex justify-center items-center py-20">
-                        <Loader2 className="animate-spin text-white" size={48} />
-                        <span className="ml-3 text-white/50 font-medium tracking-widest uppercase text-sm">Loading Marketplace...</span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                        {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => <ProductSkeleton key={n} />)}
                     </div>
                 ) : error ? (
-                    <div className="text-center text-red-400 py-10 bg-red-500/10 rounded-2xl border border-red-500/20 max-w-lg mx-auto">
-                        {error}
+                    <div className="flex flex-col items-center justify-center py-20 text-center">
+                        <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mb-4 text-red-400">
+                            <PackageX size={32} />
+                        </div>
+                        <h3 className="text-xl font-bold text-white mb-2">Oops! Something went wrong</h3>
+                        <p className="text-white/50 max-w-md">{error}</p>
                     </div>
                 ) : (
                     <>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-12">
+                        <div className="flex items-center justify-between mb-8">
+                            <h2 className="text-xl font-bold flex items-center gap-2">
+                                <Sparkles className="text-amber-400" size={20} />
+                                {activeCategory === 'all' ? 'Rare & Authentic Finds' : `${categories.find(c => c.id === activeCategory)?.label}`}
+                            </h2>
+                            <span className="text-sm font-medium text-white/40 bg-white/5 px-3 py-1 rounded-full border border-white/5">
+                                {filteredProducts.length} authentic pieces
+                            </span>
+                        </div>
+
+                        <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-x-8">
                             {filteredProducts.map(product => (
-                                <ProductCard key={product._id || product.id} product={product} />
+                                <ProductCard key={product._id || product.id} product={product} onDelete={handleDelete} />
                             ))}
                         </div>
 
                         {filteredProducts.length === 0 && (
-                            <div className="py-20 text-center border border-dashed border-white/10 rounded-2xl">
-                                <p className="text-white/40">No items available in this category.</p>
+                            <div className="flex flex-col items-center justify-center py-32 text-center border border-dashed border-white/5 rounded-3xl bg-white/[0.02]">
+                                <PackageX size={56} className="text-white/10 mb-6" />
+                                <h2 className="text-2xl font-black text-white mb-2 tracking-tight">No authentic pieces found</h2>
+                                <p className="text-white/40 text-sm max-w-sm">We couldn't find anything matching your search. Be the first to list an item in this category!</p>
                             </div>
                         )}
                     </>

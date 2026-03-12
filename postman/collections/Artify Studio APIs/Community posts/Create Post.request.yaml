@@ -1,0 +1,16 @@
+$kind: http-request
+name: "Create Post"
+url: "{{baseurl}}/posts/new"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"user\": \"6981d3fb4efad328ce463eae\",\r
+
+    \  \"content\": \"Hello Postman! Testing the new community feature.\",\r
+
+    \  \"category\": \"General\"\r
+
+    }"
+order: 1773227457117

@@ -18,7 +18,10 @@ export default function Signup() {
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -46,8 +49,6 @@ export default function Signup() {
 
   return (
     <section className="min-h-screen bg-[#050505] flex items-center justify-center relative overflow-hidden">
-
-
       <div className="hidden lg:block absolute top-0 left-0 w-1/3 h-full overflow-hidden opacity-50">
         <img src={leftSideImage} alt="Art background left" className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000 scale-110" />
         <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-[#050505]/80 to-[#050505]"></div>
@@ -56,7 +57,6 @@ export default function Signup() {
         <img src={rightSideImage} alt="Art background right" className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000 scale-110" />
         <div className="absolute inset-0 bg-gradient-to-l from-black/20 via-[#050505]/80 to-[#050505]"></div>
       </div>
-
 
       <div className="w-full max-w-md bg-[#0f0f0f]/80 border border-white/10 p-8 rounded-3xl shadow-2xl relative z-10 backdrop-blur-2xl mx-4 my-10">
 
@@ -100,7 +100,7 @@ export default function Signup() {
               onChange={handleChange} />
           </div>
 
-           <div className="relative group">
+          <div className="relative group">
             <CheckCircle className="absolute left-4 top-3.5 text-white/30 group-focus-within:text-indigo-400 transition-colors" size={20} />
             <input type="password" name="confirmPassword" placeholder="Confirm Password" required
               className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-indigo-500/50 focus:bg-white/5 transition-all"

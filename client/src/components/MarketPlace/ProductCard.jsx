@@ -1,73 +1,93 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import { Heart, ArrowUpRight, MapPin } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-const ProductCard = ({ product }) => {
+const ProductCard = ({ product, onDelete }) => {
+    const navigate = useNavigate();
+
+     const currentUser = JSON.parse(localStorage.getItem('user')) || {};
+
+     const sellerId = product.seller?._id || product.seller;
+    const currentUserId = currentUser?._id || currentUser?.id;
+    const isOwner = currentUserId && sellerId && (currentUserId === sellerId);
+
+     const discount = (product.originalPrice && product.price && product.originalPrice > product.price)
+        ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+        : 0;
+
+     const getCategoryName = (cat) => {
+        switch (cat) {
+            case 'handcrafted': return 'Wood Art';
+            case 'traditional_art': return 'Folk Art';
+            case 'tribal_instruments': return 'Instrument';
+            case 'used_gear': return 'Vintage';
+            default: return 'Authentic';
+        }
+    };
+
     return (
-        <motion.div 
-            whileHover={{ y: -8 }}
-            className="group relative bg-[#0a0a0a] border border-white/5 rounded-2xl overflow-hidden cursor-pointer hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300"
-        >
-             <div className="relative aspect-[4/5] overflow-hidden bg-[#111]">
-                <img 
-                    src={product.image} 
-                    alt={product.title} 
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90 group-hover:opacity-100"
+        <div className="group mb-8 break-inside-avoid-column bg-[#0a0a0a] rounded-2xl overflow-hidden border border-white/[0.05]">
+
+             <div
+                onClick={() => navigate(`/product/${product._id}`)}
+                className="relative cursor-pointer bg-[#111]"
+            >
+                <img
+                    src={product.images?.[0]?.url || 'https://via.placeholder.com/400'}
+                    alt={product.name}
+                    className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
                 />
-                
-                 <div className="absolute top-3 left-3 flex gap-2">
-                    {product.type === 'Used' && (
-                        <span className="px-2.5 py-1 bg-black/60 backdrop-blur-md border border-white/10 text-white/80 text-[10px] font-bold uppercase tracking-wider rounded-md">
-                            Pre-Loved
-                        </span>
-                    )}
-                    {product.type === 'Handmade' && (
-                        <span className="px-2.5 py-1 bg-emerald-900/80 backdrop-blur-md border border-emerald-500/20 text-emerald-200 text-[10px] font-bold uppercase tracking-wider rounded-md">
-                            Tribal Art
-                        </span>
-                    )}
+
+                <div className="absolute top-3 left-3">
+                    <span className="px-2.5 py-1 bg-black/60 backdrop-blur-sm text-white/90 text-[10px] uppercase tracking-widest rounded">
+                        {getCategoryName(product.category)}
+                    </span>
                 </div>
 
-                 <button className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-md text-white border border-white/10 opacity-0 group-hover:opacity-100 transition-all hover:bg-red-500 hover:border-red-500">
-                    <Heart size={14} />
-                </button>
+                {discount > 0 && (
+                    <div className="absolute top-3 right-3 px-2 py-1 bg-amber-500 text-black text-[10px] font-bold uppercase tracking-wider rounded">
+                        {discount}% OFF
+                    </div>
+                )}
             </div>
 
-             <div className="p-5">  
-                
-                 <div className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-2">
-                    {product.category === 'tribal' ? 'Artifact' : 'Studio Gear'}
-                </div>
-
-                 <h3 className="text-white text-lg font-medium leading-tight mb-2 line-clamp-1 group-hover:text-indigo-300 transition-colors">
-                    {product.title}
+             <div className="p-4">
+                <h3
+                    onClick={() => navigate(`/product/${product._id}`)}
+                    className="text-white/90 text-base font-medium leading-tight mb-1 cursor-pointer hover:text-amber-500 transition-colors line-clamp-1"
+                >
+                    {product.name}
                 </h3>
 
-                 <div className="flex items-center gap-3 text-xs text-white/40 mb-5 font-light">
-                    <span className="flex items-center gap-1">
-                        <MapPin size={12} /> {product.location}
-                    </span>
-                    <span className="w-1 h-1 rounded-full bg-white/20"></span>
-                    <span>{product.condition} Condition</span>
-                </div>
+                <p className="text-white/40 text-xs line-clamp-1 mb-4 font-light">
+                    {product.description}
+                </p>
 
-                 <div className="flex items-center justify-between pt-4 border-t border-white/5">
-                    <div className="flex flex-col">
-                        {product.originalPrice && (
-                            <span className="text-[10px] text-white/30 line-through">
-                                {product.originalPrice}
+                <div className="flex items-center justify-between pt-2 border-t border-white/[0.05]">
+
+                    <div className="flex items-center gap-2">
+                        <span className="text-lg font-medium text-amber-500">
+                            ₹{product.price}
+                        </span>
+                        {discount > 0 && (
+                            <span className="text-xs text-white/30 line-through">
+                                ₹{product.originalPrice}
                             </span>
                         )}
-                        <span className="text-xl font-bold text-white tracking-tight">
-                            {product.price}
-                        </span>
-                    </div> 
-                    <button className="flex items-center justify-center w-10 h-10 rounded-full bg-white text-black transform translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300">
-                        <ArrowUpRight size={18} />
-                    </button>
+                    </div>
+
+                     {isOwner && (
+                        <button
+                            onClick={() => onDelete(product._id)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-colors text-xs font-medium border border-red-500/20"
+                            title="Remove your artwork"
+                        >
+                            <Trash2 size={14} /> Remove
+                        </button>
+                    )}
                 </div>
             </div>
-        </motion.div>
+        </div>
     );
 };
 

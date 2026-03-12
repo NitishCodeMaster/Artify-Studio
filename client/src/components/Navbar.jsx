@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, LogOut, User } from 'lucide-react';
+import { Menu, X, LogOut, User, Plus } from 'lucide-react';
 
 const navLinks = [
     { name: "Home", path: "/" },
@@ -101,13 +101,28 @@ const Navbar = () => {
                         {User ? (
                             <div className="flex items-center gap-2 p-1.5 rounded-full bg-black/40 border border-white/10">
                                 <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold text-sm">
-                                    {User.name.charAt(0)}
+                                    {User.name ? User.name.charAt(0).toUpperCase() : <User size={14} />}
                                 </div>
                                 <span className="px-2 text-sm font-semibold text-white/90">
-                                    {User.name.split(' ')[0]}
+                                    {User.name?.split(' ')[0]}
                                 </span>
-                                <button onClick={handleLogout} className="text-xs font-bold text-red-400 hover:text-red-500 flex items-center gap-1 px-2">
-                                    <LogOut size={14} /> Logout
+                                <div className="w-[1px] h-5 bg-white/10 mx-1"></div>
+                                <Link to="/dashboard" className="px-3 py-1.5 rounded-full bg-white/5 text-white/80 hover:bg-white/10 text-xs font-bold transition-all">
+                                    Dashboard
+                                </Link>
+                                <Link
+                                    to="/add-product"
+                                    className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-indigo-500/20 text-indigo-400 hover:bg-indigo-500 hover:text-white transition-all duration-300 text-xs font-bold"
+                                >
+                                    <Plus size={14} /> Sell
+                                </Link>
+
+                                <button
+                                    onClick={handleLogout}
+                                    className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold text-red-400 hover:bg-red-500 hover:text-white transition-all duration-300 ease-out group"
+                                >
+                                    <LogOut size={14} className="group-hover:scale-110 transition-transform" />
+                                    Logout
                                 </button>
                             </div>
                         ) : (
@@ -132,10 +147,10 @@ const Navbar = () => {
                     <button className="md:hidden text-white p-2" onClick={() => setIsOpen(!isOpen)}>
                         {isOpen ? <X /> : <Menu />}
                     </button>
-                    
+
                 </div>
             </div>
-            
+
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
@@ -169,6 +184,20 @@ const Navbar = () => {
                                             <div className="text-xs text-white/40">{User.email}</div>
                                         </div>
                                     </div>
+                                    <Link
+                                        to="/dashboard"
+                                        onClick={() => setIsOpen(false)}
+                                        className="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white border border-white/10 font-bold flex items-center justify-center gap-2 transition-all"
+                                    >
+                                        Dashboard
+                                    </Link>
+                                    <Link
+                                        to="/add-product"
+                                        onClick={() => setIsOpen(false)}
+                                        className="w-full py-3 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 font-bold flex items-center justify-center gap-2 transition-all"
+                                    >
+                                        <Plus size={18} /> Add New Product
+                                    </Link>
                                     <button
                                         onClick={handleLogout}
                                         className="w-full py-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 hover:border-red-500/40 font-bold flex items-center justify-center gap-2 transition-all"
