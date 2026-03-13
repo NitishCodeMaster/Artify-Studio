@@ -1,45 +1,36 @@
 import React, { useState } from 'react';
 import { Heart, MessageCircle, Send, UserCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import api from '../../utils/api'; // Aapki centralized API file
-import { timeAgo } from '../../utils/timeAgo'; // Aapka Instagram jaisa time formatter
+import api from '../../utils/api';
+import { timeAgo } from '../../utils/timeAgo';
 
 const PostCard = ({ post }) => {
-    // Current user ko nikalna taaki pata chale like kisne kiya hai
     const currentUser = JSON.parse(localStorage.getItem('user')) || {};
 
-    // States for Like
     const [likesCount, setLikesCount] = useState(post.likes?.length || 0);
     const [isLiked, setIsLiked] = useState(post.likes?.includes(currentUser._id || currentUser.id));
     const [isLikeAnimating, setIsLikeAnimating] = useState(false);
 
-    // States for Comments
     const [showComments, setShowComments] = useState(false);
     const [comments, setComments] = useState(post.comments || []);
     const [commentText, setCommentText] = useState('');
     const [isCommenting, setIsCommenting] = useState(false);
 
-    // 🌟 1. LIKE BUTTON LOGIC 🌟
     const handleLike = async () => {
-        // UI ko turant update karo (Optimistic UI) taaki user ko wait na karna pade
         setIsLiked(!isLiked);
         setLikesCount(prev => isLiked ? prev - 1 : prev + 1);
         setIsLikeAnimating(true);
-        setTimeout(() => setIsLikeAnimating(false), 300); // Animation reset
+        setTimeout(() => setIsLikeAnimating(false), 300);
 
         try {
-            // Backend ko chupchaap background me bata do
-            // Note: Apna sahi URL path check kar lena ('/posts' ya jo bhi aapne rakha hai)
             await api.put(`/posts/${post._id}/like`);
         } catch (error) {
             console.error("Like failed:", error);
-            // Agar backend fail ho jaye toh wapas purani state me le aao
             setIsLiked(!isLiked);
             setLikesCount(prev => isLiked ? prev + 1 : prev - 1);
         }
     };
 
-    // 🌟 2. COMMENT SUBMIT LOGIC 🌟
     const handleCommentSubmit = async (e) => {
         e.preventDefault();
         if (!commentText.trim()) return;
@@ -48,7 +39,6 @@ const PostCard = ({ post }) => {
         try {
             const res = await api.post(`/posts/${post._id}/comment`, { text: commentText });
 
-            // Backend se aaye naye comments ko UI me set karo
             setComments(res.data.comments || [...comments, { text: commentText, user: currentUser }]);
             setCommentText(''); // Input box khaali karo
         } catch (error) {
@@ -61,7 +51,6 @@ const PostCard = ({ post }) => {
 
     return (
         <div className="bg-[#111] border border-white/[0.05] rounded-2xl p-5 mb-6 text-white/90">
-            {/* Header: User Info & Time Ago */}
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-500">
@@ -72,7 +61,6 @@ const PostCard = ({ post }) => {
                             {post.user?.name || "Anonymous Artist"}
                         </h4>
                         <span className="text-white/40 text-xs font-medium">
-                            {/* 👇 Time Ago Magic Yahan Kaam Karega 👇 */}
                             {timeAgo(post.createdAt)}
                         </span>
                     </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Zap, MessageSquare, Heart, Send, Loader2, Trash2 } from 'lucide-react';
+import api from '../../utils/api';
+import { Zap, Send, Loader2, Trash2 } from 'lucide-react';
+import PostCard from './PostCard';
 
 export function DiscussionList() {
     const [posts, setPosts] = useState([]);
@@ -12,7 +13,7 @@ export function DiscussionList() {
 
     const fetchPosts = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/posts/all');
+            const res = await api.get('/posts/all');
             setPosts(res.data.posts);
             setLoading(false);
         } catch (error) {
@@ -37,7 +38,7 @@ export function DiscussionList() {
 
         setSubmitting(true);
         try {
-            await axios.post('http://localhost:5000/posts/new', {
+            await api.post('/posts/new', {
                 user: currentUser._id || currentUser.id,
                 content: newPostContent,
                 category: "General"
@@ -57,7 +58,7 @@ export function DiscussionList() {
         const confirmDelete = window.confirm("Are you sure you want to delete this post?");
         if (confirmDelete) {
             try {
-                await axios.delete(`http://localhost:5000/posts/${postId}`);
+                await api.delete(`/posts/${postId}`);
                 setPosts(posts.filter(post => post._id !== postId));
             } catch (error) {
                 console.error("Delete error:", error);
@@ -105,54 +106,23 @@ export function DiscussionList() {
                     No posts yet. Be the first to start a discussion!
                 </div>
             ) : (
-                posts.map((post) => { 
+                posts.map((post) => {
                     const isOwner = currentUser && (post.user?._id === currentUser._id || post.user?._id === currentUser.id);
 
                     return (
-                        <div key={post._id} className="relative group p-6 rounded-2xl bg-[#0f0f0f] border border-white/5 hover:border-indigo-500/30 transition-all hover:shadow-lg hover:shadow-indigo-500/5">
- 
+                        <div key={post._id} className="relative">
+
+                            <PostCard post={post} />
+
                             {isOwner && (
                                 <button
                                     onClick={() => handleDelete(post._id)}
-                                    className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-red-500/10 text-red-400 opacity-0 group-hover:opacity-100 transition-all hover:bg-red-500 hover:text-white"
+                                    className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-red-500/10 text-red-400 opacity-50 hover:opacity-100 transition-all hover:bg-red-500 hover:text-white"
                                     title="Delete Post"
                                 >
                                     <Trash2 size={16} />
                                 </button>
                             )}
-
-                            <div className="flex items-start gap-4">
-                                <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
-                                    {post.user?.name?.charAt(0) || 'A'}
-                                </div>
-
-                                <div className="flex-1">
-                                    <div className="flex items-center gap-3 mb-2">
-                                        <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border text-indigo-400 bg-indigo-500/10 border-indigo-500/20">
-                                            {post.category || 'General'}
-                                        </span>
-                                        <span className="text-xs text-white/30">
-                                            {new Date(post.createdAt).toLocaleDateString()}
-                                        </span>
-                                    </div>
-
-                                    <p className="text-lg font-medium text-white mb-2 leading-relaxed">
-                                        {post.content}
-                                    </p>
-
-                                    <div className="flex items-center gap-6 text-sm text-white/40 mt-4 pt-4 border-t border-white/5">
-                                        <div className="flex items-center gap-2 hover:text-white cursor-pointer transition-colors">
-                                            <Heart size={16} /> {post.likes?.length || 0} Likes
-                                        </div>
-                                        <div className="flex items-center gap-2 hover:text-white cursor-pointer transition-colors">
-                                            <MessageSquare size={16} /> {post.comments?.length || 0} Comments
-                                        </div>
-                                        <div className="ml-auto text-white/60 text-xs">
-                                            Posted by <span className="text-white font-medium">{post.user?.name || 'Unknown User'}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     );
                 })

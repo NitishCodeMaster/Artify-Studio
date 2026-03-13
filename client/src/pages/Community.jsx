@@ -13,8 +13,6 @@ export default function Community() {
             <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[120px] pointer-events-none"></div>
 
             <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8">
-
-
                 <CommunityHero />
                 <div className="grid lg:grid-cols-3 gap-10">
                     <DiscussionList />

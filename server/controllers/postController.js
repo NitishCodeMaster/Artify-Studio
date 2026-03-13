@@ -16,7 +16,7 @@ exports.createPost = async (req, res) => {
         const newPost = await Post.create({
             content: finalContent,
             image: image || '',
-            user: req.user._id || req.user.id,
+            user: req.user._id,
             category: category || 'General'
         });
 
@@ -36,6 +36,7 @@ exports.getAllPosts = async (req, res) => {
     try {
         const posts = await Post.find()
             .populate('user', 'name email')
+            .populate('comments.user', 'name')
             .sort({ createdAt: -1 });
 
         res.status(200).json({ success: true, posts });
@@ -56,13 +57,12 @@ exports.toggleLike = async (req, res) => {
     try {
         const post = await Post.findById(req.params.id);
         if (!post) return res.status(404).json({ message: "Post not found" });
-
-        const isLiked = post.likes.includes(req.user.id);
-
+        const userIdString = req.user._id.toString();
+        const isLiked = post.likes.some(id => id.toString() === userIdString);
         if (isLiked) {
-            post.likes = post.likes.filter(id => id.toString() !== req.user.id.toString());
+            post.likes = post.likes.filter(id => id.toString() !== userIdString);
         } else {
-            post.likes.push(req.user.id);
+            post.likes.push(req.user._id);
         }
 
         await post.save();
@@ -84,8 +84,8 @@ exports.addComment = async (req, res) => {
 
         post.comments.push(newComment);
         await post.save();
-
-        res.status(201).json({ success: true, comments: post.comments });
+        const updatedPost = await Post.findById(req.params.id).populate('comments.user', 'name');
+        res.status(201).json({ success: true, comments: updatedPost.comments });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
