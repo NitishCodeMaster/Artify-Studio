@@ -14,6 +14,7 @@ export default function Signup() {
     password: '',
     confirmPassword: ''
   });
+
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -84,14 +85,12 @@ export default function Signup() {
               onChange={handleChange} />
           </div>
 
-
           <div className="relative group">
             <Phone className="absolute left-4 top-3.5 text-white/30 group-focus-within:text-indigo-400 transition-colors" size={20} />
             <input type="tel" name="phone" placeholder="Phone Number" required
               className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-indigo-500/50 focus:bg-white/5 transition-all"
               onChange={handleChange} />
           </div>
-
 
           <div className="relative group">
             <Lock className="absolute left-4 top-3.5 text-white/30 group-focus-within:text-indigo-400 transition-colors" size={20} />

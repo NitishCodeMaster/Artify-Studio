@@ -4,6 +4,7 @@ import { Loader2 } from 'lucide-react';
 import Navbar from './components/Navbar';
 import PrivateRoute from './components/PrivateRoute';
 import NotFound from './pages/NotFound';
+import CartDrawer from './components/MarketPlace/CartDrawer';
 
 const Home = lazy(() => import('./pages/Home'));
 const Discover = lazy(() => import('./pages/Discover'));
@@ -35,6 +36,7 @@ const PageLoader = () => (
 const App = () => {
   return (
     <>
+      <CartDrawer />
       <Navbar />
       <ScrollToTop />
       <div className="min-h-screen bg-[#050505]">

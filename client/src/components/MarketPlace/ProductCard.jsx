@@ -1,21 +1,23 @@
 import React from 'react';
-import { Trash2 } from 'lucide-react';
+import { Trash2, ShoppingBag } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useCart } from '../../context/CartContext';
 
 const ProductCard = ({ product, onDelete }) => {
     const navigate = useNavigate();
+    const { addToCart } = useCart();
 
-     const currentUser = JSON.parse(localStorage.getItem('user')) || {};
+    const currentUser = JSON.parse(localStorage.getItem('user')) || {};
 
-     const sellerId = product.seller?._id || product.seller;
+    const sellerId = product.seller?._id || product.seller;
     const currentUserId = currentUser?._id || currentUser?.id;
     const isOwner = currentUserId && sellerId && (currentUserId === sellerId);
 
-     const discount = (product.originalPrice && product.price && product.originalPrice > product.price)
+    const discount = (product.originalPrice && product.price && product.originalPrice > product.price)
         ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
         : 0;
 
-     const getCategoryName = (cat) => {
+    const getCategoryName = (cat) => {
         switch (cat) {
             case 'handcrafted': return 'Wood Art';
             case 'traditional_art': return 'Folk Art';
@@ -28,7 +30,7 @@ const ProductCard = ({ product, onDelete }) => {
     return (
         <div className="group mb-8 break-inside-avoid-column bg-[#0a0a0a] rounded-2xl overflow-hidden border border-white/[0.05]">
 
-             <div
+            <div
                 onClick={() => navigate(`/product/${product._id}`)}
                 className="relative cursor-pointer bg-[#111]"
             >
@@ -51,7 +53,7 @@ const ProductCard = ({ product, onDelete }) => {
                 )}
             </div>
 
-             <div className="p-4">
+            <div className="p-4">
                 <h3
                     onClick={() => navigate(`/product/${product._id}`)}
                     className="text-white/90 text-base font-medium leading-tight mb-1 cursor-pointer hover:text-amber-500 transition-colors line-clamp-1"
@@ -76,7 +78,17 @@ const ProductCard = ({ product, onDelete }) => {
                         )}
                     </div>
 
-                     {isOwner && (
+                    <button 
+                        onClick={(e) => {
+                            e.stopPropagation(); 
+                            addToCart(product);
+                        }}
+                        className="flex items-center gap-2 bg-amber-500/10 hover:bg-amber-500 text-amber-500 hover:text-white px-3 py-1.5 rounded-lg transition-colors text-xs font-bold border border-amber-500/20"
+                    >
+                        <ShoppingBag size={14} /> Add
+                    </button>
+
+                    {isOwner && (
                         <button
                             onClick={() => onDelete(product._id)}
                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-colors text-xs font-medium border border-red-500/20"
