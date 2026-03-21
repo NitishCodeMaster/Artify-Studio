@@ -29,11 +29,14 @@ export const CartProvider = ({ children }) => {
     const removeFromCart = (id) => {
         setCart(prev => prev.filter(item => item._id !== id));
     };
-
+    
+    const clearCart = () => {
+        setCart([]);
+    };
     const cartTotal = cart.reduce((total, item) => total + Number(item.price), 0);
 
     return (
-        <CartContext.Provider value={{ cart, addToCart, removeFromCart, isCartOpen, setIsCartOpen, cartTotal }}>
+        <CartContext.Provider value={{ cart, addToCart, removeFromCart, isCartOpen, setIsCartOpen, cartTotal, clearCart }}>
             {children}
         </CartContext.Provider>
     );

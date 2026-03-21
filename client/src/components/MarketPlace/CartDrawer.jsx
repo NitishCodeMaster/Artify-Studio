@@ -5,9 +5,9 @@ import { useCart } from '../../context/CartContext';
 import api from '../../utils/api';
 
 const CartDrawer = () => {
-    const { cart, isCartOpen, setIsCartOpen, removeFromCart, cartTotal } = useCart();
+    const { cart, isCartOpen, setIsCartOpen, removeFromCart, cartTotal, clearCart } = useCart();
 
-     const handleCheckout = async () => {
+    const handleCheckout = async () => {
         try {
             const orderRes = await api.post('/payments/create-order', { amount: cartTotal });
             const order = orderRes.data.order;
@@ -23,14 +23,18 @@ const CartDrawer = () => {
 
                 handler: async function (response) {
                     try {
-                        const verifyRes = await api.post('/payment/verify-payment', {
+                        const verifyRes = await api.post('/payments/verify-payment', {
                             razorpay_order_id: response.razorpay_order_id,
                             razorpay_payment_id: response.razorpay_payment_id,
-                            razorpay_signature: response.razorpay_signature
+                            razorpay_signature: response.razorpay_signature,
+                            products: cart.map(item => item._id),
+                            totalAmount: cartTotal
                         });
+
 
                         if (verifyRes.data.success) {
                             alert("Payment Successful! 🎉 Your masterpiece is on its way.");
+                            clearCart();
                             setIsCartOpen(false);
                         }
                     } catch (err) {
