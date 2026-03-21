@@ -1,4 +1,4 @@
-import React from 'react';
+ import React from 'react';
 import { Trash2, ShoppingBag } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
@@ -29,7 +29,6 @@ const ProductCard = ({ product, onDelete }) => {
 
     return (
         <div className="group mb-8 break-inside-avoid-column bg-[#0a0a0a] rounded-2xl overflow-hidden border border-white/[0.05]">
-
             <div
                 onClick={() => navigate(`/product/${product._id}`)}
                 className="relative cursor-pointer bg-[#111]"
@@ -53,20 +52,19 @@ const ProductCard = ({ product, onDelete }) => {
                 )}
             </div>
 
-            <div className="p-4">
+            <div className="p-5">
                 <h3
                     onClick={() => navigate(`/product/${product._id}`)}
-                    className="text-white/90 text-base font-medium leading-tight mb-1 cursor-pointer hover:text-amber-500 transition-colors line-clamp-1"
+                    className="text-white/90 text-base font-medium leading-tight mb-2 cursor-pointer hover:text-amber-500 transition-colors line-clamp-1"
                 >
                     {product.name}
                 </h3>
 
-                <p className="text-white/40 text-xs line-clamp-1 mb-4 font-light">
+                <p className="text-white/40 text-xs line-clamp-2 mb-5 font-light leading-relaxed">
                     {product.description}
                 </p>
 
-                <div className="flex items-center justify-between pt-2 border-t border-white/[0.05]">
-
+                <div className="flex items-center justify-between pt-4 border-t border-white/[0.05]">
                     <div className="flex items-center gap-2">
                         <span className="text-lg font-medium text-amber-500">
                             ₹{product.price}
@@ -78,25 +76,28 @@ const ProductCard = ({ product, onDelete }) => {
                         )}
                     </div>
 
-                    <button 
-                        onClick={(e) => {
-                            e.stopPropagation(); 
-                            addToCart(product);
-                        }}
-                        className="flex items-center gap-2 bg-amber-500/10 hover:bg-amber-500 text-amber-500 hover:text-white px-3 py-1.5 rounded-lg transition-colors text-xs font-bold border border-amber-500/20"
-                    >
-                        <ShoppingBag size={14} /> Add
-                    </button>
+                    <div className="flex items-center gap-2.5">
+                        {isOwner && (
+                            <button
+                                onClick={() => onDelete(product._id)}
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-colors text-xs font-medium border border-red-500/20"
+                                title="Remove your artwork"
+                            >
+                                <Trash2 size={14} /> Remove
+                            </button>
+                        )}
 
-                    {isOwner && (
-                        <button
-                            onClick={() => onDelete(product._id)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-colors text-xs font-medium border border-red-500/20"
-                            title="Remove your artwork"
+                        <button 
+                            onClick={(e) => {
+                                e.stopPropagation(); 
+                                addToCart(product);
+                            }}
+                            className="flex items-center gap-2 bg-amber-500/10 hover:bg-amber-500 text-amber-500 hover:text-white px-3 py-1.5 rounded-lg transition-colors text-xs font-bold border border-amber-500/20"
                         >
-                            <Trash2 size={14} /> Remove
+                            <ShoppingBag size={14} /> Add
                         </button>
-                    )}
+                    </div>
+                    
                 </div>
             </div>
         </div>

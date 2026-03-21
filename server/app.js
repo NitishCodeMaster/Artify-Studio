@@ -10,6 +10,9 @@ const userRoutes = require('./routes/userRoutes');
 const sellerRoutes = require('./routes/sellerRoutes');
 const productRoutes = require('./routes/productRoutes');
 const postRoutes = require('./routes/postRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
+
+
 
 app.use(cors({
     origin: "http://localhost:5173",
@@ -29,5 +32,6 @@ app.use('/users', userRoutes);
 app.use('/sellers', sellerRoutes);
 app.use('/products', productRoutes);
 app.use('/posts', postRoutes);
+app.use('/payments', paymentRoutes);
 
 module.exports = app;

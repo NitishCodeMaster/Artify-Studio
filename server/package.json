@@ -25,6 +25,8 @@
   },
   "dependencies": {
     "cloudinary": "^2.9.0",
-    "mongodb": "^7.0.0"
+    "crypto": "^1.0.1",
+    "mongodb": "^7.0.0",
+    "razorpay": "^2.9.6"
   }
 }

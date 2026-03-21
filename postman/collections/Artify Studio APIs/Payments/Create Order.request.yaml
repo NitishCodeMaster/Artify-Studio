@@ -1,0 +1,7 @@
+$kind: http-request
+name: Create Order
+url: "{{baseurl}}/payment/create-order"
+method: GET
+auth:
+  type: bearer
+order: 1774075502310
