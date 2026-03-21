@@ -1,0 +1,5 @@
+$kind: http-request
+name: Update Seller Profile
+url: "{{baseurl}}/sellers/profile"
+method: PUT
+order: 3997083235280876

@@ -1,7 +1,12 @@
 $kind: http-request
 name: Create Order
-url: "{{baseurl}}/payment/create-order"
-method: GET
+url: "{{baseurl}}/payments/create-order"
+method: POST
+body:
+  type: json
+  content: "{\r\n    \"amount\": 500\r\n}"
 auth:
   type: bearer
+  credentials:
+    token: "{{bearer_token}}"
 order: 1774075502310

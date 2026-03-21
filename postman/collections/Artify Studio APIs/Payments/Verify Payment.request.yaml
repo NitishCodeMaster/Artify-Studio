@@ -1,0 +1,5 @@
+$kind: http-request
+name: Verify Payment
+url: "{{baseurl}}/payment/verify-payment"
+method: GET
+order: 1373288703249246

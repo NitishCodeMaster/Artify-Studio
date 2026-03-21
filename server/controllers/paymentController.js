@@ -15,9 +15,9 @@ exports.createOrder = async (req, res) => {
         }
 
         const options = {
-            amount: Math.round(amount * 100),
+            amount: Math.round(amount * 100), // Professional Rule: Convert INR to Paise
             currency: "INR",
-            receipt: `receipt_${Date.now()}_${req.user._id}`,
+            receipt: `rcpt_${Date.now()}_${req.user._id.toString().slice(-5)}`,
         };
 
         const order = await razorpay.orders.create(options);
@@ -43,13 +43,13 @@ exports.verifyPayment = async (req, res) => {
             .update(sign.toString())
             .digest("hex");
 
-        if (expectedSignature === razorpay_signature) {   
+        if (expectedSignature === razorpay_signature) {
             return res.status(200).json({
                 success: true,
                 message: "Payment verified successfully!",
                 paymentId: razorpay_payment_id
             });
-        } else { 
+        } else {
             return res.status(400).json({
                 success: false,
                 message: "Invalid signature! Payment verification failed.",

@@ -1,0 +1,5 @@
+$kind: http-request
+name: Register
+url: "{{baseurl}}/users/register"
+method: POST
+order: 4404767189660898

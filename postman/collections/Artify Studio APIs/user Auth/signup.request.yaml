@@ -1,5 +1,0 @@
-$kind: http-request
-name: signup
-url: ""
-method: GET
-order: 4404767189660898

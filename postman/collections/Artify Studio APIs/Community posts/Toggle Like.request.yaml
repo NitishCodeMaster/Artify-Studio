@@ -1,0 +1,7 @@
+$kind: http-request
+name: Toggle Like
+url: "{{baseurl}}/posts/:id/like"
+method: PUT
+pathVariables:
+  id: ""
+order: 4050042452936988

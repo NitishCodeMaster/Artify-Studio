@@ -1,0 +1,5 @@
+$kind: http-request
+name: Create Product
+url: "{{baseurl}}/products/new"
+method: POST
+order: 1774079464417

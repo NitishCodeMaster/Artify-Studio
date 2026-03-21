@@ -1,0 +1,14 @@
+$kind: http-request
+name: Login
+url: "{{baseurl}}/users/login"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"email\": \"nk8878900@gmail.com\",\r
+
+    \    \"password\": \"Nitish@123\"\r
+
+    }"
+order: 1774076020988

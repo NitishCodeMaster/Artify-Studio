@@ -1,0 +1,7 @@
+$kind: http-request
+name: Get Products By Seller
+url: "{{baseurl}}/products/seller/:sellerId"
+method: GET
+pathVariables:
+  sellerId: ""
+order: 4360918481709977

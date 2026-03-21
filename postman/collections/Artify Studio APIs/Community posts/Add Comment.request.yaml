@@ -1,0 +1,7 @@
+$kind: http-request
+name: Add Comment
+url: "{{baseurl}}/posts/:id/comment"
+method: POST
+pathVariables:
+  id: ""
+order: 4447220755283659

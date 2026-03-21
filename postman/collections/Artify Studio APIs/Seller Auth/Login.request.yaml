@@ -1,0 +1,5 @@
+$kind: http-request
+name: Login
+url: "{{baseurl}}/sellers/login"
+method: POST
+order: 2763008527429643

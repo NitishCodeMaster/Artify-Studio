@@ -1,0 +1,7 @@
+$kind: http-request
+name: Delete Post
+url: "{{baseurl}}/posts/:id"
+method: DELETE
+pathVariables:
+  id: ""
+order: 3899197077134439

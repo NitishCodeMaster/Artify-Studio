@@ -1,0 +1,5 @@
+$kind: http-request
+name: Get Seller Profile
+url: "{{baseurl}}/sellers/profile"
+method: GET
+order: 3973761417027238

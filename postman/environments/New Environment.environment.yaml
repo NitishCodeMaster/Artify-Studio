@@ -1,2 +1,10 @@
 name: New Environment
-values: []
+values:
+  - key: baseurl
+    value: ''
+    enabled: true
+    type: default
+  - key: bearer_token
+    value: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ODFkM2ZiNGVmYWQzMjhjZTQ2M2VhZSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzc0MDg2MTM5LCJleHAiOjE3NzQ2OTA5Mzl9.1vJzeXQ11KEc1kyXuCn7BV4aqxHDtpgl04zVoO3bWMA'
+    enabled: true
+    type: default

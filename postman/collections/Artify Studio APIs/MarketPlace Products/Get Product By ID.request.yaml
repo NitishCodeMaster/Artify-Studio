@@ -1,0 +1,7 @@
+$kind: http-request
+name: Get Product By ID
+url: "{{baseurl}}/products/:id"
+method: GET
+pathVariables:
+  id: ""
+order: 4096251599287969
