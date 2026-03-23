@@ -3,10 +3,12 @@ import { Heart, MessageCircle, Send, UserCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../utils/api';
 import { timeAgo } from '../../utils/timeAgo';
+import { useNavigate } from 'react-router-dom';
 
 const PostCard = ({ post }) => {
     const currentUser = JSON.parse(localStorage.getItem('user')) || {};
 
+    const navigate = useNavigate();
     const [likesCount, setLikesCount] = useState(post.likes?.length || 0);
     const [isLiked, setIsLiked] = useState(post.likes?.includes(currentUser._id || currentUser.id));
     const [isLikeAnimating, setIsLikeAnimating] = useState(false);
@@ -57,7 +59,10 @@ const PostCard = ({ post }) => {
                         <UserCircle2 size={24} />
                     </div>
                     <div>
-                        <h4 className="font-semibold text-sm">
+                        <h4
+                            onClick={() => post.user?._id && navigate(`/profile/${post.user._id}`)}
+                            className="font-bold text-base text-white hover:text-amber-400 cursor-pointer transition-colors"
+                        >
                             {post.user?.name || "Anonymous Artist"}
                         </h4>
                         <span className="text-white/40 text-xs font-medium">
@@ -67,21 +72,17 @@ const PostCard = ({ post }) => {
                 </div>
             </div>
 
-            {/* Post Content */}
             <p className="text-white/80 text-sm leading-relaxed mb-4 whitespace-pre-wrap">
                 {post.content}
             </p>
 
-            {/* Post Image (Agar ho toh) */}
             {post.image && (
                 <div className="rounded-xl overflow-hidden mb-4 border border-white/[0.05]">
                     <img src={post.image} alt="Post Attachment" className="w-full h-auto object-cover max-h-[400px]" />
                 </div>
             )}
 
-            {/* Social Actions (Like & Comment Buttons) */}
             <div className="flex items-center gap-6 pt-3 border-t border-white/[0.05]">
-                {/* LIKE BUTTON */}
                 <div className="flex items-center gap-2 cursor-pointer group" onClick={handleLike}>
                     <motion.div
                         animate={isLikeAnimating ? { scale: [1, 1.4, 1] } : {}}
@@ -97,7 +98,6 @@ const PostCard = ({ post }) => {
                     </span>
                 </div>
 
-                {/* COMMENT BUTTON */}
                 <div
                     className="flex items-center gap-2 cursor-pointer group"
                     onClick={() => setShowComments(!showComments)}
@@ -109,7 +109,6 @@ const PostCard = ({ post }) => {
                 </div>
             </div>
 
-            {/* 🌟 3. COMMENTS SECTION (Collapsible) 🌟 */}
             <AnimatePresence>
                 {showComments && (
                     <motion.div
@@ -120,7 +119,6 @@ const PostCard = ({ post }) => {
                     >
                         <div className="pt-4 mt-4 border-t border-white/[0.02]">
 
-                            {/* Comment Input */}
                             <form onSubmit={handleCommentSubmit} className="flex gap-3 mb-5">
                                 <div className="w-8 h-8 rounded-full bg-white/10 flex-shrink-0 flex items-center justify-center">
                                     <UserCircle2 size={18} className="text-white/50" />
@@ -143,7 +141,6 @@ const PostCard = ({ post }) => {
                                 </div>
                             </form>
 
-                            {/* Comments List */}
                             <div className="space-y-4 max-h-[300px] overflow-y-auto hide-scrollbar pr-2">
                                 {comments.length > 0 ? (
                                     comments.map((cmd, idx) => (

@@ -5,6 +5,7 @@ import Navbar from '../components/Navbar';
 import { Footer } from '../components/Footer';
 import MarketHero from '../components/MarketPlace/MarketHero';
 import ProductCard from '../components/MarketPlace/ProductCard';
+import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 import { Search, PackageX, Sparkles, Filter, Plus } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -38,6 +39,8 @@ const Marketplace = () => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState(null);
 
     const productGridRef = useRef(null);
 
@@ -57,17 +60,24 @@ const Marketplace = () => {
         fetchProducts();
     }, []);
 
-    const handleDelete = async (id) => {
-        const confirmDelete = window.confirm("Are you sure you want to delete this unique piece?");
-        if (confirmDelete) {
-            try {
-                await api.delete(`/products/${id}`);
-                setProducts(products.filter(product => product._id !== id));
-                toast.success("Item removed from marketplace! 🗑️");
-            } catch (err) {
-                console.error("Error deleting product", err);
-                toast.error("Failed to remove item!");
-            }
+    const initiateDelete = (id) => {
+        setItemToDelete(id);
+        setDeleteModalOpen(true);
+    };
+
+    const confirmDeleteAction = async () => {
+        if (!itemToDelete) return;
+
+        try {
+            await api.delete(`/products/${itemToDelete}`);
+            setProducts(products.filter(product => product._id !== itemToDelete));
+            toast.success("Item removed from marketplace! 🗑️");
+        } catch (err) {
+            console.error("Error deleting product", err);
+            toast.error("Failed to remove item!");
+        } finally {
+            setDeleteModalOpen(false);
+            setItemToDelete(null);
         }
     };
 
@@ -130,7 +140,6 @@ const Marketplace = () => {
                             ))}
                         </div>
 
-                        {/* Search Bar + NEW SELL BUTTON */}
                         <div className="flex items-center gap-4 w-full lg:w-auto">
                             <div className="relative group w-full lg:w-[300px]">
                                 <div className="absolute inset-0 bg-gradient-to-r from-amber-500/20 to-orange-500/20 rounded-full blur-md opacity-0 group-focus-within:opacity-100 transition-opacity duration-500"></div>
@@ -195,7 +204,7 @@ const Marketplace = () => {
                                         transition={{ duration: 0.3 }}
                                         className="break-inside-avoid"
                                     >
-                                        <ProductCard product={product} onDelete={handleDelete} />
+                                        <ProductCard product={product} onDelete={initiateDelete} />
                                     </motion.div>
                                 ))}
                             </AnimatePresence>
@@ -214,6 +223,14 @@ const Marketplace = () => {
                     </>
                 )}
             </div>
+
+            <ConfirmDeleteModal
+                isOpen={deleteModalOpen}
+                onClose={() => setDeleteModalOpen(false)}
+                onConfirm={confirmDeleteAction}
+                title="Remove Masterpiece?"
+                message="Are you sure you want to remove this authentic piece from the marketplace? This action is permanent."
+            />
 
             <Footer />
         </div>

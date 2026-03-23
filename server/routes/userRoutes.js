@@ -20,6 +20,10 @@ router.post('/logout', authUser, userController.logoutUser);
 
 router.get('/profile', authUser, userController.getUserProfile);
 
+router.get('/top-creators', userController.getTopCreators);
+
+router.get('/profile/:id', userController.getUserProfileById);
+
 router.put('/profile', authUser, userController.updateUserProfile);
 
 module.exports = router;

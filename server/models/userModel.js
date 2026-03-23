@@ -19,7 +19,7 @@ const UserSchema = new mongoose.Schema({
         required: true,
         select: false
     },
-    profilePic: {
+    avatar: {
         type: String,
         default: ""
     },
@@ -29,15 +29,41 @@ const UserSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        default: "user"
-    }
+        default: "Artist"
+    },
+    bio: {
+        type: String,
+        default: '',
+        maxLength: [250, "Bio cannot exceed 250 characters"]
+    },
+    artStyle: {
+        type: String,
+        default: '',
+    },
+    originLocation: {
+        type: String,
+        default: '',
+    },
+    experience: {
+        type: String,
+        default: '',
+    },
+    socialLinks: {
+        instagram: { type: String, default: '' },
+        youtube: { type: String, default: '' },
+        portfolioUrl: { type: String, default: '' }
+    },
+    resetPasswordToken: String,
+    resetPasswordExpire: Date,
+
 }, { timestamps: true });
 
-UserSchema.pre('save', async function () {
-    if (!this.isModified('password')) return;
+UserSchema.pre('save', async function (next) {
+    if (!this.isModified('password')) return next();
 
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
+    next();
 });
 
 UserSchema.methods.matchPassword = async function (password) {

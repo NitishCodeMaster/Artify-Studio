@@ -6,6 +6,7 @@ import { Loader2 } from 'lucide-react';
 import Navbar from './components/Navbar';
 import PrivateRoute from './components/PrivateRoute';
 import NotFound from './pages/NotFound';
+import Profile from './pages/Profile';  
 
 const Home = lazy(() => import('./pages/Home'));
 const Discover = lazy(() => import('./pages/Discover'));
@@ -55,6 +56,7 @@ const App = () => {
               <Route path="/add-product" element={<AddProduct />} />
               <Route path="/product/:id" element={<ProductDetails />} />
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/profile/:id" element={<Profile />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
