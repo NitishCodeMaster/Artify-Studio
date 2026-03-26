@@ -4,6 +4,8 @@ const Product = require('../models/productModel');
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
 const blacklistToken = require('../models/blacklistTokenModel');
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
 
 
 module.exports.registerUser = async (req, res) => {
@@ -139,22 +141,21 @@ module.exports.getUserProfile = async (req, res) => {
 
 exports.updateUserProfile = async (req, res) => {
     try {
-        const user = await User.findById(req.user._id);
-
+        const user = await userModel.findById(req.user._id);
         if (!user) {
             return res.status(404).json({ success: false, message: "User not found" });
         }
 
-        let avatarUrl = user.avatar;
-        if (req.body.avatar && req.body.avatar !== '') {
-            avatarUrl = req.body.avatar;
+        let profilePicUrl = user.profilePic;
+        if (req.body.profilePic && req.body.profilePic !== '') {
+            profilePicUrl = req.body.profilePic;
         }
 
         user.name = req.body.name || user.name;
         user.bio = req.body.bio || user.bio;
         user.role = req.body.role || user.role;
         user.phoneNumber = req.body.phoneNumber || user.phoneNumber;
-        user.avatar = avatarUrl;
+        user.profilePic = profilePicUrl;
 
         user.originLocation = req.body.originLocation || user.originLocation;
         user.artStyle = req.body.artStyle || user.artStyle;
@@ -175,12 +176,12 @@ exports.updateUserProfile = async (req, res) => {
 };
 module.exports.getTopCreators = async (req, res) => {
     try {
-        const topCreators = await User.find({ role: 'seller' })
-            .select('name role avatar')
+        const topCreators = await userModel.find({ role: 'seller' })
+            .select('name role profilePic')
             .limit(5);
 
         if (topCreators.length === 0) {
-            const users = await User.find().select('name role avatar').limit(5);
+            const users = await userModel.find().select('name role profilePic').limit(5);
             return res.status(200).json({ success: true, creators: users });
         }
 
@@ -198,7 +199,7 @@ module.exports.getUserProfileById = async (req, res) => {
         }
 
         const posts = await Post.find({ user: req.params.id })
-            .populate('user', 'name avatar')
+            .populate('user', 'name profilePic')
             .sort({ createdAt: -1 });
 
         let products = [];
@@ -212,5 +213,93 @@ module.exports.getUserProfileById = async (req, res) => {
     } catch (error) {
         console.error("❌ Fetch Profile Error:", error);
         res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+};
+module.exports.forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        const user = await userModel.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ success: false, message: "No artist found with this email." });
+        }
+
+        const resetToken = crypto.randomBytes(32).toString('hex');
+
+        user.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+        user.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
+        await user.save();
+
+        const resetUrl = `http://localhost:5173/reset-password/${resetToken}`;
+
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
+            }
+        });
+
+        const mailOptions = {
+            from: `Artify Studio <${process.env.EMAIL_USER}>`,
+            to: user.email,
+            subject: '🎨 Password Reset Request - Artify Studio',
+            html: `
+                <div style="font-family: Arial, sans-serif; background-color: #0a0a0a; padding: 40px; color: #fff; text-align: center;">
+                    <h2 style="color: #f59e0b;">Password Reset Request</h2>
+                    <p style="color: #aaa; font-size: 16px;">We received a request to reset your password for Artify Studio.</p>
+                    <p style="color: #aaa; font-size: 16px;">Click the magic button below to set a new password:</p>
+                    <br/>
+                    <a href="${resetUrl}" style="background-color: #f59e0b; color: #000; padding: 12px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Reset Password ✨</a>
+                    <br/><br/>
+                    <p style="color: #555; font-size: 12px;">If you didn't request this, please ignore this email. This link will expire in 15 minutes.</p>
+                </div>
+            `
+        };
+
+        await transporter.sendMail(mailOptions);
+
+        res.status(200).json({ success: true, message: "Magic link sent to your email!" });
+
+    } catch (error) {
+        console.error("Forgot Password Error:", error);
+
+        if (req.user) {
+            const user = await userModel.findOne({ email: req.body.email });
+            if (user) {
+                user.resetPasswordToken = undefined;
+                user.resetPasswordExpire = undefined;
+                await user.save({ validateBeforeSave: false });
+            }
+        }
+        res.status(500).json({ success: false, message: "Email could not be sent. Please try again." });
+    }
+};
+
+module.exports.resetPassword = async (req, res) => {
+    try {
+        const resetPasswordToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
+
+        const user = await userModel.findOne({
+            resetPasswordToken,
+            resetPasswordExpire: { $gt: Date.now() }
+        });
+
+        if (!user) {
+            return res.status(400).json({ success: false, message: "Invalid or expired token! Please try again." });
+        }
+
+        user.password = req.body.password;
+
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpire = undefined;
+
+        await user.save();
+
+        res.status(200).json({ success: true, message: "Password updated magically! ✨ You can now login." });
+
+    } catch (error) {
+        console.error("Reset Password Error:", error);
+        res.status(500).json({ success: false, message: "Something went wrong!" });
     }
 };

@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+ import React, { useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
+import toast, { Toaster } from 'react-hot-toast'; // 👈 Ye pehle se import kar liya hai
 import { Mail, Lock, ArrowRight, Loader2, LogIn } from 'lucide-react';
 
- const leftSideImage = "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=600&q=80"; 
+const leftSideImage = "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=600&q=80"; 
 const rightSideImage = "https://images.unsplash.com/photo-1554188248-986adbb73be0?w=600&q=80";  
 
 export default function Login() {
@@ -22,18 +23,21 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     try {
-       const res = await axios.post('http://localhost:5000/users/login', formData);
+        const res = await axios.post('http://localhost:5000/users/login', formData);
 
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('user', JSON.stringify(res.data.user));
 
-      alert('Login Successful!');
-      navigate('/');
-      window.location.reload();
+       toast.success('Welcome back to Artify! 🎨');
+      
+       setTimeout(() => {
+          navigate('/');
+          window.location.reload();
+      }, 1500);
 
     } catch (error) {
       console.error(error);
-      alert(error.response?.data?.message || 'Login Failed');
+       toast.error(error.response?.data?.message || 'Login Failed');
     } finally {
       setLoading(false);
     }
@@ -41,7 +45,18 @@ export default function Login() {
 
   return (
     <section className="min-h-screen bg-[#050505] flex items-center justify-center relative overflow-hidden">
- 
+      
+       <Toaster 
+          position="bottom-right" 
+          toastOptions={{
+              style: {
+                  background: '#1a1a1a',
+                  color: '#fff',
+                  border: '1px solid #333'
+              }
+          }} 
+      />
+
       <div className="hidden lg:block absolute top-0 left-0 w-1/3 h-full overflow-hidden opacity-40">
         <img src={leftSideImage} alt="Art background left" className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000 scale-110" />
          <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-[#050505]/90 to-[#050505]"></div>
@@ -67,7 +82,6 @@ export default function Login() {
 
         <form onSubmit={handleSubmit} className="space-y-5">
 
-          
           <div className="relative group">
             <Mail className="absolute left-4 top-3.5 text-white/30 group-focus-within:text-pink-400 transition-colors" size={20} />
             <input
@@ -93,7 +107,9 @@ export default function Login() {
           </div>
 
           <div className="flex justify-end">
-            <a href="#" className="text-xs text-white/40 hover:text-white transition-colors">Forgot Password?</a>
+             <Link to="/forgot-password" className="text-xs text-white/40 hover:text-white transition-colors">
+                Forgot Password?
+            </Link>
           </div>
 
           <button

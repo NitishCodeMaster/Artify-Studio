@@ -43,8 +43,8 @@ export function CreatorSidebar() {
                                 className="flex items-center gap-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-all cursor-pointer group border border-transparent hover:border-white/10"
                             >
                                 <div className="relative">
-                                    {creator.avatar ? (
-                                        <img src={creator.avatar} alt={creator.name} className="w-10 h-10 rounded-full object-cover" />
+                                    {creator.profilePic ? (
+                                        <img src={creator.profilePic} alt={creator.name} className="w-10 h-10 rounded-full object-cover" />
                                     ) : (
                                         <div className="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center">
                                             <UserCircle2 size={24} className="text-indigo-400" />

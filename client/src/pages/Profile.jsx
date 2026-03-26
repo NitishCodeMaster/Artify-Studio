@@ -59,8 +59,8 @@ const Profile = () => {
 
                 <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 lg:left-24 lg:translate-x-0">
                     <div className="w-32 h-32 rounded-full border-4 border-[#030303] bg-[#0f0f0f] flex items-center justify-center overflow-hidden shadow-[0_0_30px_rgba(0,0,0,0.5)] relative group">
-                        {user.avatar ? (
-                            <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+                        {user.profilePic ? (
+                            <img src={user.profilePic} alt={user.name} className="w-full h-full object-cover" />
                         ) : (
                             <UserCircle2 size={80} className="text-white/20" />
                         )}

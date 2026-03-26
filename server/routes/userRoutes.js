@@ -26,4 +26,8 @@ router.get('/profile/:id', userController.getUserProfileById);
 
 router.put('/profile', authUser, userController.updateUserProfile);
 
+router.post('/forgot-password', userController.forgotPassword);
+
+router.post('/reset-password/:token', userController.resetPassword);
+
 module.exports = router;

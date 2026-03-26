@@ -17,6 +17,7 @@ const Navbar = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState(false);
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [userProfile, setUserProfile] = useState(null);
     const { cart, setIsCartOpen } = useCart();
 
@@ -106,21 +107,49 @@ const Navbar = () => {
                         </button>
 
                         {userProfile ? (
-                            <div className="flex items-center gap-2 p-1.5 rounded-full bg-black/40 border border-white/10">
-                                <div className={`w-8 h-8 rounded-full ${theme.avatar} flex items-center justify-center font-bold text-sm transition-colors duration-500`}>
-                                    {userProfile.name ? userProfile.name.charAt(0).toUpperCase() : <User size={14} />}
-                                </div>
-                                <span className="px-2 text-sm font-semibold text-white/90">
-                                    {userProfile.name?.split(' ')[0]}
-                                </span>
-                                <div className="w-[1px] h-5 bg-white/10 mx-1"></div>
-                                <Link to="/dashboard" className="px-3 py-1.5 rounded-full bg-white/5 text-white/80 hover:bg-white/10 text-xs font-bold transition-all">
-                                    Dashboard
-                                </Link>
-                                <button onClick={handleLogout} className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold text-red-400 hover:bg-red-500 hover:text-white transition-all duration-300 ease-out group">
-                                    <LogOut size={14} className="group-hover:scale-110 transition-transform" />
-                                    Logout
+                            <div className="relative">
+                                <button
+                                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                                    className="flex items-center gap-2 p-1.5 rounded-full bg-black/40 border border-white/10 hover:bg-black/60 transition-colors focus:outline-none"
+                                >
+                                    <div className={`w-8 h-8 rounded-full ${theme.avatar} flex items-center justify-center font-bold text-sm transition-colors duration-500 overflow-hidden`}>
+                                        {userProfile.profilePic ? (
+                                            <img src={userProfile.profilePic} alt={userProfile.name} className="w-full h-full object-cover" />
+                                        ) : userProfile.name ? (
+                                            userProfile.name.charAt(0).toUpperCase()
+                                        ) : (
+                                            <User size={14} />
+                                        )}
+                                    </div>
+                                    <span className="px-2 text-sm font-semibold text-white/90">
+                                        {userProfile.name?.split(' ')[0]}
+                                    </span>
                                 </button>
+
+                                <AnimatePresence>
+                                    {isDropdownOpen && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: 10 }}
+                                            className="absolute right-0 mt-2 w-48 bg-[#1a1a1a] rounded-xl shadow-lg border border-white/10 py-2"
+                                        >
+                                            <Link to={`/profile/${userProfile._id}`} onClick={() => setIsDropdownOpen(false)} className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors">
+                                                My Profile
+                                            </Link>
+                                            <Link to="/dashboard" onClick={() => setIsDropdownOpen(false)} className="block px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors">
+                                                Dashboard
+                                            </Link>
+                                            <Link to="/settings" onClick={() => setIsDropdownOpen(false)} className="block px-4 py-2 text-sm text-amber-500 hover:bg-white/10 transition-colors font-medium">
+                                                Settings
+                                            </Link>
+                                            <div className="border-t border-white/10 my-1"></div>
+                                            <button onClick={() => { handleLogout(); setIsDropdownOpen(false); }} className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-white/10 transition-colors flex items-center gap-2">
+                                                <LogOut size={14} /> Logout
+                                            </button>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             </div>
                         ) : (
                             <>
@@ -152,8 +181,14 @@ const Navbar = () => {
                             <div className="h-[1px] bg-white/10 my-2"></div>
                             {userProfile ? (
                                 <div className="p-4 mt-2 rounded-2xl bg-white/5 border border-white/10 space-y-4">
+                                    <Link to={`/profile/${userProfile._id}`} onClick={() => setIsOpen(false)} className="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white border border-white/10 font-bold flex items-center justify-center gap-2 transition-all">
+                                        My Profile
+                                    </Link>
                                     <Link to="/dashboard" onClick={() => setIsOpen(false)} className="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white border border-white/10 font-bold flex items-center justify-center gap-2 transition-all">
                                         Dashboard
+                                    </Link>
+                                    <Link to="/settings" onClick={() => setIsOpen(false)} className="w-full py-3 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 border border-amber-500/20 hover:border-amber-500/40 font-bold flex items-center justify-center gap-2 transition-all">
+                                        Settings
                                     </Link>
                                     <button onClick={handleLogout} className="w-full py-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 hover:border-red-500/40 font-bold flex items-center justify-center gap-2 transition-all">
                                         <LogOut size={18} /> Sign Out

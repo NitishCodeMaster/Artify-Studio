@@ -6,7 +6,10 @@ import { Loader2 } from 'lucide-react';
 import Navbar from './components/Navbar';
 import PrivateRoute from './components/PrivateRoute';
 import NotFound from './pages/NotFound';
-import Profile from './pages/Profile';  
+import Profile from './pages/Profile';
+import { ForgotPassword } from './pages/ForgotPassword';
+import { Settings } from './pages/Settings';
+import { ResetPassword } from './pages/ResetPassword';
 
 const Home = lazy(() => import('./pages/Home'));
 const Discover = lazy(() => import('./pages/Discover'));
@@ -57,6 +60,9 @@ const App = () => {
               <Route path="/product/:id" element={<ProductDetails />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/profile/:id" element={<Profile />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password/:token" element={<ResetPassword />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
