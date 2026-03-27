@@ -10,6 +10,7 @@ import Profile from './pages/Profile';
 import { ForgotPassword } from './pages/ForgotPassword';
 import { Settings } from './pages/Settings';
 import { ResetPassword } from './pages/ResetPassword';
+import { PublicProfile } from './pages/PublicProfile';
 
 const Home = lazy(() => import('./pages/Home'));
 const Discover = lazy(() => import('./pages/Discover'));
@@ -22,7 +23,6 @@ const Signup = lazy(() => import('./pages/Signup'));
 const AddProduct = lazy(() => import('./pages/AddProduct'));
 const ProductDetails = lazy(() => import('./pages/ProductDetails'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
-
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -63,6 +63,7 @@ const App = () => {
               <Route path="/settings" element={<Settings />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password/:token" element={<ResetPassword />} />
+              <Route path="/profile/:id" element={<PublicProfile />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
