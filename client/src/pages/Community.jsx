@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { CommunityHero } from '../components/Community/CommunityHero';
 import { DiscussionList } from '../components/Community/DiscussionList';
 import { CreatorSidebar } from '../components/Community/CreatorSidebar';
 import { StatsStrip } from '../components/Community/StatsStrip';
 
 export default function Community() {
+    const discussionRef = useRef(null);
+    const groupsRef = useRef(null);
+
     return (
         <section className="relative py-24 bg-[#050505] overflow-hidden">
 
@@ -13,14 +16,16 @@ export default function Community() {
             <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[120px] pointer-events-none"></div>
 
             <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8">
-                <CommunityHero />
-                <div className="grid lg:grid-cols-3 gap-10">
-                    <DiscussionList />
+                <CommunityHero discussionRef={discussionRef} groupsRef={groupsRef} />
 
-                    <CreatorSidebar /> 
+                <div ref={discussionRef} className="grid lg:grid-cols-3 gap-10 scroll-mt-24">
+                    <DiscussionList />
+                    <CreatorSidebar />
                 </div>
 
-                <StatsStrip />
+                <div ref={groupsRef} className="mt-20 scroll-mt-24">
+                    <StatsStrip />
+                </div>
 
             </div>
         </section>

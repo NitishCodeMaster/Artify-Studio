@@ -8,7 +8,7 @@ import api from '../utils/api';
 const defaultCover = "https://images.unsplash.com/photo-1547826039-bfc35e0f1ea8?q=80&w=2564&auto=format&fit=crop";
 
 export const PublicProfile = () => {
-    const { id } = useParams(); 
+    const { id } = useParams();
     const [profile, setProfile] = useState(null);
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -17,7 +17,6 @@ export const PublicProfile = () => {
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                // Backend se is user ki details mangwayenge
                 const res = await api.get(`/users/${id}`);
                 setProfile(res.data.user);
             } catch (err) {
