@@ -191,6 +191,7 @@ module.exports.getTopCreators = async (req, res) => {
         res.status(500).json({ success: false, message: "Error fetching creators" });
     }
 };
+
 module.exports.getUserProfileById = async (req, res) => {
     try {
         const user = await userModel.findById(req.params.id).select('-password');
@@ -215,6 +216,7 @@ module.exports.getUserProfileById = async (req, res) => {
         res.status(500).json({ success: false, message: "Internal Server Error" });
     }
 };
+
 module.exports.forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
