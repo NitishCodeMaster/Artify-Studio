@@ -54,17 +54,16 @@ exports.deletePost = async (req, res) => {
         if (!post) return res.status(404).json({ success: false, message: "Post not found" });
 
         if (post.user.toString() !== req.user._id.toString()) {
-            return res.status(403).json({ success: false, message: "You can only delete your own posts!" });
+            return res.status(403).json({ success: false, message: "Unauthorized action" });
         }
 
         await Post.findByIdAndDelete(req.params.id);
         req.app.get('io').emit('post_deleted', req.params.id);
-
         res.status(200).json({ success: true, message: "Post Deleted Successfully!" });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
-};
+}; 
 
 exports.toggleLike = async (req, res) => {
     try {

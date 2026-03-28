@@ -1,11 +1,11 @@
- import React, { useState } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast'; // 👈 Ye pehle se import kar liya hai
 import { Mail, Lock, ArrowRight, Loader2, LogIn } from 'lucide-react';
 
-const leftSideImage = "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=600&q=80"; 
-const rightSideImage = "https://images.unsplash.com/photo-1554188248-986adbb73be0?w=600&q=80";  
+const leftSideImage = "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=600&q=80";
+const rightSideImage = "https://images.unsplash.com/photo-1554188248-986adbb73be0?w=600&q=80";
 
 export default function Login() {
   const [formData, setFormData] = useState({
@@ -23,21 +23,26 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     try {
-        const res = await axios.post('http://localhost:5000/users/login', formData);
+      const res = await axios.post('http://localhost:5000/users/login', formData);
 
-      localStorage.setItem('token', res.data.token);
-      localStorage.setItem('user', JSON.stringify(res.data.user));
+      localStorage.setItem('token', res.data.token); 
+      const fixedUser = {
+        ...res.data.user,
+        _id: res.data.user._id || res.data.user.id
+      };
 
-       toast.success('Welcome back to Artify! 🎨');
-      
-       setTimeout(() => {
-          navigate('/');
-          window.location.reload();
+      localStorage.setItem('user', JSON.stringify(fixedUser));
+
+      toast.success('Welcome back to Artify! 🎨');
+
+      setTimeout(() => {
+        navigate('/');
+        window.location.reload();
       }, 1500);
 
     } catch (error) {
       console.error(error);
-       toast.error(error.response?.data?.message || 'Login Failed');
+      toast.error(error.response?.data?.message || 'Login Failed');
     } finally {
       setLoading(false);
     }
@@ -45,34 +50,34 @@ export default function Login() {
 
   return (
     <section className="min-h-screen bg-[#050505] flex items-center justify-center relative overflow-hidden">
-      
-       <Toaster 
-          position="bottom-right" 
-          toastOptions={{
-              style: {
-                  background: '#1a1a1a',
-                  color: '#fff',
-                  border: '1px solid #333'
-              }
-          }} 
+
+      <Toaster
+        position="bottom-right"
+        toastOptions={{
+          style: {
+            background: '#1a1a1a',
+            color: '#fff',
+            border: '1px solid #333'
+          }
+        }}
       />
 
       <div className="hidden lg:block absolute top-0 left-0 w-1/3 h-full overflow-hidden opacity-40">
         <img src={leftSideImage} alt="Art background left" className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000 scale-110" />
-         <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-[#050505]/90 to-[#050505]"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-[#050505]/90 to-[#050505]"></div>
       </div>
 
-       <div className="hidden lg:block absolute top-0 right-0 w-1/3 h-full overflow-hidden opacity-40">
+      <div className="hidden lg:block absolute top-0 right-0 w-1/3 h-full overflow-hidden opacity-40">
         <img src={rightSideImage} alt="Art background right" className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000 scale-110" />
-         <div className="absolute inset-0 bg-gradient-to-l from-black/40 via-[#050505]/90 to-[#050505]"></div>
+        <div className="absolute inset-0 bg-gradient-to-l from-black/40 via-[#050505]/90 to-[#050505]"></div>
       </div>
 
-       <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-pink-600/20 rounded-full blur-[120px] pointer-events-none z-0"></div>
+      <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-pink-600/20 rounded-full blur-[120px] pointer-events-none z-0"></div>
       <div className="absolute bottom-0 left-1/4 w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[120px] pointer-events-none z-0"></div>
 
-       <div className="w-full max-w-md bg-[#0f0f0f]/80 border border-white/10 p-8 rounded-3xl shadow-2xl relative z-10 backdrop-blur-2xl mx-4">
+      <div className="w-full max-w-md bg-[#0f0f0f]/80 border border-white/10 p-8 rounded-3xl shadow-2xl relative z-10 backdrop-blur-2xl mx-4">
 
-        <div className="text-center mb-8"> 
+        <div className="text-center mb-8">
           <div className="inline-block p-3 rounded-full bg-white/5 mb-4">
             <LogIn className="text-pink-400" size={24} />
           </div>
@@ -93,7 +98,7 @@ export default function Login() {
               onChange={handleChange}
             />
           </div>
- 
+
           <div className="relative group">
             <Lock className="absolute left-4 top-3.5 text-white/30 group-focus-within:text-pink-400 transition-colors" size={20} />
             <input
@@ -107,8 +112,8 @@ export default function Login() {
           </div>
 
           <div className="flex justify-end">
-             <Link to="/forgot-password" className="text-xs text-white/40 hover:text-white transition-colors">
-                Forgot Password?
+            <Link to="/forgot-password" className="text-xs text-white/40 hover:text-white transition-colors">
+              Forgot Password?
             </Link>
           </div>
 

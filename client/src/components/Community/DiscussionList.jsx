@@ -4,7 +4,7 @@ import { Zap, Send, Loader2, Trash2, Tag, Filter, Image as ImageIcon, X, Message
 import PostCard from './postCard';
 import ConfirmDeleteModal from '../ConfirmDeleteModal';
 import { io } from 'socket.io-client';
-import Masonry from 'react-masonry-css'; // इसे install करना न भूलें: npm install react-masonry-css
+import Masonry from 'react-masonry-css';
 
 const POST_CATEGORIES = ['General', 'Looking for Band', 'Art Feedback', 'Gigs'];
 
@@ -147,7 +147,12 @@ export function DiscussionList() {
     const confirmDeleteAction = async () => {
         if (!postToDelete) return;
         try {
-            await api.delete(`/posts/${postToDelete}`);
+            const token = localStorage.getItem("token");
+            await api.delete(`/posts/${postToDelete}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
             setPosts(posts.filter(post => post._id !== postToDelete));
         } catch (error) {
             alert("Failed to delete post");
@@ -219,7 +224,10 @@ export function DiscussionList() {
                     columnClassName="pl-6 bg-clip-padding"
                 >
                     {posts.map((post) => {
-                        const isOwner = currentUser && (post.user?._id === currentUser._id || post.user?._id === currentUser.id);
+                        const userId = currentUser?._id || currentUser?.id;
+                        const postUserId = post.user?._id || post.user;
+
+                        const isOwner = userId === postUserId;
                         return (
                             <div key={post._id} className="mb-6 group relative">
                                 <PostCard post={post} />
