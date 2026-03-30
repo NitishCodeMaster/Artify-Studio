@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Award, Music, PenTool, Mic, ArrowRight, UserCircle2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../utils/api';
+import toast from 'react-hot-toast';
 
 export function CreatorSidebar() {
     const [creators, setCreators] = useState([]);
+    const [followingArtists, setFollowingArtists] = useState({});
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -25,8 +27,37 @@ export function CreatorSidebar() {
         return PenTool;
     };
 
+    const handleFollowToggle = (e, creatorId, creatorName) => {
+        e.stopPropagation();
+
+        const isCurrentlyFollowing = followingArtists[creatorId];
+
+        if (isCurrentlyFollowing) {
+            toast(`Unfollowed ${creatorName}`, { icon: '👋', style: { borderRadius: '10px', background: '#333', color: '#fff' } });
+        } else {
+            toast.success(`You are now following ${creatorName}! 🌟`);
+        }
+
+        setFollowingArtists(prev => ({
+            ...prev,
+            [creatorId]: !isCurrentlyFollowing
+        }));
+    };
+
+    const handleLeaderboard = () => {
+        toast("Top Artists Leaderboard is updating live! 🏆", { icon: '🔥', style: { borderRadius: '10px', background: '#333', color: '#fff' } });
+    };
+
+    const handleCallout = () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        toast.success("Ready to Collab? Type your Callout and post it! 📣", {
+            style: { borderRadius: '10px', background: '#4f46e5', color: '#fff', border: '1px solid #6366f1' }
+        });
+    };
+
     return (
         <div className="space-y-8 sticky top-24">
+
             <div className="p-6 rounded-3xl bg-gradient-to-br from-indigo-900/20 to-purple-900/20 border border-white/10 backdrop-blur-md shadow-xl shadow-indigo-500/5">
                 <div className="flex items-center gap-2 mb-6">
                     <Award size={20} className="text-amber-500" />
@@ -36,10 +67,12 @@ export function CreatorSidebar() {
                 <div className="space-y-4">
                     {creators.length > 0 ? creators.map((creator, i) => {
                         const Icon = getIcon(creator.role);
+                        const isFollowing = followingArtists[creator._id];
+
                         return (
                             <div
                                 key={creator._id || i}
-                                onClick={() => navigate(`/profile/${creator._id}`)} // 🌟 Clickable banaya
+                                onClick={() => navigate(`/profile/${creator._id}`)}
                                 className="flex items-center gap-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-all cursor-pointer group border border-transparent hover:border-white/10"
                             >
                                 <div className="relative">
@@ -58,8 +91,15 @@ export function CreatorSidebar() {
                                     <h5 className="text-sm font-bold text-white truncate group-hover:text-amber-400 transition-colors">{creator.name}</h5>
                                     <p className="text-xs text-white/40 truncate">{creator.role || "Community Member"}</p>
                                 </div>
-                                <button className="text-xs font-bold text-white px-3 py-1.5 rounded-full bg-indigo-600 hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-500/20">
-                                    Follow
+
+                                <button
+                                    onClick={(e) => handleFollowToggle(e, creator._id, creator.name)}
+                                    className={`text-[11px] font-bold px-3 py-1.5 rounded-full transition-all shadow-lg active:scale-95 ${isFollowing
+                                        ? 'bg-white/10 text-white/70 border border-white/20'
+                                        : 'bg-indigo-600 text-white hover:bg-indigo-500 shadow-indigo-500/20 border border-transparent'
+                                        }`}
+                                >
+                                    {isFollowing ? 'Following' : 'Follow'}
                                 </button>
                             </div>
                         )
@@ -68,7 +108,10 @@ export function CreatorSidebar() {
                     )}
                 </div>
 
-                <button className="w-full mt-6 py-3 rounded-xl border border-dashed border-white/10 text-white/40 text-sm hover:text-white hover:border-white/30 transition-all bg-black/20">
+                <button
+                    onClick={handleLeaderboard}
+                    className="w-full mt-6 py-3 rounded-xl border border-dashed border-white/10 text-white/40 text-sm hover:text-white hover:border-white/30 transition-all bg-black/20"
+                >
                     View Leaderboard
                 </button>
             </div>
@@ -80,7 +123,7 @@ export function CreatorSidebar() {
                     Find perfect collaborators for your next big masterpiece.
                 </p>
                 <button
-                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                    onClick={handleCallout}
                     className="w-full py-3.5 rounded-full bg-amber-500 hover:bg-amber-400 text-black font-bold flex items-center justify-center gap-2 group-hover:scale-105 transition-all shadow-[0_0_20px_rgba(245,158,11,0.2)] relative z-10"
                 >
                     Create a Callout <ArrowRight size={16} />

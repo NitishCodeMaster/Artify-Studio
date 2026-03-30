@@ -1,167 +1,222 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import api from '../../utils/api';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, ChevronRight, Frown, Filter, TrendingUp, MapPin, Award, ShieldCheck, Zap, Disc, Music, Camera } from 'lucide-react';
-import { StandardCard, EventCard } from './Cards';
+import { Palette, Camera, Brush, ArrowRight, Music, Mic, Star, MapPin, Loader2, Edit3 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-import img1 from '../../assets/Images/PerformerPanel/image1.jpeg';
-import img2 from '../../assets/Images/PerformerPanel/image2.jpeg';
-import img3 from '../../assets/Images/PerformerPanel/image3.jpeg';
-import spot1 from '../../assets/Images/ArtistSpotlight/acoustic.jpeg';
-import spot2 from '../../assets/Images/ArtistSpotlight/dancer.avif';
-import spot3 from '../../assets/Images/ArtistSpotlight/painter.avif';
+const StandardCard = ({ item }) => (
+    <div className="group bg-[#0a0a0a] border border-white/[0.05] rounded-3xl p-5 shadow-xl hover:border-amber-500/20 transition-all duration-300 relative overflow-hidden">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-32 bg-amber-500/10 rounded-full blur-[50px] opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
-const bentoItems = [
-    { id: 1, type: "artist", category: "Musicians", name: "Aarav Patel", role: "Guitarist", loc: "Mumbai", img: img1, rating: "4.9", price: "₹5k/hr" },
-    { id: 2, type: "event", category: "Performers", name: "Neon Jazz Night", role: "Live at Blue Frog", loc: "Delhi", img: img2, date: "Tonight", time: "8:00 PM" },
-    { id: 3, type: "artist", category: "Visual Artists", name: "Sneha Art", role: "Painter", loc: "Bangalore", img: spot3, rating: "5.0", price: "₹20k/art" },
-    { id: 4, type: "gear", category: "Gear Trading", name: "Fender Strat", role: "Electric Guitar", loc: "Pune", img: spot1, rating: "New", price: "₹45,000" },
-    { id: 5, type: "artist", category: "Performers", name: "Vikram Dance", role: "Choreographer", loc: "Mumbai", img: spot2, rating: "4.8", price: "₹2k/hr" },
-    { id: 6, type: "artist", category: "Musicians", name: "Riya Sen", role: "Vocalist", loc: "Goa", img: img3, rating: "4.9", price: "₹8k/hr" },
-    { id: 7, type: "artist", category: "Photographers", name: "Lens Magic", role: "Portrait", loc: "Chennai", img: spot1, rating: "4.6", price: "₹10k/shoot" },
-    { id: 8, type: "event", category: "Musicians", name: "Drum Circle", role: "Workshop", loc: "Manali", img: img2, date: "Sat, 24th", time: "10:00 AM" },
-];
-
-const Section = ({ title, items, type = "standard", onSeeAll }) => {
-    if (!items?.length) return null;
-    return (
-        <div className="mb-16">
-            <div className="flex items-end justify-between mb-6 px-1">
-                <div>
-                    <h3 className="text-2xl font-bold text-white mb-1 flex items-center gap-2">
-                        {title}
-                        <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
-                    </h3>
-                </div>
-                <button onClick={onSeeAll} className="text-xs font-bold uppercase tracking-wider text-white/40 hover:text-indigo-400 transition-colors flex items-center gap-1 group">
-                    View All <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
-                </button>
+        <div className="flex items-center gap-3 mb-4 relative z-10">
+            <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/10 text-amber-500">
+                {item.category === "Heritage & Canvas" && <Palette size={14} />}
+                {item.category === "Beats & Vocals" && <Music size={14} />}
+                {item.category === "Rhythm & Expressions" && <Star size={14} />}
+                {item.category === "Lenses & Frames" && <Camera size={14} />}
             </div>
-            <div className="flex gap-6 overflow-x-auto pb-8 -mx-2 px-2 no-scrollbar scroll-smooth snap-x snap-mandatory">
-                {items.map(item => (
-                    <div key={item.id} className="snap-center">
-                        {type === "event" ? <EventCard item={item} /> : <StandardCard item={item} layoutMode="horizontal" />}
-                    </div>
-                ))}
-            </div>
+            <span className="text-[10px] uppercase tracking-widest font-bold text-white/50">{item.category}</span>
         </div>
-    )
+
+        <img src={item.img} alt={item.name} className="w-full h-40 object-cover rounded-2xl mb-5 group-hover:scale-105 transition-transform duration-500 relative z-10 shadow-lg" />
+
+        <div className="flex items-center justify-between mb-2 relative z-10">
+            <div className="overflow-hidden pr-2">
+                <h4 className="font-bold text-white tracking-tight text-lg truncate group-hover:text-amber-400 transition-colors">{item.name}</h4>
+                <p className="text-xs text-white/50 truncate font-medium mt-0.5">{item.role}</p>
+            </div>
+            <Link to={`/profile/${item.id}`} className="p-3 shrink-0 bg-white/5 border border-white/10 rounded-full text-white/40 group-hover:bg-amber-500 group-hover:text-black hover:scale-110 transition-all shadow-lg"><ArrowRight size={18} /></Link>
+        </div>
+
+        <div className="flex items-center gap-2 text-[11px] font-medium text-white/40 pt-4 mt-2 border-t border-white/[0.05] relative z-10">
+            <MapPin size={12} className="text-red-400/70" /> {item.loc}
+        </div>
+    </div>
+);
+
+const getOptimizedImage = (url, width = 600, height = 600) => {
+    if (!url || !url.includes("res.cloudinary.com")) return url;
+    const parts = url.split("/upload/");
+    return `${parts[0]}/upload/w_${width},h_${height},c_lfill,g_face,q_auto,f_auto/${parts[1]}`;
 };
 
- const ContentFeed = ({ activeCategory, searchQuery, setActiveCategory }) => {
-    const getCategoryItems = (cat) => bentoItems.filter(i => i.category === cat);
-    const getEventItems = () => bentoItems.filter(i => i.type === "event");
+const MyOwnPremiumProfileCard = ({ user }) => (
+    <div className="col-span-1 md:col-span-2 lg:col-span-3 xl:col-span-4 p-[1px] bg-gradient-to-r from-amber-400 via-orange-500 to-amber-400 rounded-3xl shadow-[0_0_30px_rgba(245,158,11,0.1)] group overflow-hidden mb-8">
+        <div className="bg-[#050505] p-6 sm:p-8 rounded-[23px] h-full flex flex-col sm:flex-row items-center gap-6 sm:gap-8 relative overflow-hidden">
+             <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-[80px]"></div>
 
-    const renderContent = () => {
-        if (searchQuery) {
-            const results = bentoItems.filter(i => i.name.toLowerCase().includes(searchQuery.toLowerCase()) || i.role.toLowerCase().includes(searchQuery.toLowerCase()));
-            return (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {results.length > 0 ? results.map(i => <StandardCard key={i.id} item={i} />) : <div className="text-white/40 text-center py-20 col-span-full"><Frown size={32} className="mb-4 mx-auto opacity-50" /><h3 className="text-lg font-bold text-white">No matches found</h3></div>}
-                </div>
-            )
-        }
-
-         if (activeCategory === "All") {
-            return (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className="space-y-12">
-
-                    <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
-                        {[
-                            { label: "Trending", icon: TrendingUp, color: "text-orange-400", border: "group-hover:border-orange-500/50" },
-                            { label: "New Arrivals", icon: Sparkles, color: "text-cyan-400", border: "group-hover:border-cyan-500/50" },
-                            { label: "Near You", icon: MapPin, color: "text-emerald-400", border: "group-hover:border-emerald-500/50" },
-                            { label: "Top Rated", icon: Award, color: "text-yellow-400", border: "group-hover:border-yellow-500/50" },
-                            { label: "Verified", icon: ShieldCheck, color: "text-purple-400", border: "group-hover:border-purple-500/50" },
-                        ].map((tag, i) => (
-                            <button key={i} className={`group flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#121212] border border-white/5 transition-all duration-300 hover:bg-[#1A1A1A] ${tag.border}`}>
-                                <tag.icon size={14} className={`text-white/40 transition-colors duration-300 ${tag.color.replace('text-', 'group-hover:text-')}`} />
-                                <span className="text-xs font-bold text-white/60 group-hover:text-white uppercase tracking-wider">{tag.label}</span>
-                            </button>
-                        ))}
+            <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full border-4 border-[#050505] bg-[#111] overflow-hidden shadow-2xl shrink-0 -mt-10 sm:-mt-0 group-hover:scale-105 transition-transform duration-500 relative z-10">
+                {user.img ? (
+                    <img src={user.img} alt={user.name} className="w-full h-full object-cover" />
+                ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-amber-500/10 text-amber-500 font-black text-4xl">
+                        {user.name?.charAt(0).toUpperCase()}
                     </div>
-
-                    <div className="relative w-full h-[400px] md:h-[350px] rounded-[2.5rem] overflow-hidden group cursor-pointer border border-white/10 shadow-2xl">
-                        <img src={img1} className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" alt="Spotlight" />
-                        <div className="absolute inset-0 bg-gradient-to-r from-black via-black/60 to-transparent"></div>
-
-                        {/* Content */}
-                        <div className="absolute inset-0 p-8 md:p-12 flex flex-col justify-center max-w-2xl">
-                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="flex items-center gap-3 mb-4">
-                                <span className="px-3 py-1 bg-white/10 backdrop-blur-md border border-white/10 rounded-full text-[10px] font-bold uppercase tracking-widest text-white">Editor's Pick</span>
-                                <span className="flex items-center gap-1 text-[10px] font-bold text-indigo-400 uppercase tracking-widest"><Zap size={12} fill="currentColor" /> Trending Now</span>
-                            </motion.div>
-
-                            <h2 className="text-4xl md:text-6xl font-bold font-playfair text-white mb-6 leading-tight drop-shadow-lg">
-                                The Sound of <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400 italic">Silence</span>
-                            </h2>
-
-                            <p className="text-white/70 text-sm md:text-base leading-relaxed mb-8 max-w-md">
-                                Join Aarav Patel for an exclusive acoustic session. A journey through rhythm, soul, and pure musical excellence.
-                            </p>
-
-                            <div className="flex gap-4">
-                                <button className="px-8 py-3.5 bg-white text-black rounded-full text-xs font-bold uppercase tracking-widest hover:scale-105 transition-transform shadow-[0_0_20px_rgba(255,255,255,0.3)]">
-                                    View Profile
-                                </button>
-                                <button className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center bg-black/20 backdrop-blur-md hover:bg-white hover:text-black transition-all">
-                                    <ChevronRight size={20} />
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="space-y-2">
-                        <Section title="Live Events & Gigs" items={getEventItems()} type="event" />
-                        <Section title="Trending Musicians" items={getCategoryItems("Musicians")} onSeeAll={() => setActiveCategory("Musicians")} />
-                        <Section title="Visual Arts Gallery" items={getCategoryItems("Visual Artists")} onSeeAll={() => setActiveCategory("Visual Artists")} />
-                        <Section title="Gear Trading" items={getCategoryItems("Gear Trading")} onSeeAll={() => setActiveCategory("Gear Trading")} />
-                    </div>
-
-                </motion.div>
-            )
-        }
-
-        return (
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {getCategoryItems(activeCategory).length > 0 ? getCategoryItems(activeCategory).map(item => <StandardCard key={item.id} item={item} />) : <div className="col-span-full py-20 flex flex-col items-center justify-center text-center text-white/40"><Frown size={32} className="mb-4 opacity-50" /><h3 className="text-lg font-bold text-white">No results in {activeCategory}</h3></div>}
-            </motion.div>
-        )
-    };
-
-    return (
-        <div className="flex-1 min-h-[800px] relative">
-
-            <div className="flex items-end justify-between mb-10 pb-6 border-b border-white/5 relative">
-                <div className="absolute -top-20 -left-20 w-64 h-64 bg-indigo-600/10 blur-[100px] pointer-events-none"></div>
-
-                <div className="relative z-10">
-                    <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-[0.2em] mb-2 flex items-center gap-2">
-                        {activeCategory === "All" ? <><Sparkles size={12} /> Discover</> : activeCategory}
-                    </p>
-                    <h2 className="text-4xl md:text-5xl font-bold font-playfair text-white tracking-tight">
-                        {searchQuery ? `"${searchQuery}"` : (activeCategory === "All" ? "The Spotlight" : activeCategory)}
-                    </h2>
-                </div>
-
-                {!searchQuery && activeCategory !== "All" && (
-                    <button className="relative z-10 flex items-center gap-2 px-5 py-2.5 bg-[#111] hover:bg-indigo-600 border border-white/10 hover:border-indigo-500/50 rounded-xl text-xs font-bold text-white/80 hover:text-white transition-all shadow-lg">
-                        <Filter size={14} /> <span>Filter</span>
-                    </button>
                 )}
             </div>
 
-            <AnimatePresence mode="wait">
-                <motion.div
-                    key={activeCategory + searchQuery}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.3 }}
-                >
-                    {renderContent()}
-                </motion.div>
-            </AnimatePresence>
+            <div className="flex-1 text-center sm:text-left relative z-10">
+                <div className="flex items-center justify-center sm:justify-start gap-2 mb-2">
+                    <Edit3 size={14} className="text-amber-400" />
+                    <span className="text-[11px] font-bold tracking-widest text-amber-400 uppercase">Your Creator Dashboard</span>
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight mb-2 flex items-center justify-center sm:justify-start gap-3 flex-wrap">
+                    Welcome back, {user.name}!
+                    {user.role?.toLowerCase().includes('organizer') && (
+                        <span className="bg-blue-500/20 text-blue-400 text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider">Verified</span>
+                    )}
+                </h2>
+                <p className="text-white/50 text-sm max-w-xl mx-auto md:mx-0 leading-relaxed">
+                    This is your personalized creator experience. See how your profile shines on the community discover page.
+                </p>
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-xs font-medium text-white/50 mt-5">
+                    {user.loc && <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10"><MapPin size={12} className="text-red-400" /> {user.loc}</span>}
+                    <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10"><Brush size={12} className="text-green-400" /> {user.role || 'Artist'}</span>
+                </div>
+            </div>
+
+            <Link
+                to={`/profile/${user.id}`}
+                className="flex items-center justify-center gap-2 w-full sm:w-auto bg-amber-500 hover:bg-amber-400 text-black font-bold py-3 px-8 rounded-full transition-all border border-amber-500 group-hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(245,158,11,0.2)] relative z-10"
+            >
+                View Public Profile <ArrowRight size={18} />
+            </Link>
         </div>
+    </div>
+);
+
+const ContentFeed = ({ searchQuery, setActiveCategory }) => {
+    const [dynamicItems, setDynamicItems] = useState([]);
+    const [myOwnCard, setMyOwnCard] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchDiscoverData = async () => {
+            try {
+                const res = await api.get('/users/top-creators');
+                const users = res.data.creators || res.data.users || res.data;
+
+                const currentUser = JSON.parse(localStorage.getItem('user')) || {};
+                const myId = currentUser.id || currentUser._id;
+
+                let mappedMyOwnCardData = null;
+                const mappedOtherUsers = [];
+
+                users.forEach(u => {
+                    const r = (u.role || '').toLowerCase();
+                    const s = (u.artStyle || '').toLowerCase();
+
+                    let cat = "Uncategorized";
+
+                    if (r.includes('painter') || r.includes('painting') || s.includes('painter') || s.includes('painting') || s.includes('madhubani') || s.includes('village art') || s.includes('handmade') || s.includes('traditional') || s.includes('rare') || s.includes('folk') || s.includes('sketch')) {
+                        cat = "Heritage & Canvas";
+                    } else if (r.includes('music') || r.includes('singer') || r.includes('guitar') || r.includes('drum') || r.includes('band') || r.includes('vocal')) {
+                        cat = "Beats & Vocals";
+                    } else if (r.includes('photo') || r.includes('camera') || r.includes('video') || r.includes('cinematograph')) {
+                        cat = "Lenses & Frames";
+                    } else if (r.includes('dance') || r.includes('model') || r.includes('actor') || r.includes('perform') || r.includes('choreograph')) {
+                        cat = "Rhythm & Expressions";
+                    }
+
+                    const rawImg = u.profilePic || "https://images.unsplash.com/photo-1547826039-bfc35e0f1ea8?q=80&w=2564";
+                    const dynamicImg = getOptimizedImage(rawImg, 600, 600);
+
+                    const mappedItem = {
+                        id: u._id,
+                        type: "artist",
+                        category: cat,
+                        name: u.name,
+                        role: u.role || 'Artist',
+                        loc: u.originLocation || 'World Citizen',
+                        img: dynamicImg,
+                    };
+
+                    if (u._id === myId) {
+                        mappedMyOwnCardData = mappedItem;
+                    } else {
+                        mappedOtherUsers.push(mappedItem);
+                    }
+                });
+
+                setMyOwnCard(mappedMyOwnCardData);
+                setDynamicItems(mappedOtherUsers);
+            } catch (error) {
+                console.error("Error fetching discover data:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchDiscoverData();
+    }, []);
+
+    const getCategoryItems = (cat) => dynamicItems.filter(i => i.category === cat);
+
+    const Categories = ["Heritage & Canvas", "Beats & Vocals", "Rhythm & Expressions", "Lenses & Frames"];
+    const CategoryIcons = {
+        "Heritage & Canvas": Palette,
+        "Beats & Vocals": Music,
+        "Rhythm & Expressions": Star,
+        "Lenses & Frames": Camera
+    };
+
+    const renderContent = () => {
+        if (loading) return <div className="flex justify-center items-center py-20"><Loader2 className="animate-spin text-amber-500" size={40} /></div>;
+
+        if (searchQuery) {
+            const results = dynamicItems.filter(i =>
+                i.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                i.role.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+            return (
+                <div className="space-y-6 pt-10">
+                    <h2 className="text-2xl font-black text-white px-2">Search Results for "{searchQuery}"</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {results.map(item => <StandardCard key={item.id} item={item} />)}
+                        {results.length === 0 && <p className="col-span-full text-center text-white/40 py-10 border border-dashed border-white/10 rounded-2xl">No artists found wandering around.</p>}
+                    </div>
+                </div>
+            );
+        }
+
+        return (
+            <div className="space-y-16">
+                {myOwnCard && <MyOwnPremiumProfileCard user={myOwnCard} />}
+
+                {Categories.map(cat => {
+                    const items = getCategoryItems(cat);
+                    const Icon = CategoryIcons[cat];
+
+                    if (items.length === 0) return null;
+
+                    return (
+                        <div key={cat} className="space-y-8">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.05] pb-6 px-2">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-white/10 to-transparent flex items-center justify-center text-amber-500 border border-white/10 shadow-lg backdrop-blur-sm"><Icon size={24} /></div>
+                                    <div>
+                                        <h2 className="text-3xl font-black text-white tracking-tighter">{cat}</h2>
+                                        <p className="text-sm text-white/40 font-medium mt-1">Discover top talent in this category</p>
+                                    </div>
+                                </div>
+                                <button onClick={() => setActiveCategory(cat)} className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white/90 text-sm font-bold border border-white/10 active:scale-95 transition-all w-full sm:w-auto">Explore All <ArrowRight size={16} /></button>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                {items.map(item => <StandardCard key={item.id} item={item} />)}
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        );
+    };
+
+    return (
+        <AnimatePresence mode="wait">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.3 }}>
+                {renderContent()}
+            </motion.div>
+        </AnimatePresence>
     );
 };
 

@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import api from '../utils/api';
 import { UploadCloud, Tag, AlertCircle, Feather, BookOpen, CheckCircle, ArrowLeft } from 'lucide-react';
 
 const AddProduct = () => {
@@ -41,13 +43,17 @@ const AddProduct = () => {
                 seller: user._id || user.id
             };
 
-            await axios.post('http://localhost:5000/products/new', productData);
+            await api.post('/products/new', productData);
 
-            alert("Masterpiece Added Successfully! 🎉");
-            navigate('/marketplace');
+            toast.success("Masterpiece Added Successfully! 🎉", {
+                style: { borderRadius: '10px', background: '#333', color: '#fff' }
+            });
+             navigate('/marketplace');
         } catch (err) {
-            alert("Error adding product! Backend check karo.");
             console.log(err);
+            toast.error("Error adding product! Backend check karo. 🚨", {
+                style: { borderRadius: '10px', background: '#333', color: '#fff' }
+            });
         } finally {
             setLoading(false);
         }
@@ -75,7 +81,7 @@ const AddProduct = () => {
 
             <div className="pt-32 pb-20 px-6 max-w-[1200px] mx-auto relative z-10">
                 <button
-                    onClick={() => navigate(-1)} 
+                    onClick={() => navigate(-1)}
                     className="group flex items-center gap-2 text-white/50 hover:text-amber-400 font-medium text-sm mb-8 transition-colors w-fit"
                 >
                     <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-amber-500/10 group-hover:border-amber-500/30 transition-all">

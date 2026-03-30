@@ -9,8 +9,10 @@ const PostCard = ({ post }) => {
     const currentUser = JSON.parse(localStorage.getItem('user')) || {};
     const navigate = useNavigate();
 
+     const initialIsLiked = post.likes?.some(id => id.toString() === (currentUser._id || currentUser.id)?.toString());
+
     const [likesCount, setLikesCount] = useState(post.likes?.length || 0);
-    const [isLiked, setIsLiked] = useState(post.likes?.includes(currentUser._id || currentUser.id));
+    const [isLiked, setIsLiked] = useState(initialIsLiked);
     const [isLikeAnimating, setIsLikeAnimating] = useState(false);
 
     const [showComments, setShowComments] = useState(false);
@@ -19,7 +21,12 @@ const PostCard = ({ post }) => {
     const [isCommenting, setIsCommenting] = useState(false);
 
     const handleLike = async () => {
-        setIsLiked(!isLiked);
+        if (!currentUser || (!currentUser._id && !currentUser.id)) {
+            alert("Please login to like a post");
+            return;
+        }
+
+         setIsLiked(!isLiked);
         setLikesCount(prev => isLiked ? prev - 1 : prev + 1);
         setIsLikeAnimating(true);
         setTimeout(() => setIsLikeAnimating(false), 300);
@@ -28,20 +35,29 @@ const PostCard = ({ post }) => {
             await api.put(`/posts/${post._id}/like`);
         } catch (error) {
             console.error("Like failed:", error);
+            // Revert changes if API fails
             setIsLiked(!isLiked);
             setLikesCount(prev => isLiked ? prev + 1 : prev - 1);
+            alert("Failed to like post.");
         }
     };
 
     const handleCommentSubmit = async (e) => {
         e.preventDefault();
+        if (!currentUser || (!currentUser._id && !currentUser.id)) {
+            alert("Please login to comment");
+            return;
+        }
         if (!commentText.trim()) return;
 
         setIsCommenting(true);
         try {
             const res = await api.post(`/posts/${post._id}/comment`, { text: commentText });
-            setComments(res.data.comments || [...comments, { text: commentText, user: currentUser }]);
-            setCommentText('');
+            // The backend returns the updated comments array
+            if (res.data.success) {
+                setComments(res.data.comments);
+                setCommentText('');
+            }
         } catch (error) {
             console.error("Comment failed:", error);
             alert("Failed to post comment. Try again.");
@@ -52,9 +68,9 @@ const PostCard = ({ post }) => {
 
     return (
         <div className="bg-[#111] border border-white/[0.05] rounded-2xl p-5 mb-6 text-white/90 shadow-xl shadow-black/40">
-             <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                     <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-500 overflow-hidden border border-white/10">
+                    <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-500 overflow-hidden border border-white/10">
                         {post.user?.profilePic ? (
                             <img src={post.user.profilePic} alt={post.user.name} className="w-full h-full object-cover" />
                         ) : (
@@ -76,7 +92,7 @@ const PostCard = ({ post }) => {
                 </div>
             </div>
 
-             <p className="text-white/80 text-sm leading-relaxed mb-4 whitespace-pre-wrap">
+            <p className="text-white/80 text-sm leading-relaxed mb-4 whitespace-pre-wrap">
                 {post.content}
             </p>
 
@@ -86,7 +102,7 @@ const PostCard = ({ post }) => {
                 </div>
             )}
 
-             <div className="flex items-center gap-6 pt-3 border-t border-white/[0.05]">
+            <div className="flex items-center gap-6 pt-3 border-t border-white/[0.05]">
                 <div className="flex items-center gap-2 cursor-pointer group" onClick={handleLike}>
                     <motion.div
                         animate={isLikeAnimating ? { scale: [1, 1.4, 1] } : {}}
@@ -113,7 +129,7 @@ const PostCard = ({ post }) => {
                 </div>
             </div>
 
-             <AnimatePresence>
+            <AnimatePresence>
                 {showComments && (
                     <motion.div
                         initial={{ opacity: 0, height: 0 }}
@@ -123,7 +139,7 @@ const PostCard = ({ post }) => {
                     >
                         <div className="pt-4 mt-4 border-t border-white/[0.02]">
 
-                             <form onSubmit={handleCommentSubmit} className="flex gap-3 mb-5">
+                            <form onSubmit={handleCommentSubmit} className="flex gap-3 mb-5">
                                 <div className="w-8 h-8 rounded-full bg-white/10 flex-shrink-0 flex items-center justify-center overflow-hidden">
                                     {currentUser?.profilePic ? (
                                         <img src={currentUser.profilePic} alt="Me" className="w-full h-full object-cover" />
@@ -149,11 +165,10 @@ const PostCard = ({ post }) => {
                                 </div>
                             </form>
 
-                             <div className="space-y-4 max-h-[300px] overflow-y-auto hide-scrollbar pr-2">
+                            <div className="space-y-4 max-h-[300px] overflow-y-auto hide-scrollbar pr-2">
                                 {comments.length > 0 ? (
                                     comments.map((cmd, idx) => (
                                         <div key={idx} className="flex gap-3 text-sm">
-                                            {/* 📸 Fiya: Comment karne wale ki photo */}
                                             <div className="w-8 h-8 rounded-full bg-white/5 flex-shrink-0 flex items-center justify-center mt-0.5 overflow-hidden">
                                                 {cmd.user?.profilePic ? (
                                                     <img src={cmd.user.profilePic} alt={cmd.user.name} className="w-full h-full object-cover" />

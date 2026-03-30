@@ -36,7 +36,7 @@ export function DiscussionList() {
         setLoading(true);
         try {
             const endpoint = activeFilter === 'All'
-                ? '/posts/all'
+                ? '/posts/all' // Ensure this matches your backend route
                 : `/posts/all?category=${encodeURIComponent(activeFilter)}`;
 
             const res = await api.get(endpoint);
@@ -115,6 +115,7 @@ export function DiscussionList() {
 
         setSubmitting(true);
         try {
+            // 🌟 Make sure your backend route is exactly '/posts/new' and not '/api/posts/new'
             await api.post('/posts/new', {
                 user: currentUser._id || currentUser.id,
                 content: newPostContent,
@@ -147,14 +148,11 @@ export function DiscussionList() {
     const confirmDeleteAction = async () => {
         if (!postToDelete) return;
         try {
-            const token = localStorage.getItem("token");
-            await api.delete(`/posts/${postToDelete}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
+            // 🌟 Use the configured 'api' instance, it already attaches the token
+            await api.delete(`/posts/${postToDelete}`);
             setPosts(posts.filter(post => post._id !== postToDelete));
         } catch (error) {
+            console.error("Delete failed:", error);
             alert("Failed to delete post");
         } finally {
             setDeleteModalOpen(false);

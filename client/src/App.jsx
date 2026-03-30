@@ -4,6 +4,7 @@ import CartDrawer from './components/MarketPlace/CartDrawer';
 import { CartProvider } from './context/CartContext';
 import { Loader2 } from 'lucide-react';
 import Navbar from './components/Navbar';
+import { Toaster } from 'react-hot-toast';
 import PrivateRoute from './components/PrivateRoute';
 import NotFound from './pages/NotFound';
 import Profile from './pages/Profile';
@@ -44,6 +45,7 @@ const App = () => {
       <Router>
         <CartDrawer />
         <Navbar />
+        <Toaster position="bottom-right" toastOptions={{ style: { background: '#1a1a1a', color: '#fff', border: '1px solid #333' } }} />
         <ScrollToTop />
         <div className="min-h-screen bg-[#050505]">
           <Suspense fallback={<PageLoader />}>
@@ -59,7 +61,7 @@ const App = () => {
               <Route path="/add-product" element={<AddProduct />} />
               <Route path="/product/:id" element={<ProductDetails />} />
               <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/profile/:id" element={<Profile />} />
+              <Route path="/my-profile" element={<Profile />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password/:token" element={<ResetPassword />} />

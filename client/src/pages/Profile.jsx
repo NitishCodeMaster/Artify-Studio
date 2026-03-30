@@ -1,23 +1,26 @@
- import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../utils/api';
 import Navbar from '../components/Navbar';
 import { Footer } from '../components/Footer';
-import { Loader2, UserCircle2, MapPin, Calendar, Mail, Brush, Award } from 'lucide-react';
+import { Loader2, UserCircle2, MapPin, Calendar, Award, Brush, Edit3 } from 'lucide-react';
 import PostCard from '../components/Community/postCard';
 import ProductCard from '../components/MarketPlace/ProductCard';
 import { motion } from 'framer-motion';
 
 const Profile = () => {
-    const { id } = useParams();
+    const currentUser = JSON.parse(localStorage.getItem('user')) || {};
+    const myId = currentUser.id || currentUser._id;
+
     const [profileData, setProfileData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('posts');
 
     useEffect(() => {
-        const fetchProfile = async () => {
+        const fetchMyProfile = async () => {
+            if (!myId) return setLoading(false);
             try {
-                const res = await api.get(`/users/profile/${id}`);
+                const res = await api.get(`/users/profile/${myId}`);
                 setProfileData(res.data);
             } catch (error) {
                 console.error("Error fetching profile:", error);
@@ -25,147 +28,129 @@ const Profile = () => {
                 setLoading(false);
             }
         };
-        fetchProfile();
-    }, [id]);
+        fetchMyProfile();
+    }, [myId]);
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-[#030303] flex items-center justify-center">
-                <Loader2 className="animate-spin text-amber-500" size={50} />
+            <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+                <Loader2 className="animate-spin text-amber-500" size={40} />
             </div>
         );
     }
 
     if (!profileData || !profileData.user) {
         return (
-            <div className="min-h-screen bg-[#030303] text-white flex items-center justify-center text-2xl font-bold">
-                User not found! 🕵️‍♂️
+            <div className="min-h-screen bg-[#050505] text-white flex flex-col items-center justify-center">
+                <h2 className="text-2xl font-bold mb-4">Please login to view your profile</h2>
+                <Link to="/login" className="text-amber-500 underline">Go to Login</Link>
             </div>
         );
     }
 
     const { user, posts, products } = profileData;
-
-     const joinedYear = user.createdAt ? new Date(user.createdAt).getFullYear() : '2024';
+    const joinedYear = user.createdAt ? new Date(user.createdAt).getFullYear() : '2024';
 
     return (
-        <div className="bg-[#030303] min-h-screen text-white font-sans selection:bg-amber-500/30">
+        <div className="bg-[#050505] min-h-screen text-white font-sans selection:bg-amber-500/30">
             <Navbar />
 
-             <div className="relative w-full h-[300px] lg:h-[400px]">
-                <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-purple-900/50 to-black">
-                    <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"></div>
-                </div>
+            <div className="relative w-full h-[160px] md:h-[200px] mt-20">
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/80 via-purple-900/50 to-black"></div>
+            </div>
 
-                <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 lg:left-24 lg:translate-x-0">
-                    <div className="w-32 h-32 rounded-full border-4 border-[#030303] bg-[#0f0f0f] flex items-center justify-center overflow-hidden shadow-[0_0_30px_rgba(0,0,0,0.5)] relative group">
+            <div className="max-w-[1000px] mx-auto px-4 sm:px-6 relative -mt-12 pb-12 z-10">
+
+                <div className="bg-[#0f0f0f] border border-white/10 rounded-3xl p-6 shadow-2xl flex flex-col md:flex-row items-center md:items-start gap-6 mb-8">
+
+                    <div className="w-24 h-24 md:w-28 md:h-28 rounded-full border-4 border-[#050505] bg-[#111] overflow-hidden shadow-xl shrink-0 -mt-12">
                         {user.profilePic ? (
                             <img src={user.profilePic} alt={user.name} className="w-full h-full object-cover" />
                         ) : (
-                            <UserCircle2 size={80} className="text-white/20" />
+                            <UserCircle2 size={100} className="text-white/20 -ml-1 -mt-1" />
                         )}
                     </div>
-                </div>
-            </div>
 
-             <div className="max-w-[1200px] mx-auto px-6 pt-20 pb-12">
-                <div className="flex flex-col lg:flex-row items-center lg:items-start justify-between gap-8">
-                    <div className="text-center lg:text-left flex-1">
-                        <h1 className="text-4xl lg:text-5xl font-black text-white mb-2 flex flex-wrap items-center justify-center lg:justify-start gap-3">
+                    <div className="flex-1 text-center md:text-left">
+                        <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight mb-2 flex items-center justify-center md:justify-start gap-2">
                             {user.name}
                             {user.role?.toLowerCase().includes('organizer') && (
-                                <span className="bg-blue-500/20 text-blue-400 text-xs px-2 py-1 rounded-md font-bold uppercase tracking-wider">
-                                    Verified
-                                </span>
+                                <span className="bg-blue-500/20 text-blue-400 text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider">Verified</span>
                             )}
                         </h1>
 
-                         <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 mt-3 mb-6">
-                            <span className="bg-amber-500 text-black px-4 py-1.5 rounded-full font-bold text-sm tracking-wide shadow-lg shadow-amber-500/20">
+                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mb-3">
+                            <span className="bg-amber-500 text-black px-3 py-1 rounded-full font-bold text-xs tracking-wide shadow-lg shadow-amber-500/20">
                                 {user.role || 'Artist'}
                             </span>
                             {user.artStyle && (
-                                <span className="bg-white/10 text-white px-4 py-1.5 rounded-full text-sm border border-white/20 flex items-center gap-1.5">
+                                <span className="bg-white/10 text-white px-3 py-1 rounded-full text-xs border border-white/20">
                                     ✨ {user.artStyle}
                                 </span>
                             )}
                         </div>
 
-                        <p className="text-white/70 max-w-2xl mx-auto lg:mx-0 mb-6 leading-relaxed text-lg">
-                            {user.bio || "An incredible artist sharing their craft with the world. 🎨✨"}
+                        <p className="text-white/60 text-sm max-w-xl mx-auto md:mx-0 leading-relaxed mb-4">
+                            {user.bio || "Update your bio in settings to tell people about your craft. 🎨✨"}
                         </p>
 
-                         <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 text-sm text-white/50 mb-8 bg-white/5 p-4 rounded-2xl border border-white/5 w-fit mx-auto lg:mx-0">
-                            {user.originLocation ? (
-                                <span className="flex items-center gap-2"><MapPin size={18} className="text-red-400" /> {user.originLocation}</span>
-                            ) : (
-                                <span className="flex items-center gap-2"><MapPin size={18} className="text-white/20" /> Location Unknown</span>
-                            )}
-                            
-                            {user.experience && (
-                                <span className="flex items-center gap-2"><Award size={18} className="text-yellow-400" /> {user.experience}</span>
-                            )}
-                            
-                            <span className="flex items-center gap-2"><Calendar size={18} className="text-green-400" /> Joined {joinedYear}</span>
-                            <span className="flex items-center gap-2"><Brush size={18} className="text-indigo-400" /> {posts.length} Posts</span>
+                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-xs text-white/50">
+                            {user.originLocation && <span className="flex items-center gap-1"><MapPin size={14} className="text-red-400" /> {user.originLocation}</span>}
+                            {user.experience && <span className="flex items-center gap-1"><Award size={14} className="text-yellow-400" /> {user.experience}</span>}
+                            <span className="flex items-center gap-1"><Calendar size={14} className="text-green-400" /> Joined {joinedYear}</span>
                         </div>
                     </div>
 
-                     <div className="flex flex-col gap-3 w-full lg:w-auto min-w-[200px]">
-                        <button className="w-full bg-amber-500 hover:bg-amber-400 text-black font-bold py-3 px-6 rounded-xl transition-all shadow-lg shadow-amber-500/20">
-                            {user.role?.toLowerCase().includes('organizer') ? 'Book for Event' : 'Commission Artwork'}
-                        </button>
-                        <button className="w-full bg-white/5 hover:bg-white/10 text-white font-bold py-3 px-6 rounded-xl transition-all border border-white/10">
-                            Message Artist
-                        </button>
+                    <div className="w-full md:w-auto mt-2 md:mt-0">
+                        <Link to="/settings" className="flex items-center justify-center gap-2 w-full md:w-auto bg-white/10 hover:bg-white/20 text-white font-medium py-2 px-5 rounded-xl transition-all border border-white/10">
+                            <Edit3 size={16} /> Edit Profile
+                        </Link>
                     </div>
                 </div>
 
-                 <div className="flex items-center gap-6 border-b border-white/10 mb-8 mt-4">
+                <div className="flex items-center gap-6 border-b border-white/10 mb-6">
                     <button
                         onClick={() => setActiveTab('posts')}
-                        className={`pb-4 px-2 text-sm font-bold transition-all border-b-2 ${activeTab === 'posts' ? 'border-amber-500 text-amber-500' : 'border-transparent text-white/40 hover:text-white'}`}
+                        className={`pb-3 px-2 text-sm font-bold transition-all border-b-2 ${activeTab === 'posts' ? 'border-amber-500 text-amber-500' : 'border-transparent text-white/40 hover:text-white'}`}
                     >
-                        Community Posts ({posts.length})
+                        My Posts ({posts.length})
                     </button>
                     <button
                         onClick={() => setActiveTab('products')}
-                        className={`pb-4 px-2 text-sm font-bold transition-all border-b-2 ${activeTab === 'products' ? 'border-amber-500 text-amber-500' : 'border-transparent text-white/40 hover:text-white'}`}
+                        className={`pb-3 px-2 text-sm font-bold transition-all border-b-2 ${activeTab === 'products' ? 'border-amber-500 text-amber-500' : 'border-transparent text-white/40 hover:text-white'}`}
                     >
                         Marketplace ({products.length})
                     </button>
                 </div>
 
-                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                >
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
                     {activeTab === 'posts' ? (
-                        <div className="max-w-2xl">
+                        <div className="max-w-2xl mx-auto md:mx-0">
                             {posts.length > 0 ? (
-                                <div className="space-y-6">
+                                <div className="space-y-4">
                                     {posts.map(post => <PostCard key={post._id} post={post} />)}
                                 </div>
                             ) : (
-                                <p className="text-white/40 py-10 text-center border border-dashed border-white/10 rounded-2xl">No posts yet.</p>
+                                <div className="py-12 border border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center text-white/30 bg-white/[0.02]">
+                                    <Brush size={32} className="mb-2 opacity-50" />
+                                    <p className="text-sm">You haven't posted anything yet.</p>
+                                </div>
                             )}
                         </div>
                     ) : (
                         <div>
-                            <div className="mb-6">
-                                <h3 className="text-2xl font-bold text-white mb-2">Artworks & Instruments for Sale</h3>
-                                <p className="text-white/50 text-sm">Support the artist directly by purchasing their authentic work.</p>
-                            </div>
-                            <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-x-8">
+                            <div className="columns-1 sm:columns-2 lg:columns-3 gap-x-6">
                                 {products.length > 0 ? (
                                     products.map(product => (
-                                        <div key={product._id} className="break-inside-avoid">
+                                        <div key={product._id} className="break-inside-avoid mb-6">
                                             <ProductCard product={product} onDelete={() => { }} />
                                         </div>
                                     ))
                                 ) : (
-                                    <p className="text-white/40 py-10 text-center border border-dashed border-white/10 rounded-2xl col-span-full">No items for sale right now.</p>
+                                    <div className="py-12 border border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center text-white/30 bg-white/[0.02] col-span-full w-full">
+                                        <p className="text-sm">No items for sale right now.</p>
+                                        <Link to="/add-product" className="mt-4 text-amber-500 hover:underline text-sm font-medium">Add a Product</Link>
+                                    </div>
                                 )}
                             </div>
                         </div>

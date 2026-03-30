@@ -7,7 +7,6 @@ const blacklistToken = require('../models/blacklistTokenModel');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 
-
 module.exports.registerUser = async (req, res) => {
     try {
         const errors = validationResult(req);
