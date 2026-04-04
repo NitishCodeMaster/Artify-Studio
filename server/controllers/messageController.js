@@ -82,17 +82,20 @@ exports.sendMessage = async (req, res) => {
             text: text
         });
 
-        await Conversation.findByIdAndUpdate(chatId, {
-            lastMessage: text
-        });
+        await Conversation.findByIdAndUpdate(chatId, { lastMessage: text });
 
         const io = req.app.get('io');
-        io.to(chatId).emit("receive_message", newMessage);
+
+        io.to(chatId).emit("receive_message", {
+            _id: newMessage._id,
+            conversationId: chatId,
+            sender: senderId,
+            text: text,
+            createdAt: newMessage.createdAt
+        });
 
         res.status(201).json({ success: true, message: newMessage });
-
     } catch (error) {
-        console.error("Error sending message:", error);
         res.status(500).json({ success: false, message: "Error sending message" });
     }
 };

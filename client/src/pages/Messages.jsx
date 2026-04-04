@@ -2,8 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import Navbar from '../components/Navbar';
 import { MessageSquare, Search, Send, Loader2, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { io } from "socket.io-client";
 import api from '../utils/api';
-
+const socket = io("http://localhost:5000", {
+    transports: ["websocket"],
+    autoConnect: true
+});
 const Messages = () => {
     const navigate = useNavigate();
     const [chats, setChats] = useState([]);
@@ -11,7 +15,16 @@ const Messages = () => {
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
     const [loading, setLoading] = useState(true);
+    const [currentUser, setCurrentUser] = useState(null);
     const messagesEndRef = useRef(null);
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            const res = await api.get('/users/profile');
+            setCurrentUser(res.data.user);
+        }
+        fetchUser();
+    }, []);
 
     useEffect(() => {
         const fetchChats = async () => {
@@ -30,6 +43,31 @@ const Messages = () => {
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
+
+    useEffect(() => {
+        if (activeChat && currentUser) {
+            socket.emit("join_chat", activeChat._id);
+            const handleReceive = (incomingMsg) => {
+                if (incomingMsg.conversationId === activeChat._id) {
+                    setMessages((prev) => {
+                        if (prev.find(m => m._id === incomingMsg._id)) return prev;
+
+                        return [...prev, {
+                            ...incomingMsg,
+                            sender: incomingMsg.sender === currentUser._id ? 'me' : 'other'
+                        }];
+                    });
+                }
+            };
+
+            socket.on("receive_message", handleReceive);
+
+            return () => {
+                socket.off("receive_message", handleReceive);
+            };
+        }
+    }, [activeChat, currentUser]);
+
 
     const handleSelectChat = async (chat) => {
         setActiveChat(chat);

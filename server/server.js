@@ -12,8 +12,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
         origin: "http://localhost:5173",
-        methods: ["GET", "POST", "PUT", "DELETE"],
-        credentials: true
+        methods: ["GET", "POST"],
     }
 });
 
@@ -26,7 +25,7 @@ io.on("connection", (socket) => {
         socket.join(chatId);
         console.log(`User Joined Chat Room: ${chatId}`);
     });
-    
+
     socket.on("disconnect", () => {
         console.log(` User Disconnected: ${socket.id}`);
     });
