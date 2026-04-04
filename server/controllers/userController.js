@@ -304,3 +304,30 @@ module.exports.resetPassword = async (req, res) => {
         res.status(500).json({ success: false, message: "Something went wrong!" });
     }
 };
+
+module.exports.getWallet = async (req, res) => {
+    try {
+        res.status(200).json({
+            success: true,
+            balance: 12450,
+            transactions: [
+                { _id: "t1", title: "Sold 'Abstract Sunset'", type: "credit", amount: 4500, date: new Date(Date.now() - 86400000) },
+                { _id: "t2", title: "BoomBox 2026 Ticket", type: "debit", amount: 1499, date: new Date(Date.now() - 172800000) },
+                { _id: "t3", title: "Wallet Top-up", type: "credit", amount: 5000, date: new Date(Date.now() - 500000000) }
+            ]
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Error fetching wallet" });
+    }
+};
+
+module.exports.getSavedItems = async (req, res) => {
+    try {
+         res.status(200).json({
+            success: true,
+            savedItems: [] 
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Error fetching saved items" });
+    }
+};

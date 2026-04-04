@@ -1,38 +1,72 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../utils/api';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Palette, Camera, Brush, ArrowRight, Music, Mic, Star, MapPin, Loader2, Edit3 } from 'lucide-react';
+import { Palette, Camera, Brush, ArrowRight, Music, MessageSquare, Star, MapPin, Loader2, Edit3, Calendar } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const StandardCard = ({ item }) => (
-    <div className="group bg-[#0a0a0a] border border-white/[0.05] rounded-3xl p-5 shadow-xl hover:border-amber-500/20 transition-all duration-300 relative overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-32 bg-amber-500/10 rounded-full blur-[50px] opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+// 🌟 API aur useNavigate upar file me import hone chahiye
+// import api from '../../utils/api';
+// import { MessageSquare } from 'lucide-react';
 
-        <div className="flex items-center gap-3 mb-4 relative z-10">
-            <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/10 text-amber-500">
-                {item.category === "Heritage & Canvas" && <Palette size={14} />}
-                {item.category === "Beats & Vocals" && <Music size={14} />}
-                {item.category === "Rhythm & Expressions" && <Star size={14} />}
-                {item.category === "Lenses & Frames" && <Camera size={14} />}
+const StandardCard = ({ item, navigate }) => {
+
+    const handleMessageArtist = async (e) => {
+        e.preventDefault();
+        try {
+            await api.post(`/messages/start/${item.id}`);
+
+            navigate('/messages');
+        } catch (error) {
+            console.error("Chat initiation error:", error);
+            navigate('/messages');
+        }
+    };
+
+    return (
+        <div className="group bg-[#0a0a0a] border border-white/[0.05] rounded-3xl p-5 shadow-xl hover:border-amber-500/20 transition-all duration-300 relative overflow-hidden">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-32 bg-amber-500/10 rounded-full blur-[50px] opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+            <div className="flex items-center gap-3 mb-4 relative z-10">
+                <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/10 text-amber-500">
+                    {/* Icon aayega yahan (Aapka purana code) */}
+                    <Star size={14} />
+                </div>
+                <span className="text-[10px] uppercase tracking-widest font-bold text-white/50">{item.category}</span>
             </div>
-            <span className="text-[10px] uppercase tracking-widest font-bold text-white/50">{item.category}</span>
-        </div>
 
-        <img src={item.img} alt={item.name} className="w-full h-40 object-cover rounded-2xl mb-5 group-hover:scale-105 transition-transform duration-500 relative z-10 shadow-lg" />
+            <img src={item.img} alt={item.name} className="w-full h-40 object-cover rounded-2xl mb-5 group-hover:scale-105 transition-transform duration-500 relative z-10 shadow-lg" />
 
-        <div className="flex items-center justify-between mb-2 relative z-10">
-            <div className="overflow-hidden pr-2">
-                <h4 className="font-bold text-white tracking-tight text-lg truncate group-hover:text-amber-400 transition-colors">{item.name}</h4>
-                <p className="text-xs text-white/50 truncate font-medium mt-0.5">{item.role}</p>
+            <div className="flex items-center justify-between mb-2 relative z-10">
+                <div className="overflow-hidden pr-2">
+                    <h4 className="font-bold text-white tracking-tight text-lg truncate group-hover:text-amber-400 transition-colors">{item.name}</h4>
+                    <p className="text-xs text-white/50 truncate font-medium mt-0.5">{item.role}</p>
+                </div>
+
+                {/* 🌟 YAHAN HAI AAPKA MESSAGE BUTTON AUR PROFILE LINK */}
+                <div className="flex items-center gap-2">
+                    {/* 💬 MESSAGE BUTTON */}
+                    <button
+                        onClick={handleMessageArtist}
+                        title="Message Artist"
+                        className="p-2.5 bg-indigo-500/10 border border-indigo-500/30 rounded-full text-indigo-400 hover:bg-indigo-500 hover:text-white transition-all shadow-lg hover:scale-110"
+                    >
+                        <MessageSquare size={16} />
+                    </button>
+
+                    {/* 👤 PROFILE BUTTON (Aapka pehle wala arrow) */}
+                    <Link to={`/profile/${item.id}`} className="p-2.5 bg-white/5 border border-white/10 rounded-full text-white/40 hover:bg-amber-500 hover:text-black hover:scale-110 transition-all shadow-lg">
+                        <ArrowRight size={16} />
+                    </Link>
+                </div>
             </div>
-            <Link to={`/profile/${item.id}`} className="p-3 shrink-0 bg-white/5 border border-white/10 rounded-full text-white/40 group-hover:bg-amber-500 group-hover:text-black hover:scale-110 transition-all shadow-lg"><ArrowRight size={18} /></Link>
-        </div>
 
-        <div className="flex items-center gap-2 text-[11px] font-medium text-white/40 pt-4 mt-2 border-t border-white/[0.05] relative z-10">
-            <MapPin size={12} className="text-red-400/70" /> {item.loc}
+            <div className="flex items-center gap-2 text-[11px] font-medium text-white/40 pt-4 mt-2 border-t border-white/[0.05] relative z-10">
+                <MapPin size={12} className="text-red-400/70" /> {item.loc}
+            </div>
         </div>
-    </div>
-);
+    );
+};
 
 const getOptimizedImage = (url, width = 600, height = 600) => {
     if (!url || !url.includes("res.cloudinary.com")) return url;
@@ -43,7 +77,7 @@ const getOptimizedImage = (url, width = 600, height = 600) => {
 const MyOwnPremiumProfileCard = ({ user }) => (
     <div className="col-span-1 md:col-span-2 lg:col-span-3 xl:col-span-4 p-[1px] bg-gradient-to-r from-amber-400 via-orange-500 to-amber-400 rounded-3xl shadow-[0_0_30px_rgba(245,158,11,0.1)] group overflow-hidden mb-8">
         <div className="bg-[#050505] p-6 sm:p-8 rounded-[23px] h-full flex flex-col sm:flex-row items-center gap-6 sm:gap-8 relative overflow-hidden">
-             <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-[80px]"></div>
+            <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-[80px]"></div>
 
             <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full border-4 border-[#050505] bg-[#111] overflow-hidden shadow-2xl shrink-0 -mt-10 sm:-mt-0 group-hover:scale-105 transition-transform duration-500 relative z-10">
                 {user.img ? (
@@ -85,7 +119,8 @@ const MyOwnPremiumProfileCard = ({ user }) => (
     </div>
 );
 
-const ContentFeed = ({ searchQuery, setActiveCategory }) => {
+const ContentFeed = ({ activeCategory, searchQuery, setActiveCategory }) => {
+    const navigate = useNavigate();
     const [dynamicItems, setDynamicItems] = useState([]);
     const [myOwnCard, setMyOwnCard] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -106,16 +141,18 @@ const ContentFeed = ({ searchQuery, setActiveCategory }) => {
                     const r = (u.role || '').toLowerCase();
                     const s = (u.artStyle || '').toLowerCase();
 
-                    let cat = "Uncategorized";
+                    let cat = "Event Organizers";
 
-                    if (r.includes('painter') || r.includes('painting') || s.includes('painter') || s.includes('painting') || s.includes('madhubani') || s.includes('village art') || s.includes('handmade') || s.includes('traditional') || s.includes('rare') || s.includes('folk') || s.includes('sketch')) {
-                        cat = "Heritage & Canvas";
-                    } else if (r.includes('music') || r.includes('singer') || r.includes('guitar') || r.includes('drum') || r.includes('band') || r.includes('vocal')) {
-                        cat = "Beats & Vocals";
-                    } else if (r.includes('photo') || r.includes('camera') || r.includes('video') || r.includes('cinematograph')) {
-                        cat = "Lenses & Frames";
-                    } else if (r.includes('dance') || r.includes('model') || r.includes('actor') || r.includes('perform') || r.includes('choreograph')) {
-                        cat = "Rhythm & Expressions";
+                    if (r.includes('painter') || r.includes('painting') || s.includes('art') || s.includes('canvas') || s.includes('craft') || s.includes('madhubani') || s.includes('sketch')) {
+                        cat = "Painters & Crafters";
+                    } else if (r.includes('music') || r.includes('singer') || r.includes('guitar') || r.includes('drum') || r.includes('vocal')) {
+                        cat = "Musicians & Singers";
+                    } else if (r.includes('dance') || r.includes('model') || r.includes('actor') || r.includes('perform')) {
+                        cat = "Dancers & Actors";
+                    } else if (r.includes('photo') || r.includes('camera') || r.includes('video') || r.includes('film') || r.includes('cinematograph')) {
+                        cat = "Photographers & Video";
+                    } else if (r.includes('organizer') || r.includes('manager') || r.includes('event')) {
+                        cat = "Event Organizers";
                     }
 
                     const rawImg = u.profilePic || "https://images.unsplash.com/photo-1547826039-bfc35e0f1ea8?q=80&w=2564";
@@ -152,12 +189,14 @@ const ContentFeed = ({ searchQuery, setActiveCategory }) => {
 
     const getCategoryItems = (cat) => dynamicItems.filter(i => i.category === cat);
 
-    const Categories = ["Heritage & Canvas", "Beats & Vocals", "Rhythm & Expressions", "Lenses & Frames"];
+    const Categories = ["Painters & Crafters", "Musicians & Singers", "Dancers & Actors", "Photographers & Video", "Event Organizers"];
+
     const CategoryIcons = {
-        "Heritage & Canvas": Palette,
-        "Beats & Vocals": Music,
-        "Rhythm & Expressions": Star,
-        "Lenses & Frames": Camera
+        "Painters & Crafters": Palette,
+        "Musicians & Singers": Music,
+        "Dancers & Actors": Star,
+        "Photographers & Video": Camera,
+        "Event Organizers": Calendar
     };
 
     const renderContent = () => {
@@ -172,8 +211,8 @@ const ContentFeed = ({ searchQuery, setActiveCategory }) => {
                 <div className="space-y-6 pt-10">
                     <h2 className="text-2xl font-black text-white px-2">Search Results for "{searchQuery}"</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {results.map(item => <StandardCard key={item.id} item={item} />)}
-                        {results.length === 0 && <p className="col-span-full text-center text-white/40 py-10 border border-dashed border-white/10 rounded-2xl">No artists found wandering around.</p>}
+                        {results.map(item => <StandardCard key={item.id} item={item} navigate={navigate} />)}
+                        {results.length === 0 && <p className="col-span-full text-center text-white/40 py-10 border border-dashed border-white/10 rounded-2xl">No creators found.</p>}
                     </div>
                 </div>
             );
@@ -184,6 +223,7 @@ const ContentFeed = ({ searchQuery, setActiveCategory }) => {
                 {myOwnCard && <MyOwnPremiumProfileCard user={myOwnCard} />}
 
                 {Categories.map(cat => {
+                    if (activeCategory !== "All" && activeCategory !== cat) return null;
                     const items = getCategoryItems(cat);
                     const Icon = CategoryIcons[cat];
 
@@ -202,11 +242,12 @@ const ContentFeed = ({ searchQuery, setActiveCategory }) => {
                                 <button onClick={() => setActiveCategory(cat)} className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white/90 text-sm font-bold border border-white/10 active:scale-95 transition-all w-full sm:w-auto">Explore All <ArrowRight size={16} /></button>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                                {items.map(item => <StandardCard key={item.id} item={item} />)}
+                                {items.map(item => <StandardCard key={item.id} item={item} navigate={navigate} />)}
                             </div>
                         </div>
                     );
                 })}
+
             </div>
         );
     };

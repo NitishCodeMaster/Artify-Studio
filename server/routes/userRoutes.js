@@ -30,4 +30,7 @@ router.post('/forgot-password', userController.forgotPassword);
 
 router.post('/reset-password/:token', userController.resetPassword);
 
+router.get('/wallet', authUser, userController.getWallet);
+router.get('/saved', authUser, userController.getSavedItems);
+
 module.exports = router;

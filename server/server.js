@@ -1,7 +1,7 @@
 const http = require("http");
 const app = require('./app');
 const connectDB = require("./config/db");
-const { Server } = require("socket.io"); // 🌟 NAYA: Socket.io Import
+const { Server } = require("socket.io"); 
 
 connectDB();
 

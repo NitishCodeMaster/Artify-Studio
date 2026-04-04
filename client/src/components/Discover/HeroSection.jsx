@@ -56,11 +56,18 @@ const HeroSection = ({ searchQuery, setSearchQuery }) => {
                         <div className="mt-8">
                             <p className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-3 flex items-center gap-2"><TrendingUp size={12} className="text-indigo-400" /> Trending Searches:</p>
                             <div className="flex flex-wrap gap-2">
-                                {['Guitarists in Mumbai', 'Wedding Photographers', 'Used Drums', 'DJ for Party'].map((tag, i) => (
-                                    <button key={i} className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/5 text-xs text-white/60 hover:bg-white/10 hover:text-white hover:border-indigo-500/30 transition-all">{tag}</button>
+                                 {['Painter', 'Singer', 'Model', 'Guitar'].map((tag, i) => (
+                                    <button
+                                        key={i}
+                                        onClick={() => setSearchQuery(tag)} // Click karte hi search ho jayega!
+                                        className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/5 text-xs text-white/60 hover:bg-white/10 hover:text-white hover:border-indigo-500/30 transition-all"
+                                    >
+                                        {tag}
+                                    </button>
                                 ))}
                             </div>
                         </div>
+
                     </motion.div>
                 </div>
 

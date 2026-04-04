@@ -11,6 +11,7 @@ const sellerRoutes = require('./routes/sellerRoutes');
 const productRoutes = require('./routes/productRoutes');
 const postRoutes = require('./routes/postRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
+const messageRoutes = require('./routes/messageRoutes');
 
 
 
@@ -33,5 +34,6 @@ app.use('/sellers', sellerRoutes);
 app.use('/products', productRoutes);
 app.use('/posts', postRoutes);
 app.use('/payments', paymentRoutes);
+app.use('/api/messages', messageRoutes);
 
 module.exports = app;

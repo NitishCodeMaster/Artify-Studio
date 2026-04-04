@@ -12,6 +12,9 @@ import { ForgotPassword } from './pages/ForgotPassword';
 import { Settings } from './pages/Settings';
 import { ResetPassword } from './pages/ResetPassword';
 import { PublicProfile } from './pages/PublicProfile';
+import Messages from './pages/Messages';
+import SavedCollections from './pages/SavedCollections';
+import Wallet from './pages/Wallet';
 
 const Home = lazy(() => import('./pages/Home'));
 const Discover = lazy(() => import('./pages/Discover'));
@@ -66,6 +69,9 @@ const App = () => {
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password/:token" element={<ResetPassword />} />
               <Route path="/profile/:id" element={<PublicProfile />} />
+              <Route path="/messages" element={<Messages />} />
+              <Route path="/saved" element={<SavedCollections />} />
+              <Route path="/wallet" element={<Wallet />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
