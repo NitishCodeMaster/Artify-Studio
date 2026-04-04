@@ -86,7 +86,11 @@ exports.sendMessage = async (req, res) => {
             lastMessage: text
         });
 
+        const io = req.app.get('io');
+        io.to(chatId).emit("receive_message", newMessage);
+
         res.status(201).json({ success: true, message: newMessage });
+
     } catch (error) {
         console.error("Error sending message:", error);
         res.status(500).json({ success: false, message: "Error sending message" });

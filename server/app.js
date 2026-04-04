@@ -14,7 +14,6 @@ const paymentRoutes = require('./routes/paymentRoutes');
 const messageRoutes = require('./routes/messageRoutes');
 
 
-
 app.use(cors({
     origin: "http://localhost:5173",
     methods: "GET,POST,PUT,DELETE",
@@ -34,6 +33,6 @@ app.use('/sellers', sellerRoutes);
 app.use('/products', productRoutes);
 app.use('/posts', postRoutes);
 app.use('/payments', paymentRoutes);
-app.use('/api/messages', messageRoutes);
+app.use('/messages', messageRoutes);
 
 module.exports = app;
