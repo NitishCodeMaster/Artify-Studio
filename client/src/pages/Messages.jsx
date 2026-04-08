@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Navbar from '../components/Navbar';
-import { MessageSquare, Search, Send, Loader2, ArrowLeft } from 'lucide-react';
+import { MessageSquare, Search, Send, Loader2, ArrowLeft, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { io } from "socket.io-client";
 import api from '../utils/api';
+import Swal from 'sweetalert2';
+
 const socket = io("http://localhost:5000", {
     transports: ["websocket"],
     autoConnect: true
 });
+
 const Messages = () => {
     const navigate = useNavigate();
     const [chats, setChats] = useState([]);
@@ -44,29 +47,39 @@ const Messages = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
+
     useEffect(() => {
         if (activeChat && currentUser) {
             socket.emit("join_chat", activeChat._id);
+
             const handleReceive = (incomingMsg) => {
                 if (incomingMsg.conversationId === activeChat._id) {
                     setMessages((prev) => {
                         if (prev.find(m => m._id === incomingMsg._id)) return prev;
-
                         return [...prev, {
-                            ...incomingMsg,
+                            _id: incomingMsg._id,
+                            text: incomingMsg.text,
+                            createdAt: incomingMsg.createdAt,
                             sender: incomingMsg.sender === currentUser._id ? 'me' : 'other'
                         }];
                     });
                 }
             };
 
+            const handleDelete = (deletedId) => {
+                setMessages((prev) => prev.filter(m => m._id !== deletedId));
+            };
+
             socket.on("receive_message", handleReceive);
+            socket.on("message_deleted", handleDelete);
 
             return () => {
                 socket.off("receive_message", handleReceive);
+                socket.off("message_deleted", handleDelete);
             };
         }
     }, [activeChat, currentUser]);
+
 
 
     const handleSelectChat = async (chat) => {
@@ -97,6 +110,42 @@ const Messages = () => {
             await api.post(`/messages/${activeChat._id}`, { text: tempMsg.text });
         } catch (error) {
             console.error("Failed to send message", error);
+        }
+    };
+
+    const handleDeleteMessage = async (messageId) => {
+        const result = await Swal.fire({
+            title: 'Delete Message?',
+            text: "This action cannot be undone. The message will be removed for everyone.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#f59e0b',
+            cancelButtonColor: '#333',
+            confirmButtonText: 'Yes, Delete',
+            cancelButtonText: 'Cancel',
+            background: '#0a0a0a',
+            color: '#fff',
+            customClass: {
+                popup: 'rounded-3xl border border-white/10'
+            }
+        });
+
+        if (result.isConfirmed) {
+            try {
+                await api.delete(`/messages/delete/${messageId}`);
+                setMessages((prev) => prev.filter(m => m._id !== messageId));
+
+                Swal.fire({
+                    title: 'Deleted!',
+                    icon: 'success',
+                    timer: 1000,
+                    showConfirmButton: false,
+                    background: '#0a0a0a',
+                    color: '#fff'
+                });
+            } catch (error) {
+                console.error("Delete failed:", error);
+            }
         }
     };
 
@@ -171,13 +220,26 @@ const Messages = () => {
                                 </div>
 
                                 <div className="flex-1 overflow-y-auto p-5 space-y-4 custom-scrollbar">
+
                                     {messages.map((msg) => (
-                                        <div key={msg._id} className={`flex ${msg.sender === 'me' ? 'justify-end' : 'justify-start'}`}>
-                                            <div className={`max-w-[75%] p-3 px-5 rounded-2xl text-sm ${msg.sender === 'me' ? 'bg-amber-500 text-black rounded-br-sm font-medium shadow-md' : 'bg-white/10 text-white rounded-bl-sm border border-white/5'}`}>
-                                                {msg.text}
-                                                <p className={`text-[9px] mt-1 text-right ${msg.sender === 'me' ? 'text-black/60' : 'text-white/40'}`}>
-                                                    {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                </p>
+                                        <div key={msg._id} className={`flex group ${msg.sender === 'me' ? 'justify-end' : 'justify-start'}`}>
+                                            <div className="flex items-center gap-2">
+                                                {msg.sender === 'me' && (
+                                                    <button
+                                                        onClick={() => handleDeleteMessage(msg._id)}
+                                                        className="opacity-0 group-hover:opacity-100 p-1 text-white/20 hover:text-red-500 transition-all"
+                                                        title="Delete message"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                )}
+
+                                                <div className={`max-w-[75%] p-3 px-5 rounded-2xl text-sm ${msg.sender === 'me' ? 'bg-amber-500 text-black rounded-br-sm font-medium shadow-md' : 'bg-white/10 text-white rounded-bl-sm border border-white/5'}`}>
+                                                    {msg.text}
+                                                    <p className={`text-[9px] mt-1 text-right ${msg.sender === 'me' ? 'text-black/60' : 'text-white/40'}`}>
+                                                        {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                    </p>
+                                                </div>
                                             </div>
                                         </div>
                                     ))}

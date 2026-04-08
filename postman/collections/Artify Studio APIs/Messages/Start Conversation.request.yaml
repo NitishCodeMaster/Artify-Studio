@@ -1,0 +1,5 @@
+$kind: http-request
+name: Start Conversation
+url: "{{baseurl}}/messages/start/:"
+method: POST
+order: 2791931271887699

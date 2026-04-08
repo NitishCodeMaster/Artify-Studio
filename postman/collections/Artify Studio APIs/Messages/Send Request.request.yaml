@@ -1,0 +1,8 @@
+$kind: http-request
+name: Send Request
+url: "{{baseurl}}/messages/69d14481b0443045eff1cb9e"
+method: POST
+body:
+  type: json
+  content: "{\r\n  \"text\": \"Hello bhai\"\r\n}"
+order: 2204648833519261

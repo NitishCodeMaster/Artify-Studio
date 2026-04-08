@@ -1,9 +1,9 @@
 $kind: collection
-name: User Auth
+name: Messages
 auth:
-  - id: a586219f-9db4-4aab-927f-9fdcea8e7500
+  - id: ac4e2e95-5325-49d0-87e8-a32094dd12dc
     type: bearer
     name: Bearer Token
     credentials:
       token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ODFkM2ZiNGVmYWQzMjhjZTQ2M2VhZSIsInJvbGUiOiJTaW5nZXIgYW5kIGNvZGVyIiwiaWF0IjoxNzc1NDc1MTIwLCJleHAiOjE3NzYwNzk5MjB9.NoxgWJ9NaIESgAUZ8jgceFlpgoXmjeGFCn2Vv1fmzms
-order: 3365543735197695
+order: 2754108609003519

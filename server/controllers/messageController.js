@@ -3,7 +3,7 @@ const Message = require('../models/messageModel');
 
 exports.startConversation = async (req, res) => {
     try {
-        const senderId = req.user._id;
+        const senderId = req.user._id || req.user.id;
         const receiverId = req.params.userId;
 
         let chat = await Conversation.findOne({
@@ -20,7 +20,7 @@ exports.startConversation = async (req, res) => {
         res.status(200).json({ success: true, conversation: chat });
     } catch (error) {
         console.error("Error starting chat:", error);
-        res.status(500).json({ success: false, message: "Error starting chat" });
+        res.status(500).json({ success: false, error: error.message });
     }
 };
 
@@ -82,20 +82,47 @@ exports.sendMessage = async (req, res) => {
             text: text
         });
 
-        await Conversation.findByIdAndUpdate(chatId, { lastMessage: text });
+        await Conversation.findByIdAndUpdate(chatId, {
+            lastMessage: text
+        });
 
         const io = req.app.get('io');
 
         io.to(chatId).emit("receive_message", {
             _id: newMessage._id,
             conversationId: chatId,
-            sender: senderId,
             text: text,
+            sender: senderId,
             createdAt: newMessage.createdAt
         });
 
         res.status(201).json({ success: true, message: newMessage });
     } catch (error) {
-        res.status(500).json({ success: false, message: "Error sending message" });
+        res.status(500).json({ success: false, message: "Error" });
+    }
+};
+exports.deleteMessage = async (req, res) => {
+    try {
+        const { messageId } = req.params;
+        const userId = req.user._id || req.user.id;
+
+        const message = await Message.findById(messageId);
+
+        if (!message) {
+            return res.status(404).json({ success: false, message: "Message not found" });
+        }
+
+        if (message.sender.toString() !== userId.toString()) {
+            return res.status(403).json({ success: false, message: "Unauthorized" });
+        }
+
+        await Message.findByIdAndDelete(messageId);
+
+        const io = req.app.get('io');
+        io.to(message.conversationId.toString()).emit("message_deleted", messageId);
+
+        res.status(200).json({ success: true, messageId });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server error" });
     }
 };

@@ -1,0 +1,5 @@
+$kind: http-request
+name: Get Messages
+url: "{{baseurl}}/messages/"
+method: GET
+order: 4137394339180258
