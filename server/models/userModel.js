@@ -56,7 +56,8 @@ const UserSchema = new mongoose.Schema({
     savedItems: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product'
-    }],
+    }], 
+    
     resetPasswordToken: String,
     resetPasswordExpire: Date,
 

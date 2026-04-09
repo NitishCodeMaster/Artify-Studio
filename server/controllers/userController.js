@@ -332,14 +332,14 @@ module.exports.getSavedItems = async (req, res) => {
     }
 };
 
-exports.toggleSaveProduct = async (req, res) => {
+module.exports.toggleSaveProduct = async (req, res) => {
     try {
         const userId = req.user._id || req.user.id;
-        const { productId } = req.params;
+        const { productId } = req.params.id;
 
         const user = await userModel.findById(userId);
-        const isSaved = user.savedItems.includes(productId);
-
+        const isSaved = user.savedItems.some(id => id.toString() === productId);
+        
         if (isSaved) {
             user.savedItems = user.savedItems.filter(id => id.toString() !== productId);
         } else {
@@ -353,11 +353,11 @@ exports.toggleSaveProduct = async (req, res) => {
     }
 };
 
-exports.getSavedItems = async (req, res) => {
+module.exports.getSavedItems = async (req, res) => {
     try {
         const userId = req.user._id || req.user.id;
         const user = await userModel.findById(userId).populate('savedItems');
-        res.status(200).json({ success: true, items: user.savedItems });
+        res.status(200).json({ success: true, savedItems: user.savedItems || [] });
     } catch (error) {
         res.status(500).json({ success: false, message: "Error fetching saved items" });
     }

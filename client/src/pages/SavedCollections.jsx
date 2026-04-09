@@ -13,7 +13,7 @@ const SavedCollections = () => {
     useEffect(() => {
         const fetchSaved = async () => {
             try {
-                 const res = await api.get('/users/saved-items');
+                const res = await api.get('/users/saved-items');
                 setSavedItems(res.data.savedItems || []);
             } catch (error) {
                 console.error("Failed to fetch saved collections:", error);
@@ -39,10 +39,10 @@ const SavedCollections = () => {
                     <div className="flex justify-center py-20"><Loader2 className="animate-spin text-amber-500" size={40} /></div>
                 ) : savedItems.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                         {savedItems.map(item => (
+                        {savedItems.map(item => (
                             <div key={item._id} className="bg-[#0a0a0a] p-4 rounded-3xl border border-white/10">
-                                <img src={item.image} alt="Saved" className="w-full h-40 object-cover rounded-2xl mb-4" />
-                                <h3 className="text-lg font-bold">{item.title}</h3>
+                                <img src={item?.images?.[0]?.url || 'https://via.placeholder.com/400'} alt="Saved" className="w-full h-40 object-cover rounded-2xl mb-4" />
+                                <h3 className="text-lg font-bold">{item.name || "No Name"}</h3>
                             </div>
                         ))}
                     </div>

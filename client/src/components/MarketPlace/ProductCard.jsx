@@ -17,10 +17,13 @@ const ProductCard = ({ product, onDelete }) => {
     const isOwner = currentUserId && sellerId && (currentUserId === sellerId);
 
     useEffect(() => {
-        if (currentUser?.savedItems?.includes(product._id)) {
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (user?.savedItems?.includes(product._id)) {
             setIsSaved(true);
+        } else {
+            setIsSaved(false);
         }
-    }, [product._id, currentUser?.savedItems]);
+    }, [product._id]);
 
     const handleSave = async (e) => {
         e.stopPropagation();
@@ -37,7 +40,16 @@ const ProductCard = ({ product, onDelete }) => {
 
         try {
             const res = await api.post(`/users/save-product/${product._id}`);
-            setIsSaved(res.data.saved);
+            const newStatus = res.data.saved;
+            setIsSaved(newStatus);
+            
+            const user = JSON.parse(localStorage.getItem('user')) || {};
+            if (newStatus) {
+                user.savedItems = [...(user.savedItems || []), product._id];
+            } else {
+                user.savedItems = (user.savedItems || []).filter(id => id !== product._id);
+            }
+            localStorage.setItem('user', JSON.stringify(user));
 
             const Toast = Swal.mixin({
                 toast: true,
@@ -51,6 +63,7 @@ const ProductCard = ({ product, onDelete }) => {
                 icon: 'success',
                 title: res.data.saved ? 'Added to Saved' : 'Removed from Saved'
             });
+
         } catch (error) {
             console.error("Save error:", error);
         }
@@ -133,7 +146,7 @@ const ProductCard = ({ product, onDelete }) => {
                     </div>
 
                     <div className="flex items-center gap-2">
-                         {isOwner && (
+                        {isOwner && (
                             <button
                                 onClick={(e) => { e.stopPropagation(); onDelete(product._id); }}
                                 className="flex items-center justify-center p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-colors border border-red-500/20"
@@ -143,7 +156,7 @@ const ProductCard = ({ product, onDelete }) => {
                             </button>
                         )}
 
-                         <button
+                        <button
                             onClick={(e) => {
                                 e.stopPropagation();
                                 addToCart(product);
