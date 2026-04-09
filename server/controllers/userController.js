@@ -323,10 +323,41 @@ module.exports.getWallet = async (req, res) => {
 
 module.exports.getSavedItems = async (req, res) => {
     try {
-         res.status(200).json({
+        res.status(200).json({
             success: true,
-            savedItems: [] 
+            savedItems: []
         });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Error fetching saved items" });
+    }
+};
+
+exports.toggleSaveProduct = async (req, res) => {
+    try {
+        const userId = req.user._id || req.user.id;
+        const { productId } = req.params;
+
+        const user = await userModel.findById(userId);
+        const isSaved = user.savedItems.includes(productId);
+
+        if (isSaved) {
+            user.savedItems = user.savedItems.filter(id => id.toString() !== productId);
+        } else {
+            user.savedItems.push(productId);
+        }
+
+        await user.save();
+        res.status(200).json({ success: true, saved: !isSaved });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Error toggling save" });
+    }
+};
+
+exports.getSavedItems = async (req, res) => {
+    try {
+        const userId = req.user._id || req.user.id;
+        const user = await userModel.findById(userId).populate('savedItems');
+        res.status(200).json({ success: true, items: user.savedItems });
     } catch (error) {
         res.status(500).json({ success: false, message: "Error fetching saved items" });
     }

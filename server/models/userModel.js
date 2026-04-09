@@ -53,6 +53,10 @@ const UserSchema = new mongoose.Schema({
         youtube: { type: String, default: '' },
         portfolioUrl: { type: String, default: '' }
     },
+    savedItems: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product'
+    }],
     resetPasswordToken: String,
     resetPasswordExpire: Date,
 

@@ -1,34 +1,90 @@
- import React from 'react';
-import { Trash2, ShoppingBag } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Trash2, ShoppingBag, Heart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
+import api from '../../utils/api';
+import Swal from 'sweetalert2';
 
 const ProductCard = ({ product, onDelete }) => {
     const navigate = useNavigate();
     const { addToCart } = useCart();
+    const [isSaved, setIsSaved] = useState(false);
 
     const currentUser = JSON.parse(localStorage.getItem('user')) || {};
-
-    const sellerId = product.seller?._id || product.seller;
     const currentUserId = currentUser?._id || currentUser?.id;
+    const sellerId = product.seller?._id || product.seller;
+
     const isOwner = currentUserId && sellerId && (currentUserId === sellerId);
+
+    useEffect(() => {
+        if (currentUser?.savedItems?.includes(product._id)) {
+            setIsSaved(true);
+        }
+    }, [product._id, currentUser?.savedItems]);
+
+    const handleSave = async (e) => {
+        e.stopPropagation();
+        if (!currentUserId) {
+            return Swal.fire({
+                title: 'Login Required',
+                text: 'Please login to save items to your collection.',
+                icon: 'info',
+                background: '#0a0a0a',
+                color: '#fff',
+                confirmButtonColor: '#f59e0b'
+            });
+        }
+
+        try {
+            const res = await api.post(`/users/save-product/${product._id}`);
+            setIsSaved(res.data.saved);
+
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 1500,
+                background: '#111',
+                color: '#fff'
+            });
+            Toast.fire({
+                icon: 'success',
+                title: res.data.saved ? 'Added to Saved' : 'Removed from Saved'
+            });
+        } catch (error) {
+            console.error("Save error:", error);
+        }
+    };
 
     const discount = (product.originalPrice && product.price && product.originalPrice > product.price)
         ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
         : 0;
 
     const getCategoryName = (cat) => {
-        switch (cat) {
-            case 'handcrafted': return 'Wood Art';
-            case 'traditional_art': return 'Folk Art';
-            case 'tribal_instruments': return 'Instrument';
-            case 'used_gear': return 'Vintage';
-            default: return 'Authentic';
-        }
+        const categories = {
+            'handcrafted': 'Wood Art',
+            'traditional_art': 'Folk Art',
+            'tribal_instruments': 'Instrument',
+            'used_gear': 'Vintage'
+        };
+        return categories[cat] || 'Authentic';
     };
 
     return (
-        <div className="group mb-8 break-inside-avoid-column bg-[#0a0a0a] rounded-2xl overflow-hidden border border-white/[0.05]">
+        <div className="group mb-8 break-inside-avoid-column bg-[#0a0a0a] rounded-2xl overflow-hidden border border-white/[0.05] hover:border-amber-500/30 transition-all duration-300 relative">
+
+            <button
+                onClick={handleSave}
+                className="absolute top-3 right-3 z-20 p-2 bg-black/40 backdrop-blur-md rounded-full border border-white/10 hover:scale-110 transition-all"
+                title={isSaved ? "Remove from Saved" : "Save to Collection"}
+            >
+                <Heart
+                    size={16}
+                    fill={isSaved ? "#f59e0b" : "none"}
+                    className={isSaved ? "text-amber-500" : "text-white/70"}
+                />
+            </button>
+
             <div
                 onClick={() => navigate(`/product/${product._id}`)}
                 className="relative cursor-pointer bg-[#111]"
@@ -46,7 +102,7 @@ const ProductCard = ({ product, onDelete }) => {
                 </div>
 
                 {discount > 0 && (
-                    <div className="absolute top-3 right-3 px-2 py-1 bg-amber-500 text-black text-[10px] font-bold uppercase tracking-wider rounded">
+                    <div className="absolute bottom-3 right-3 px-2 py-1 bg-amber-500 text-black text-[10px] font-bold uppercase tracking-wider rounded">
                         {discount}% OFF
                     </div>
                 )}
@@ -65,39 +121,38 @@ const ProductCard = ({ product, onDelete }) => {
                 </p>
 
                 <div className="flex items-center justify-between pt-4 border-t border-white/[0.05]">
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-col">
                         <span className="text-lg font-medium text-amber-500">
                             ₹{product.price}
                         </span>
                         {discount > 0 && (
-                            <span className="text-xs text-white/30 line-through">
+                            <span className="text-[10px] text-white/30 line-through">
                                 ₹{product.originalPrice}
                             </span>
                         )}
                     </div>
 
-                    <div className="flex items-center gap-2.5">
-                        {isOwner && (
+                    <div className="flex items-center gap-2">
+                         {isOwner && (
                             <button
-                                onClick={() => onDelete(product._id)}
-                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-colors text-xs font-medium border border-red-500/20"
-                                title="Remove your artwork"
+                                onClick={(e) => { e.stopPropagation(); onDelete(product._id); }}
+                                className="flex items-center justify-center p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-colors border border-red-500/20"
+                                title="Delete Artwork"
                             >
-                                <Trash2 size={14} /> Remove
+                                <Trash2 size={14} />
                             </button>
                         )}
 
-                        <button 
+                         <button
                             onClick={(e) => {
-                                e.stopPropagation(); 
+                                e.stopPropagation();
                                 addToCart(product);
                             }}
-                            className="flex items-center gap-2 bg-amber-500/10 hover:bg-amber-500 text-amber-500 hover:text-white px-3 py-1.5 rounded-lg transition-colors text-xs font-bold border border-amber-500/20"
+                            className="flex-1 flex items-center justify-center gap-2 bg-amber-500/10 hover:bg-amber-500 text-amber-500 hover:text-white px-3 py-2 rounded-lg transition-colors text-xs font-bold border border-amber-500/20"
                         >
-                            <ShoppingBag size={14} /> Add
+                            <ShoppingBag size={14} /> Add to Cart
                         </button>
                     </div>
-                    
                 </div>
             </div>
         </div>

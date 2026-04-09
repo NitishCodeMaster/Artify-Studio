@@ -13,7 +13,7 @@ const SavedCollections = () => {
     useEffect(() => {
         const fetchSaved = async () => {
             try {
-                 const res = await api.get('/users/saved');
+                 const res = await api.get('/users/saved-items');
                 setSavedItems(res.data.savedItems || []);
             } catch (error) {
                 console.error("Failed to fetch saved collections:", error);
