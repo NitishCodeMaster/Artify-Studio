@@ -1,6 +1,7 @@
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const Order = require('../models/orderModel');
+const userModel = require('../models/userModel'); // 1. Ensure this is imported
 
 const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID,
@@ -16,7 +17,7 @@ exports.createOrder = async (req, res) => {
         }
 
         const options = {
-            amount: Math.round(amount * 100), // Professional Rule: Convert INR to Paise
+            amount: Math.round(amount * 100),
             currency: "INR",
             receipt: `rcpt_${Date.now()}_${req.user._id.toString().slice(-5)}`,
         };
@@ -54,16 +55,34 @@ exports.verifyPayment = async (req, res) => {
                 razorpay_order_id
             });
 
+             if (products && products.length > 0) {
+                for (const item of products) {
+                    const sellerId = item.seller?._id || item.seller;
+                    const creditAmount = item.price;
+
+                    if (sellerId) {
+                        await userModel.findByIdAndUpdate(sellerId, {
+                            $inc: { walletBalance: creditAmount },
+                            $push: {
+                                transactions: {
+                                    title: `Sold '${item.name}'`,
+                                    amount: creditAmount,
+                                    type: 'credit',
+                                    date: new Date()
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+
             return res.status(200).json({
                 success: true,
-                message: "Payment verified & Order Placed successfully!",
+                message: "Payment verified & Wallet updated!",
                 order: newOrder
             });
         } else {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid signature! Payment verification failed.",
-            });
+            return res.status(400).json({ success: false, message: "Invalid signature!" });
         }
     } catch (error) {
         console.error("❌ Razorpay Verify Error:", error);

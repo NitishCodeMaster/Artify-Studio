@@ -71,6 +71,7 @@ exports.toggleLike = async (req, res) => {
         if (!post) return res.status(404).json({ message: "Post not found" });
 
         const userIdString = req.user._id.toString();
+        post.likes = post.likes.filter(id => id !== null);
         const isLiked = post.likes.some(id => id.toString() === userIdString);
 
         if (isLiked) {

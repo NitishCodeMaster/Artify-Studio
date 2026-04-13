@@ -12,6 +12,7 @@ const productRoutes = require('./routes/productRoutes');
 const postRoutes = require('./routes/postRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const messageRoutes = require('./routes/messageRoutes');
+const eventRoutes = require('./routes/eventRoutes');
 
 
 app.use(cors({
@@ -34,5 +35,6 @@ app.use('/products', productRoutes);
 app.use('/posts', postRoutes);
 app.use('/payments', paymentRoutes);
 app.use('/messages', messageRoutes);
+app.use('/api/events', eventRoutes);
 
 module.exports = app;

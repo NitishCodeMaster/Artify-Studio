@@ -334,22 +334,32 @@ module.exports.getSavedItems = async (req, res) => {
 
 module.exports.toggleSaveProduct = async (req, res) => {
     try {
-        const userId = req.user._id || req.user.id;
-        const { productId } = req.params.id;
+        const userId = req.user.id || req.user._id;
+        const productId = req.params.id;
 
         const user = await userModel.findById(userId);
-        const isSaved = user.savedItems.some(id => id.toString() === productId);
-        
+        if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+        console.log("Saving product ID:", productId);
+        console.log("Current savedItems before clean:", user.savedItems);
+        user.savedItems = user.savedItems.filter(item => item !== null);
+        const isSaved = user.savedItems.some(id => id && id.toString() === productId);
+
         if (isSaved) {
-            user.savedItems = user.savedItems.filter(id => id.toString() !== productId);
+            user.savedItems = user.savedItems.filter(id => id && id.toString() !== productId);
         } else {
             user.savedItems.push(productId);
         }
 
         await user.save();
-        res.status(200).json({ success: true, saved: !isSaved });
+        console.log("New saved status:", !isSaved);
+        res.status(200).json({
+            success: true,
+            saved: !isSaved
+        });
     } catch (error) {
-        res.status(500).json({ success: false, message: "Error toggling save" });
+        console.error("Toggle Save Error:", error);
+        res.status(500).json({ success: false, message: "Server error during toggle" });
     }
 };
 
@@ -360,5 +370,23 @@ module.exports.getSavedItems = async (req, res) => {
         res.status(200).json({ success: true, savedItems: user.savedItems || [] });
     } catch (error) {
         res.status(500).json({ success: false, message: "Error fetching saved items" });
+    }
+};
+module.exports.getWallet = async (req, res) => {
+    try {
+        const userId = req.user.id || req.user._id;
+        const user = await userModel.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+
+        res.status(200).json({
+            success: true,
+            balance: user.walletBalance || 0,
+            transactions: (user.transactions || []).reverse()
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Error fetching wallet data" });
     }
 };

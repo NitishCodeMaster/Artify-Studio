@@ -1,0 +1,30 @@
+$kind: http-request
+name: Create Event
+url: "{{baseurl}}/events/create"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"title\": \"Acoustic Night 2026\",\r
+
+    \    \"description\": \"A soulful evening with live acoustic music and art
+    showcase.\",\r
+
+    \    \"bannerImage\":
+    \"https://images.unsplash.com/photo-1501281668745-f7f57925c3b4\",\r
+
+    \    \"date\": \"2026-05-20\",\r
+
+    \    \"time\": \"18:00\",\r
+
+    \    \"price\": 49,\r
+
+    \    \"location\": \"Artech Studio, Delhi\",\r
+
+    \    \"category\": \"Music\",\r
+
+    \    \"maxSeats\": 50\r
+
+    }"
+order: 1775932915421

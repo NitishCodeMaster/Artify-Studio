@@ -1,0 +1,9 @@
+$kind: collection
+name: Review
+auth:
+  - id: a7fd020c-612e-4691-919b-b80a7292f655
+    type: bearer
+    name: Bearer Token
+    credentials:
+      token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ODFkM2ZiNGVmYWQzMjhjZTQ2M2VhZSIsInJvbGUiOiJTaW5nZXIgYW5kIGNvZGVyIiwiaWF0IjoxNzc1NDc1MTIwLCJleHAiOjE3NzYwNzk5MjB9.NoxgWJ9NaIESgAUZ8jgceFlpgoXmjeGFCn2Vv1fmzms
+order: 2087914889543679

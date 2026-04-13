@@ -1,0 +1,5 @@
+$kind: http-request
+name: Get Event
+url: "{{baseurl}}/events/get-all"
+method: GET
+order: 2498088116767041

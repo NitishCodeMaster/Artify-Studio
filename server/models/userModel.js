@@ -56,7 +56,17 @@ const UserSchema = new mongoose.Schema({
     savedItems: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product'
-    }], 
+    }],
+    walletBalance: {
+        type: Number,
+        default: 0
+    },
+    transactions: [{
+        title: String,
+        amount: Number,
+        type: { type: String, enum: ['credit', 'debit'] },
+        date: { type: Date, default: Date.now }
+    }],
     
     resetPasswordToken: String,
     resetPasswordExpire: Date,
