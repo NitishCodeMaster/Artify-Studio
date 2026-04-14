@@ -1,4 +1,4 @@
- import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 
@@ -6,7 +6,7 @@ import Navbar from '../components/Navbar';
 import EventHero from '../components/Events/EventHero';
 import ArtistView from '../components/Events/ArtistView';
 import AudienceView from '../components/Events/AudienceView';
-import EventDetails from '../components/Events/EventDetails'; 
+import EventDetails from '../components/Events/EventDetails';
 import { Footer } from '../components/Footer';
 
 import LiveRadar from '../components/Events/LiveRadar';
@@ -17,10 +17,12 @@ import api from "../utils/api";
 const Events = () => {
     const [viewMode, setViewMode] = useState('audience');
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedEvent, setSelectedEvent] = useState(null); 
+    const [selectedEvent, setSelectedEvent] = useState(null);
     const [activeVibe, setActiveVibe] = useState('all');
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
+    const today = new Date().toDateString();
+    const liveTodayCount = events.filter(event => new Date(event.date).toDateString() === today).length;
 
     const fetchEvents = async () => {
         try {
@@ -40,20 +42,20 @@ const Events = () => {
         fetchEvents();
     }, []);
 
-     const filteredEvents = activeVibe === 'all'
+    const filteredEvents = activeVibe === 'all'
         ? events
-        : events.filter(event => event.category?.toLowerCase() === activeVibe.toLowerCase());
+        : events.filter(event => event.category === activeVibe);
 
     return (
         <div className="bg-[#050505] min-h-screen text-white font-sans selection:bg-indigo-500/30">
             <Navbar />
 
-             <AnimatePresence mode="wait">
+            <AnimatePresence mode="wait">
                 {selectedEvent ? (
-                    <EventDetails 
-                        event={selectedEvent} 
+                    <EventDetails
+                        event={selectedEvent}
                         viewMode={viewMode}
-                        onBack={() => setSelectedEvent(null)} 
+                        onBack={() => setSelectedEvent(null)}
                         refresh={() => {
                             fetchEvents();
                             setSelectedEvent(null);
@@ -67,7 +69,7 @@ const Events = () => {
                     >
                         <EventHero events={events} />
 
-                         <AnimatePresence>
+                        <AnimatePresence>
                             {isModalOpen && (
                                 <CreateEventModal
                                     isOpen={isModalOpen}
@@ -77,13 +79,13 @@ const Events = () => {
                             )}
                         </AnimatePresence>
 
-                         <div className="sticky top-20 z-40 bg-[#050505]/90 backdrop-blur-xl border-b border-white/5 py-4 shadow-2xl">
+                        <div className="sticky top-20 z-40 bg-[#050505]/90 backdrop-blur-xl border-b border-white/5 py-4 shadow-2xl">
                             <div className="max-w-[1400px] mx-auto px-6 flex flex-col md:flex-row gap-6 md:items-center justify-between">
                                 <div className="flex items-center gap-6">
                                     <h2 className="text-2xl font-bold text-white">
                                         {viewMode === 'artist' ? 'Artist Workspace' : 'Box Office'}
                                     </h2>
-                                    <LiveRadar />
+                                    <LiveRadar count={liveTodayCount} />
                                 </div>
 
                                 <div className="relative flex bg-[#111] p-1 rounded-lg border border-white/10">
@@ -97,11 +99,11 @@ const Events = () => {
                             </div>
                         </div>
 
-                         <div className="max-w-[1400px] mx-auto px-6 mt-8">
+                        <div className="max-w-[1400px] mx-auto px-6 mt-8">
                             <VibeFilter activeVibe={activeVibe} setActiveVibe={setActiveVibe} />
                         </div>
 
-                         <div className="max-w-[1400px] mx-auto px-6 py-8 min-h-[600px]">
+                        <div className="max-w-[1400px] mx-auto px-6 py-8 min-h-[600px]">
                             {loading ? (
                                 <div className="flex flex-col items-center justify-center h-64 gap-4">
                                     <Loader2 className="animate-spin text-indigo-500" size={40} />
@@ -110,15 +112,15 @@ const Events = () => {
                             ) : (
                                 <div key={viewMode + activeVibe}>
                                     {viewMode === 'artist' ? (
-                                        <ArtistView 
-                                            events={filteredEvents} 
-                                            refresh={fetchEvents} 
+                                        <ArtistView
+                                            events={filteredEvents}
+                                            refresh={fetchEvents}
                                             onOpenModal={() => setIsModalOpen(true)}
                                             onOpenDetails={(ev) => setSelectedEvent(ev)} // Detail handler
                                         />
                                     ) : (
-                                        <AudienceView 
-                                            events={filteredEvents} 
+                                        <AudienceView
+                                            events={filteredEvents}
                                             onOpenDetails={(ev) => setSelectedEvent(ev)} // Detail handler
                                         />
                                     )}

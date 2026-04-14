@@ -20,7 +20,7 @@ router.post('/logout', authUser, userController.logoutUser);
 
 router.get('/profile', authUser, userController.getUserProfile);
 
-router.get('/top-creators', userController.getTopCreators);
+router.get('/top-creators', authUser, userController.getTopCreators);
 
 router.get('/profile/:id', userController.getUserProfileById);
 
@@ -30,7 +30,7 @@ router.post('/forgot-password', userController.forgotPassword);
 
 router.post('/reset-password/:token', userController.resetPassword);
 
-router.get('/wallet', authUser, userController.getWallet); 
+router.get('/wallet', authUser, userController.getWallet);
 
 router.post('/save-product/:id', authUser, userController.toggleSaveProduct);
 

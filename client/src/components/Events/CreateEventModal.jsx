@@ -137,11 +137,9 @@ const CreateEventModal = ({ isOpen, onClose, refresh }) => {
                             className="w-full bg-[#151515] border border-white/10 rounded-xl px-4 py-3 text-white focus:border-indigo-500 outline-none transition-all cursor-pointer appearance-none"
                             onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                         >
-                            <option value="General" className="bg-[#151515] text-white">General</option>
-                            <option value="Music" className="bg-[#151515] text-white">Music</option>
-                            <option value="Dance" className="bg-[#151515] text-white">Dance</option>
-                            <option value="Art" className="bg-[#151515] text-white">Art</option>
-                            <option value="Workshop" className="bg-[#151515] text-white">Workshop</option>
+                            <option value="Music">Music Gig</option>
+                            <option value="Dance">Dance Performance</option>
+                            <option value="Art">Art Gallery / Painting</option>
                         </select>
                     </div>
                     <div className="space-y-2">

@@ -36,7 +36,7 @@ export default function Signup() {
     try {
       const { confirmPassword, ...dataToSend } = formData;
 
-      const res = await axios.post('http://localhost:5000/users/register', dataToSend);
+      const res = await axios.post('http://localhost:5000/api/users/register', dataToSend);
 
       alert('Account created successfully! Please Login.');
       navigate('/login');

@@ -5,17 +5,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Palette, Camera, Brush, ArrowRight, Music, MessageSquare, Star, MapPin, Loader2, Edit3, Calendar } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-// 🌟 API aur useNavigate upar file me import hone chahiye
-// import api from '../../utils/api';
-// import { MessageSquare } from 'lucide-react';
-
 const StandardCard = ({ item, navigate }) => {
 
     const handleMessageArtist = async (e) => {
         e.preventDefault();
         try {
             await api.post(`/messages/start/${item.id}`);
-
             navigate('/messages');
         } catch (error) {
             console.error("Chat initiation error:", error);
@@ -29,8 +24,7 @@ const StandardCard = ({ item, navigate }) => {
 
             <div className="flex items-center gap-3 mb-4 relative z-10">
                 <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/10 text-amber-500">
-                    {/* Icon aayega yahan (Aapka purana code) */}
-                    <Star size={14} />
+                     <Star size={14} />
                 </div>
                 <span className="text-[10px] uppercase tracking-widest font-bold text-white/50">{item.category}</span>
             </div>
@@ -43,10 +37,8 @@ const StandardCard = ({ item, navigate }) => {
                     <p className="text-xs text-white/50 truncate font-medium mt-0.5">{item.role}</p>
                 </div>
 
-                {/* 🌟 YAHAN HAI AAPKA MESSAGE BUTTON AUR PROFILE LINK */}
-                <div className="flex items-center gap-2">
-                    {/* 💬 MESSAGE BUTTON */}
-                    <button
+                 <div className="flex items-center gap-2">
+                     <button
                         onClick={handleMessageArtist}
                         title="Message Artist"
                         className="p-2.5 bg-indigo-500/10 border border-indigo-500/30 rounded-full text-indigo-400 hover:bg-indigo-500 hover:text-white transition-all shadow-lg hover:scale-110"
@@ -54,8 +46,7 @@ const StandardCard = ({ item, navigate }) => {
                         <MessageSquare size={16} />
                     </button>
 
-                    {/* 👤 PROFILE BUTTON (Aapka pehle wala arrow) */}
-                    <Link to={`/profile/${item.id}`} className="p-2.5 bg-white/5 border border-white/10 rounded-full text-white/40 hover:bg-amber-500 hover:text-black hover:scale-110 transition-all shadow-lg">
+                     <Link to={`/profile/${item.id}`} className="p-2.5 bg-white/5 border border-white/10 rounded-full text-white/40 hover:bg-amber-500 hover:text-black hover:scale-110 transition-all shadow-lg">
                         <ArrowRight size={16} />
                     </Link>
                 </div>

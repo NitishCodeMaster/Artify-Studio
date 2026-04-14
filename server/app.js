@@ -29,12 +29,12 @@ app.get("/", (req, res) => {
     res.send("hello world");
 });
 
-app.use('/users', userRoutes);
-app.use('/sellers', sellerRoutes);
-app.use('/products', productRoutes);
-app.use('/posts', postRoutes);
-app.use('/payments', paymentRoutes);
-app.use('/messages', messageRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/sellers', sellerRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/posts', postRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/messages', messageRoutes);
 app.use('/api/events', eventRoutes);
 
 module.exports = app;

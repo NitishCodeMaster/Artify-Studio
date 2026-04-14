@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-const LiveRadar = () => {
+const LiveRadar = ({ count }) => {
     return (
         <div className="hidden lg:flex items-center gap-4 bg-[#0a0a0a] border border-white/10 px-4 py-2 rounded-full shadow-xl">
             <div className="relative flex items-center justify-center w-8 h-8">
@@ -11,7 +11,7 @@ const LiveRadar = () => {
 
             <div className="flex flex-col">
                 <span className="text-[10px] font-bold text-white uppercase tracking-widest">Live Now</span>
-                <span className="text-xs text-white/50">12 Gigs in Mumbai</span>
+                <span className="text-xs text-white/50">{count} Events Active Today</span>
             </div>
         </div>
     );
