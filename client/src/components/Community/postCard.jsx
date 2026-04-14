@@ -35,8 +35,7 @@ const PostCard = ({ post }) => {
             await api.put(`/posts/${post._id}/like`);
         } catch (error) {
             console.error("Like failed:", error);
-            // Revert changes if API fails
-            setIsLiked(!isLiked);
+             setIsLiked(!isLiked);
             setLikesCount(prev => isLiked ? prev + 1 : prev - 1);
             alert("Failed to like post.");
         }
@@ -52,9 +51,8 @@ const PostCard = ({ post }) => {
 
         setIsCommenting(true);
         try {
-            const res = await api.post(`/posts/${post._id}/comment`, { text: commentText });
-            // The backend returns the updated comments array
-            if (res.data.success) {
+            const res = await api.post(`/api/posts/${post._id}/comment`, { text: commentText });
+             if (res.data.success) {
                 setComments(res.data.comments);
                 setCommentText('');
             }

@@ -2,8 +2,9 @@ const http = require("http");
 const app = require('./app');
 const connectDB = require("./config/db");
 const { Server } = require("socket.io");
-
+const initcronJobs = require("./utils/cronJobs");
 connectDB();
+initcronJobs();
 
 const PORT = process.env.PORT || 4000;
 
@@ -26,7 +27,7 @@ io.on("connection", (socket) => {
         socket.join(chatId);
         console.log(`User Joined Chat Room: ${chatId}`);
     });
-    
+
     socket.on("disconnect", () => {
         console.log(` User Disconnected: ${socket.id}`);
     });

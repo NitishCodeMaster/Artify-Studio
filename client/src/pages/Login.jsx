@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
-import toast, { Toaster } from 'react-hot-toast'; // 👈 Ye pehle se import kar liya hai
+import toast, { Toaster } from 'react-hot-toast'; 
 import { Mail, Lock, ArrowRight, Loader2, LogIn } from 'lucide-react';
 
 const leftSideImage = "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=600&q=80";

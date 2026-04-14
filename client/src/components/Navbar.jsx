@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, LogOut, User, ShoppingBag } from 'lucide-react';
+import { Menu, X, LogOut, User, ShoppingBag, ShoppingCart } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
 const navLinks = [

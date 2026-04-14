@@ -3,9 +3,11 @@ import { X, Trash2, ShoppingBag, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../../context/CartContext';
 import api from '../../utils/api';
+import { useNavigate } from "react-router-dom";
 
 const CartDrawer = () => {
     const { cart, isCartOpen, setIsCartOpen, removeFromCart, cartTotal, clearCart } = useCart();
+    const navigate = useNavigate();
 
     const handleCheckout = async () => {
         try {
@@ -82,7 +84,10 @@ const CartDrawer = () => {
                                 <div className="h-full flex flex-col items-center justify-center text-white/40 space-y-4">
                                     <ShoppingBag size={48} className="opacity-20" />
                                     <p>Your cart is empty.</p>
-                                    <button onClick={() => setIsCartOpen(false)} className="text-amber-500 font-medium hover:underline">
+                                    <button onClick={() => {
+                                        setIsCartOpen(false);
+                                        navigate('/marketplace');
+                                    }} className="text-amber-500 font-medium hover:underline">
                                         Explore Marketplace
                                     </button>
                                 </div>
@@ -119,8 +124,9 @@ const CartDrawer = () => {
                         )}
                     </motion.div>
                 </>
-            )}
-        </AnimatePresence>
+            )
+            }
+        </AnimatePresence >
     );
 };
 
