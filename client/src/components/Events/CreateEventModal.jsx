@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { X, Upload, Calendar, Clock, MapPin, IndianRupee, Tag } from 'lucide-react';
 import api from '../../utils/api';
 import { toast } from 'react-hot-toast';
+import CloudinaryUpload from './CloudinaryUpload';
 
 const CreateEventModal = ({ isOpen, onClose, refresh }) => {
     const [formData, setFormData] = useState({
@@ -144,12 +145,10 @@ const CreateEventModal = ({ isOpen, onClose, refresh }) => {
                         </select>
                     </div>
                     <div className="space-y-2">
-                        <label className="text-xs font-bold text-white/40 uppercase flex items-center gap-2"><Upload size={12} /> Banner URL</label>
-                        <input
-                            type="text"
-                            placeholder="Image URL"
-                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-indigo-500 outline-none"
-                            onChange={(e) => setFormData({ ...formData, bannerImage: e.target.value })}
+                        <label className="text-xs font-bold text-white/40 uppercase tracking-widest">Event Poster</label>
+                        <CloudinaryUpload
+                            onUploadSuccess={(url) => setFormData({ ...formData, bannerImage: url })}
+                            currentImage={formData.bannerImage}
                         />
                     </div>
 

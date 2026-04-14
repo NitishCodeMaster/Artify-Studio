@@ -5,7 +5,7 @@ import api from '../../utils/api';
 import { toast } from 'react-hot-toast';
 import DeleteConfirmModal from './DeleteConfirmModal';
 
-const GigCard = ({ event, refresh }) => {
+const GigCard = ({ event, refresh, onOpenDetails }) => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     const eventDate = new Date(event.date).toLocaleDateString('en-IN', {
@@ -14,6 +14,7 @@ const GigCard = ({ event, refresh }) => {
     });
 
     const handleDeleteClick = (e) => {
+        e.stopPropagation();
         e.preventDefault();
         setShowDeleteModal(true);
     };
@@ -35,6 +36,7 @@ const GigCard = ({ event, refresh }) => {
         <>
             <motion.div
                 whileHover={{ y: -5 }}
+                onClick={() => onOpenDetails(event)}
                 className="relative bg-[#111] border border-white/10 rounded-2xl p-5 hover:border-indigo-500/50 transition-all duration-300 group overflow-hidden"
             >
                 <div className="flex justify-between items-start mb-4 mt-2">
@@ -80,11 +82,13 @@ const GigCard = ({ event, refresh }) => {
 
                         <div className="flex flex-col items-end">
                             <span className="text-[10px] text-white/40 flex items-center gap-1">
-                                <Clock size={10} /> {eventDate}
+                                <Clock size={10} /> {eventDate} • {event.time}
                             </span>
                             <button
-                                onClick={() => window.location.href = `/event/${event._id}`}
-                                className="mt-1 flex items-center gap-1 text-xs font-bold text-indigo-400 hover:text-white transition-colors"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onOpenDetails(event);
+                                }} className="mt-1 flex items-center gap-1 text-xs font-bold text-indigo-400 hover:text-white transition-colors"
                             >
                                 View Gig <ArrowUpRight size={12} />
                             </button>

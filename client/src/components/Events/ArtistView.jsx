@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Mic2, DollarSign, Users, PlusCircle } from 'lucide-react';
 import GigCard from './GigCard';
 
-const ArtistView = ({ events, refresh, onOpenModal }) => {
+const ArtistView = ({ events, refresh, onOpenModal,onOpenDetails }) => {
     const icons = { mic: Mic2, dollar: DollarSign, users: Users };
 
 
@@ -77,7 +77,7 @@ const ArtistView = ({ events, refresh, onOpenModal }) => {
                 {events.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {events.map(event => (
-                            <GigCard key={event._id} event={event} refresh={refresh} />
+                            <GigCard key={event._id} event={event} refresh={refresh} onOpenDetails={onOpenDetails}/>
                         ))}
                     </div>
                 ) : (
