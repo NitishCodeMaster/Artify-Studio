@@ -1,112 +1,193 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Calendar, MapPin, Clock, PlayCircle, Trash2 } from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, Clock, PlayCircle, Trash2, ShieldCheck, Users, Zap, Ticket } from 'lucide-react';
 import api from '../../utils/api';
 import { toast } from 'react-hot-toast';
 import DeleteConfirmModal from './DeleteConfirmModal';
 
 const EventDetails = ({ event, onBack, refresh, viewMode }) => {
+    const { user } = useAuth();
+    if (!event) return null;
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [isProcessing, setIsProcessing] = useState(false);
 
-    const handleDelete = async () => {
+    useEffect(() => {
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.async = true;
+        document.body.appendChild(script);
+    }, []);
+
+    const handlePayment = async () => {
+        if (!window.Razorpay) {
+            toast.error("Razorpay failed to load.");
+            return;
+        }
+
         try {
-            const res = await api.delete(`/events/delete/${event._id}`);
-            if (res.data.success) {
-                toast.success("Event deleted successfully!");
-                refresh();
-            }
+            setIsProcessing(true);
+            const { data } = await api.post('/payments/create-order', {
+                amount: event.price,
+                eventId: event._id
+            });
+
+            const rawPhone = user?.phone || "";
+            const cleanPhone = rawPhone.toString().replace(/\D/g, '').slice(-10);
+            const options = {
+                key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+                amount: data.order.amount,
+                currency: "INR",
+                name: "Artify Studio",
+                description: `Ticket for ${event.title}`,
+                order_id: data.order.id,
+                prefill: {
+                    name: user?.fullname || user?.name || "Guest User",
+                    email: user?.email || "customer@example.com",
+                    contact: cleanPhone,
+                    ...(cleanPhone.length === 10 ? { contact: cleanPhone } : {})
+                },
+                readonly: {
+                    contact: cleanPhone.length === 10 ? true : false,
+                    email: true,
+                    name: true
+                },
+                theme: { color: "#6366f1" },
+                handler: async (response) => {
+                    try {
+                        const verifyRes = await api.post('/payments/verify', {
+                            ...response,
+                            eventId: event._id,
+                            totalAmount: event.price
+                        });
+                        if (verifyRes.data.success) {
+                            toast.success("Ticket Booked!");
+                            refresh();
+                            onBack();
+                        }
+                    } catch (err) {
+                        toast.error("Verification failed!");
+                    }
+                },
+                modal: {
+                    ondismiss: () => setIsProcessing(false),
+                },
+            };
+
+            const rzp = new window.Razorpay(options);
+            rzp.open();
+
         } catch (error) {
-            toast.error("Failed to delete event");
+            console.error("Payment Error:", error);
+            toast.error("Order creation failed");
+        } finally {
+            setIsProcessing(false);
         }
     };
 
     return (
         <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-0 z-[100] bg-[#050505] text-white p-6 pb-20 overflow-y-auto custom-scrollbar"        >
-            <div className="max-w-6xl mx-auto flex justify-between items-center mb-8">
-                <button
-                    onClick={onBack}
-                    className="flex items-center gap-2 text-white/50 hover:text-white transition-colors group"
-                >
-                    <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
-                    <span className="font-medium">Back to Gigs</span>
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-[#050505] text-white overflow-hidden flex flex-col font-sans"
+        >
+            <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-indigo-600/5 blur-[100px] rounded-full -z-10" />
+
+            <nav className="h-16 flex items-center justify-between px-8 border-b border-white/5 bg-black/20 backdrop-blur-md">
+                <button onClick={onBack} className="flex items-center gap-2 text-white/50 hover:text-white transition-all group">
+                    <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
+                    <span className="text-sm font-bold uppercase tracking-widest">Back</span>
                 </button>
                 {viewMode === 'artist' && (
-                    <button
-                        onClick={() => setShowDeleteModal(true)}
-                        className="p-3 bg-red-500/10 text-red-500 rounded-2xl hover:bg-red-500 hover:text-white transition-all shadow-lg shadow-red-500/5"
-                    >
-                        <Trash2 size={20} />
+                    <button onClick={() => setShowDeleteModal(true)} className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-all">
+                        <Trash2 size={18} />
                     </button>
                 )}
-            </div>
+            </nav>
 
-            <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12">
-                <div className="space-y-6">
-                    <div className="relative aspect-video rounded-3xl overflow-hidden border border-white/10 shadow-2xl group">
-                        <img
-                            src={event.bannerImage}
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                            alt={event.title}
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+            <main className="flex-1 overflow-hidden grid grid-cols-1 lg:grid-cols-12 gap-0">
+
+                <div className="lg:col-span-5 relative bg-[#080808] border-r border-white/5">
+                    <img
+                        src={event.bannerImage}
+                        className="w-full h-full object-cover opacity-60"
+                        alt={event.title}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[#050505]" />
+
+                    <div className="absolute bottom-10 left-10 space-y-4">
+                        <div className="flex gap-3">
+                            <span className="px-3 py-1 bg-indigo-600 text-white text-[10px] font-black rounded-full uppercase">
+                                {event.category}
+                            </span>
+                            <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
+                                <Users size={12} className="text-indigo-400" />
+                                <span className="text-[10px] font-bold uppercase">{event.attendees?.length || 0} Attending</span>
+                            </div>
+                        </div>
+                        <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-none">{event.title}</h1>
                     </div>
-
-                    {event.trailerUrl && (
-                        <button
-                            onClick={() => window.open(event.trailerUrl, '_blank')}
-                            className="w-full py-4 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center gap-3 hover:bg-white hover:text-black transition-all font-bold group"
-                        >
-                            <PlayCircle size={24} className="group-hover:scale-110 transition-transform" />
-                            Watch Official Trailer
-                        </button>
-                    )}
                 </div>
 
-                <div className="space-y-8">
-                    <div>
-                        <span className="px-3 py-1 bg-indigo-500/20 text-indigo-400 rounded-full text-xs font-bold uppercase tracking-widest border border-indigo-500/30">
-                            {event.category}
-                        </span>
-                        <h1 className="text-5xl font-black mt-4 leading-tight tracking-tight">{event.title}</h1>
-                    </div>
+                <div className="lg:col-span-7 flex flex-col p-8 md:p-12 overflow-y-auto custom-scrollbar">
+                    <div className="max-w-2xl space-y-10">
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-white/5 p-4 rounded-2xl border border-white/5 hover:border-white/10 transition-colors">
-                            <Calendar className="text-indigo-400 mb-2" size={20} />
-                            <p className="text-xs text-white/40 uppercase font-bold tracking-tighter">Date</p>
-                            <p className="font-medium">{new Date(event.date).toDateString()}</p>
+                        <div className="grid grid-cols-2 gap-8">
+                            <div className="space-y-1">
+                                <p className="text-xs text-indigo-400 font-black uppercase tracking-widest flex items-center gap-2">
+                                    <Calendar size={14} /> Schedule
+                                </p>
+                                <p className="text-xl font-bold">{new Date(event.date).toDateString()}</p>
+                                <p className="text-sm text-white/40">{event.time || "07:00 PM onwards"}</p>
+                            </div>
+                            <div className="space-y-1">
+                                <p className="text-xs text-indigo-400 font-black uppercase tracking-widest flex items-center gap-2">
+                                    <MapPin size={14} /> Venue
+                                </p>
+                                <p className="text-xl font-bold capitalize">{event.location}</p>
+                                <p className="text-sm text-white/40">Open Entry for Ticket Holders</p>
+                            </div>
                         </div>
-                        <div className="bg-white/5 p-4 rounded-2xl border border-white/5 hover:border-white/10 transition-colors">
-                            <MapPin className="text-indigo-400 mb-2" size={20} />
-                            <p className="text-xs text-white/40 uppercase font-bold tracking-tighter">Location</p>
-                            <p className="font-medium capitalize">{event.location}</p>
-                        </div>
-                    </div>
 
-                    <div>
-                        <h4 className="text-sm font-bold text-white/40 uppercase mb-3 tracking-widest">About this Event</h4>
-                        <p className="text-lg text-white/70 leading-relaxed font-light italic">
-                            {event.description || "No description provided for this gig."}
-                        </p>
-                    </div>
-
-                    <div className="pt-6 border-t border-white/10 flex items-center justify-between">
-                        <div>
-                            <p className="text-xs text-white/40 uppercase font-bold">Ticket Price</p>
-                            <p className="text-3xl font-black text-emerald-400">
-                                {event.price === 0 ? "FREE" : `₹${event.price}`}
+                        <div className="space-y-3">
+                            <h4 className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em]">The Experience</h4>
+                            <p className="text-lg text-white/70 font-light leading-relaxed line-clamp-4">
+                                {event.description || "Join us for an unforgettable artistic journey where creativity meets passion. A curated experience designed specifically for the Artify community."}
                             </p>
                         </div>
-                        <button className="px-10 py-4 bg-indigo-600 text-white rounded-full font-bold shadow-lg shadow-indigo-600/30 hover:bg-indigo-500 hover:scale-105 active:scale-95 transition-all">
-                            Book Tickets
-                        </button>
+
+                        <div className="relative group p-8 rounded-[2rem] bg-gradient-to-br from-indigo-600/10 to-transparent border border-indigo-500/20 overflow-hidden">
+                            <div className="flex justify-between items-end relative z-10">
+                                <div className="space-y-2">
+                                    <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Entry Pass</p>
+                                    <div className="flex items-baseline gap-2">
+                                        <span className="text-5xl font-black text-white">₹{event.price}</span>
+                                        <span className="text-sm text-white/40 font-medium">/ person</span>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={handlePayment}
+                                    disabled={isProcessing}
+                                    className="px-10 py-5 bg-white text-black rounded-2xl font-black text-lg hover:scale-105 active:scale-95 transition-all shadow-2xl flex items-center gap-3 disabled:opacity-50"
+                                >
+                                    {isProcessing ? "Processing..." : "Get Tickets"}
+                                    <Ticket size={20} />
+                                </button>
+                            </div>
+
+                            <div className="absolute top-0 right-0 p-4 opacity-10">
+                                <ShieldCheck size={100} />
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-6 text-[10px] font-bold text-white/20 uppercase tracking-[0.2em]">
+                            <span className="flex items-center gap-2"><ShieldCheck size={14} /> Secured Payment</span>
+                            <span className="flex items-center gap-2"><Clock size={14} /> Instant Confirmation</span>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </main>
 
             <AnimatePresence>
                 {showDeleteModal && (

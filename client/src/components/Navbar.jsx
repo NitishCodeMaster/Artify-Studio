@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, LogOut, User, ShoppingBag, ShoppingCart } from 'lucide-react';
+import { Menu, X, LogOut, User, ShoppingBag, ShoppingCart, Bell } from 'lucide-react';
+import { socket } from "../socket";
+import toast from 'react-hot-toast';
 import { useCart } from '../context/CartContext';
+import { useRef } from "react";
+
 
 const navLinks = [
     { name: "Home", path: "/" },
@@ -20,6 +24,63 @@ const Navbar = () => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [userProfile, setUserProfile] = useState(null);
     const { cart, setIsCartOpen } = useCart();
+    const [unreadCount, setUnreadCount] = useState(0);
+    const [showNotifications, setShowNotifications] = useState(false);
+    const [notifications, setNotifications] = useState([]);
+    const socketRef = useRef(null);
+    const notifRef = useRef(null);
+
+    useEffect(() => {
+        socket.connect();
+
+        socket.on("connect", () => {
+            console.log(" Socket Connected:", socket.id);
+
+            const storedUser = JSON.parse(localStorage.getItem("user"));
+
+            if (storedUser?._id || storedUser?.id) {
+                const uid = storedUser._id || storedUser.id;
+
+                socket.emit("register_user", uid);
+            }
+        });
+
+        socket.on("new_notification", (data) => {
+            setNotifications(prev => {
+                const updated = [data, ...prev];
+                localStorage.setItem("notifications", JSON.stringify(updated));
+                return updated;
+            });
+
+            setUnreadCount(prev => prev + 1);
+        });
+
+        return () => {
+            socket.off("connect");
+            socket.off("new_notification");
+        };
+    }, []);
+
+    useEffect(() => {
+        const stored = localStorage.getItem("notifications");
+        if (stored) {
+            setNotifications(JSON.parse(stored));
+        }
+    }, []);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (notifRef.current && !notifRef.current.contains(event.target)) {
+                setShowNotifications(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
 
     const isMarket = location.pathname === '/marketplace';
 
@@ -36,10 +97,22 @@ const Navbar = () => {
     };
 
     useEffect(() => {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-            setUserProfile(JSON.parse(storedUser));
-        }
+        const loadUser = () => {
+            const storedUser = localStorage.getItem('user');
+            if (storedUser) {
+                setUserProfile(JSON.parse(storedUser));
+            } else {
+                setUserProfile(null);
+            }
+        };
+
+        loadUser();
+
+        window.addEventListener("userChanged", loadUser);
+
+        return () => {
+            window.removeEventListener("userChanged", loadUser);
+        };
     }, []);
 
     const handleLogout = () => {
@@ -93,7 +166,71 @@ const Navbar = () => {
                         })}
                     </nav>
 
-                    <div className="hidden md:flex items-center gap-6">
+                    <div className=" relative hidden md:flex items-center gap-6" ref={notifRef}>
+                        <button
+                            onClick={() => setShowNotifications(prev => !prev)}
+                            className="relative text-white/80 hover:text-white transition-colors"
+                        >
+                            <Bell size={20} />
+
+                            {unreadCount > 0 && (
+                                <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                                    {unreadCount}
+                                </span>
+                            )}
+                        </button>
+                        {showNotifications && (
+                            <div className="absolute right-0 top-10 mt-3 w-80 bg-[#1a1a1a] border border-white/10 rounded-xl shadow-lg z-50">
+
+                                <div className="p-3 border-b border-white/10 text-white font-bold">
+                                    Notifications
+                                </div>
+
+                                {notifications.length === 0 ? (
+                                    <p className="p-4 text-white/50 text-sm">No notifications</p>
+                                ) : (
+                                    notifications.map((n, index) => (
+                                        <div
+                                            key={index}
+                                            onClick={async () => {
+                                                console.log("Clicked eventId:", n.eventId);
+
+                                                if (!n.eventId) {
+                                                    navigate("/events");
+                                                    return;
+                                                }
+                                                try {
+                                                    const res = await fetch(`http://localhost:5000/api/events/${n.eventId}`);
+
+                                                    if (res.ok) {
+                                                        navigate(`/events/${n.eventId}`);
+                                                    } else {
+                                                        navigate("/events");
+                                                    }
+                                                } catch (err) {
+                                                    toast("This event is no longer available");
+                                                    navigate("/events");
+
+                                                    setNotifications(prev => {
+                                                        const updated = prev.filter(item => item.eventId !== n.eventId);
+                                                        localStorage.setItem("notifications", JSON.stringify(updated));
+                                                        return updated;
+                                                    });
+                                                }
+
+                                                setShowNotifications(false);
+                                                setUnreadCount(0);
+                                            }}
+
+                                            className="p-3 border-b border-white/10 hover:bg-white/5 cursor-pointer"
+                                        >
+                                            <p className="text-white text-sm font-semibold">{n.title}</p>
+                                            <p className="text-white/50 text-xs">{n.message}</p>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        )}
                         <button
                             onClick={() => setIsCartOpen(true)}
                             className="relative text-white/80 hover:text-white transition-colors"

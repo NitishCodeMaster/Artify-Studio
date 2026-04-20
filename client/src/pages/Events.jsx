@@ -98,34 +98,35 @@ const Events = () => {
                                 </div>
                             </div>
                         </div>
+                        <div id="event-list" className="scroll-mt-48">
+                            <div className="max-w-[1400px] mx-auto px-6 mt-8">
+                                <VibeFilter activeVibe={activeVibe} setActiveVibe={setActiveVibe} />
+                            </div>
 
-                        <div className="max-w-[1400px] mx-auto px-6 mt-8">
-                            <VibeFilter activeVibe={activeVibe} setActiveVibe={setActiveVibe} />
-                        </div>
-
-                        <div className="max-w-[1400px] mx-auto px-6 py-8 min-h-[600px]">
-                            {loading ? (
-                                <div className="flex flex-col items-center justify-center h-64 gap-4">
-                                    <Loader2 className="animate-spin text-indigo-500" size={40} />
-                                    <p className="text-white/40">Loading Gigs...</p>
-                                </div>
-                            ) : (
-                                <div key={viewMode + activeVibe}>
-                                    {viewMode === 'artist' ? (
-                                        <ArtistView
-                                            events={filteredEvents}
-                                            refresh={fetchEvents}
-                                            onOpenModal={() => setIsModalOpen(true)}
-                                            onOpenDetails={(ev) => setSelectedEvent(ev)} // Detail handler
-                                        />
-                                    ) : (
-                                        <AudienceView
-                                            events={filteredEvents}
-                                            onOpenDetails={(ev) => setSelectedEvent(ev)} // Detail handler
-                                        />
-                                    )}
-                                </div>
-                            )}
+                            <div className="max-w-[1400px] mx-auto px-6 py-8 min-h-[600px]">
+                                {loading ? (
+                                    <div className="flex flex-col items-center justify-center h-64 gap-4">
+                                        <Loader2 className="animate-spin text-indigo-500" size={40} />
+                                        <p className="text-white/40">Loading Gigs...</p>
+                                    </div>
+                                ) : (
+                                    <div key={viewMode + activeVibe}>
+                                        {viewMode === 'artist' ? (
+                                            <ArtistView
+                                                events={filteredEvents}
+                                                refresh={fetchEvents}
+                                                onOpenModal={() => setIsModalOpen(true)}
+                                                onOpenDetails={(ev) => setSelectedEvent(ev)} // Detail handler
+                                            />
+                                        ) : (
+                                            <AudienceView
+                                                events={filteredEvents}
+                                                onOpenDetails={(ev) => setSelectedEvent(ev)} // Detail handler
+                                            />
+                                        )}
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </motion.div>
                 )}

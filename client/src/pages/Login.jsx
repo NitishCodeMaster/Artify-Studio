@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
-import toast, { Toaster } from 'react-hot-toast'; 
+import toast, { Toaster } from 'react-hot-toast';
 import { Mail, Lock, ArrowRight, Loader2, LogIn } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const leftSideImage = "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=600&q=80";
 const rightSideImage = "https://images.unsplash.com/photo-1554188248-986adbb73be0?w=600&q=80";
@@ -14,6 +15,7 @@ export default function Login() {
   });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -24,22 +26,22 @@ export default function Login() {
     setLoading(true);
     try {
       const res = await axios.post('http://localhost:5000/api/users/login', formData);
+      console.log(res.data);
+      if (res.data.success) {
+        localStorage.setItem('token', res.data.token);
+        const fixedUser = {
+          ...res.data.user,
+          _id: res.data.user._id || res.data.user.id
+        };
+        localStorage.setItem("user", JSON.stringify(fixedUser));
+        window.dispatchEvent(new Event("userChanged"));
+        login(fixedUser);
+        toast.success('Welcome back to Artify! 🎨');
 
-      localStorage.setItem('token', res.data.token); 
-      const fixedUser = {
-        ...res.data.user,
-        _id: res.data.user._id || res.data.user.id
-      };
-
-      localStorage.setItem('user', JSON.stringify(fixedUser));
-
-      toast.success('Welcome back to Artify! 🎨');
-
-      setTimeout(() => {
-        navigate('/');
-        window.location.reload();
-      }, 1500);
-
+        setTimeout(() => {
+          navigate('/');
+        }, 1500);
+      }
     } catch (error) {
       console.error(error);
       toast.error(error.response?.data?.message || 'Login Failed');

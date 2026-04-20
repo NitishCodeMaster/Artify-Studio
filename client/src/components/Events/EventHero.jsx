@@ -16,7 +16,7 @@ const EventHero = ({ events }) => {
         if (featuredList.length <= 1) return;
         const timer = setInterval(() => {
             setCurrentIndex((prev) => (prev + 1) % featuredList.length);
-        }, 6000);
+        }, 8000);
         return () => clearInterval(timer);
     }, [featuredList.length]);
 
@@ -24,15 +24,22 @@ const EventHero = ({ events }) => {
 
     if (!event) return null;
 
+    const scrollToEvents = () => {
+        const element = document.getElementById('event-list');
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+        }
+    };
+
     const displayDate = event.date.includes('-') || !isNaN(Date.parse(event.date))
         ? new Date(event.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'long' })
         : event.date;
 
     return (
-        <div className="relative w-full h-[600px] md:h-[700px] overflow-hidden bg-black font-sans">
+        <div className="relative w-full h-[650px] md:h-[800px] overflow-hidden bg-[#050505] font-sans">
             <AnimatePresence mode="wait">
                 <motion.div
-                    key={event._id || event.id} 
+                    key={event._id || event.id}
                     initial={{ opacity: 0, scale: 1.1 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0 }}
@@ -56,50 +63,61 @@ const EventHero = ({ events }) => {
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -30 }}
-                        transition={{ duration: 0.6, delay: 0.2 }}
-                        className="max-w-3xl"
+                        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                        className="w-full"
                     >
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 backdrop-blur-md mb-6">
-                            <span className={`w-2 h-2 rounded-full ${event.color ? `bg-gradient-to-r ${event.color}` : 'bg-indigo-500'} animate-pulse shadow-[0_0_10px_#6366f1]`}></span>
-                            <span className="text-xs font-bold uppercase tracking-widest text-white">
-                                {events && events.length > 0 ? "Featured Event" : "Sample Preview"}
+                        <div className="flex items-center gap-3 mb-8">
+                            <span className="flex h-3 w-3 relative">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-3 w-3 bg-indigo-500"></span>
                             </span>
+                            <p className="text-sm font-bold tracking-[0.3em] uppercase text-indigo-400/90">
+                                Now Trending in {event.location.split(',')[0]}
+                            </p>
                         </div>
 
-                        <h1 className="text-5xl md:text-8xl font-bold text-white font-playfair mb-4 leading-[0.9] tracking-tight">
-                            {event.title}
+                         <h1 className="text-6xl md:text-[120px] font-black text-white leading-[0.85] mb-6 tracking-tighter drop-shadow-2xl">
+                            {event.title.split(' ').map((word, i) => (
+                                <span key={i} className={i === 1 ? "text-indigo-500 block md:inline" : ""}>
+                                    {word}{' '}
+                                </span>
+                            ))}
                         </h1>
 
-                        <p className="text-xl md:text-2xl text-white/80 font-light italic mb-8 border-l-4 border-indigo-500 pl-4">
-                            Perfomance by <span className="text-white font-bold">{event.organizer?.name || event.artist}</span>
-                        </p>
-
-                        <div className="flex flex-wrap gap-4 mb-10 text-sm md:text-base text-white/90 font-medium">
-                            <div className="flex items-center gap-2 bg-black/40 px-4 py-2 rounded-lg border border-white/10 backdrop-blur-sm">
-                                <Calendar size={18} className="text-indigo-400" /> {displayDate}
-                            </div>
-                            <div className="flex items-center gap-2 bg-black/40 px-4 py-2 rounded-lg border border-white/10 backdrop-blur-sm">
-                                <Clock size={18} className="text-indigo-400" /> {event.time}
-                            </div>
-                            <div className="flex items-center gap-2 bg-black/40 px-4 py-2 rounded-lg border border-white/10 backdrop-blur-sm">
-                                <MapPin size={18} className="text-indigo-400" /> {event.location}
+                        <div className="flex items-center gap-6 mb-12">
+                            <div className="h-20 w-[2px] bg-gradient-to-b from-indigo-500 to-transparent"></div>
+                            <div>
+                                <p className="text-2xl text-white/70 font-medium tracking-tight">
+                                    Featuring <span className="text-white font-bold underline decoration-indigo-500 underline-offset-8">
+                                        {event.organizer?.name || event.artist}
+                                    </span>
+                                </p>
+                                <div className="flex items-center gap-4 mt-4 text-white/50 text-sm">
+                                    <span className="flex items-center gap-1"><Calendar size={14} /> {event.date}</span>
+                                    <span className="flex items-center gap-1"><MapPin size={14} /> {event.location}</span>
+                                </div>
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-4">
-                             <button
-                                onClick={() => navigate(`/event/${event._id}`)}
-                                className="px-8 py-4 rounded-full bg-indigo-600 text-white font-bold text-sm uppercase tracking-widest hover:scale-105 transition-all shadow-[0_10px_30px_rgba(99,102,241,0.3)] flex items-center gap-3"
+                         <div className="flex flex-wrap gap-5">
+                            <button
+                                onClick={scrollToEvents}
+                                className="group relative px-10 py-5 bg-indigo-600 rounded-full overflow-hidden transition-all hover:bg-indigo-500 active:scale-95 shadow-2xl shadow-indigo-600/20"
                             >
-                                <Ticket size={18} /> Get Tickets • {event.price === 0 ? 'FREE' : `₹${event.price}`}
+                                <span className="relative z-10 text-white font-black text-lg flex items-center gap-2">
+                                    Find Tickets <Ticket size={20} className="group-hover:rotate-12 transition-transform" />
+                                </span>
                             </button>
 
-                             {event.trailerUrl && (
+                            {event.trailerUrl && (
                                 <button
                                     onClick={() => window.open(event.trailerUrl, '_blank')}
-                                    className="px-6 py-4 rounded-full bg-white/5 border border-white/10 text-white font-bold text-sm hover:bg-white hover:text-black transition-colors flex items-center gap-3 backdrop-blur-md"
+                                    className="px-8 py-5 rounded-full bg-white/5 border border-white/10 text-white font-bold hover:bg-white/10 transition-all flex items-center gap-3 backdrop-blur-xl group"
                                 >
-                                    <PlayCircle size={18} /> Watch Trailer
+                                    <div className="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                        <PlayCircle size={20} fill="currentColor" className="text-white" />
+                                    </div>
+                                    Watch Intro
                                 </button>
                             )}
                         </div>
@@ -107,12 +125,24 @@ const EventHero = ({ events }) => {
                 </AnimatePresence>
             </div>
 
-            <div className="absolute bottom-10 right-10 z-20 flex gap-4 items-end">
-                {featuredList.map((_, i) => (
-                    <div key={i} className="relative group cursor-pointer" onClick={() => setCurrentIndex(i)}>
-                        <div className={`h-1 transition-all duration-500 ${i === currentIndex ? 'w-16 bg-white' : 'w-8 bg-white/20'}`}></div>
-                    </div>
-                ))}
+            <div className="absolute right-12 top-1/2 -translate-y-1/2 hidden md:flex flex-col gap-10 items-center">
+                <span className="text-white/30 [writing-mode:vertical-lr] text-xs font-bold tracking-[0.5em] uppercase">Scroll to Explore</span>
+                <div className="w-[1px] h-32 bg-gradient-to-b from-indigo-500 via-white/20 to-transparent"></div>
+            </div>
+
+             <div className="absolute bottom-12 left-6 right-6 z-20 flex justify-between items-end max-w-[1400px] mx-auto">
+                <div className="flex gap-3">
+                    {featuredList.map((_, i) => (
+                        <button
+                            key={i}
+                            onClick={() => setCurrentIndex(i)}
+                            className={`h-[2px] transition-all duration-700 ${i === currentIndex ? 'w-24 bg-indigo-500' : 'w-8 bg-white/20'}`}
+                        />
+                    ))}
+                </div>
+                <div className="text-white/20 font-black text-6xl select-none">
+                    0{currentIndex + 1}
+                </div>
             </div>
         </div>
     );

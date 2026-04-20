@@ -5,6 +5,8 @@ const { authUser } = require('../middleware/authMiddleware');
 
 router.get('/get-all', eventController.getAllEvents);
 
+router.get('/:id', eventController.getEventById);
+
 router.post('/create', authUser, eventController.createEvent);
 
 router.post('/:id/review', authUser, eventController.addEventReview);

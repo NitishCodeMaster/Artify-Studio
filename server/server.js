@@ -2,12 +2,12 @@ const http = require("http");
 const app = require('./app');
 const connectDB = require("./config/db");
 const { Server } = require("socket.io");
-const initcronJobs = require("./utils/cronJobs");
+const initcronJobs = require("./utils/cronjobs");
+
 connectDB();
 initcronJobs();
 
 const PORT = process.env.PORT || 4000;
-
 const server = http.createServer(app);
 
 const io = new Server(server, {
@@ -18,21 +18,43 @@ const io = new Server(server, {
     }
 });
 
+const onlineUsers = new Map();
+
 app.set('io', io);
+app.set('onlineUsers', onlineUsers);
 
 io.on("connection", (socket) => {
-    console.log(`User Connected: ${socket.id}`);
+    console.log("✅ Socket Connected:", socket.id);
+
+    socket.on("register_user", (userId) => {
+        if (!userId) return;
+
+        const uid = userId.toString();
+
+        onlineUsers.set(uid, socket.id);
+
+        console.log(`🟢 User ${uid} registered with socket ${socket.id}`);
+        console.log("Online Users:", onlineUsers);
+    });
 
     socket.on("join_chat", (chatId) => {
+        if (!chatId) return;
+
         socket.join(chatId);
-        console.log(`User Joined Chat Room: ${chatId}`);
+        console.log(`📩 User joined chat room: ${chatId}`);
     });
 
     socket.on("disconnect", () => {
-        console.log(` User Disconnected: ${socket.id}`);
+        for (let [userId, socketId] of onlineUsers.entries()) {
+            if (socketId === socket.id) {
+                onlineUsers.delete(userId);
+                console.log(`❌ User ${userId} disconnected`);
+                break;
+            }
+        }
     });
 });
 
 server.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(`🚀 Server running on port ${PORT}`);
 });

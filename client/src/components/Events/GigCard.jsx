@@ -8,6 +8,16 @@ import DeleteConfirmModal from './DeleteConfirmModal';
 const GigCard = ({ event, refresh, onOpenDetails }) => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 
+    const currentUser = JSON.parse(localStorage.getItem("user"));
+    const currentUserId = currentUser?._id || currentUser?.id;
+    const organizerId =
+        event.organizer?._id || event.organizer;
+
+    const isOwner =
+        currentUserId &&
+        organizerId &&
+        currentUserId.toString() === organizerId.toString();
+
     const eventDate = new Date(event.date).toLocaleDateString('en-IN', {
         day: 'numeric',
         month: 'short'
@@ -70,13 +80,15 @@ const GigCard = ({ event, refresh, onOpenDetails }) => {
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <button
-                            onClick={handleDeleteClick}
-                            className="p-2 text-white/20 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
-                            title="Delete Gig"
-                        >
-                            <Trash2 size={16} />
-                        </button>
+                        {isOwner && (
+                            <button
+                                onClick={handleDeleteClick}
+                                className="p-2 text-white/20 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
+                                title="Delete Gig"
+                            >
+                                <Trash2 size={16} />
+                            </button>
+                        )}
 
                         <div className="h-8 w-[1px] bg-white/5"></div>
 

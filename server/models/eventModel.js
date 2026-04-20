@@ -50,7 +50,7 @@ const eventSchema = new mongoose.Schema({
     },
     category: {
         type: String,
-        enum: ['Music', 'Dance', 'Art', 'Workshop'],
+        enum: ['Music', 'Dance', 'Art', 'General'],
         default: "General"
     },
     organizer: {

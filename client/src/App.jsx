@@ -1,6 +1,7 @@
 import React, { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import CartDrawer from './components/MarketPlace/CartDrawer';
+import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { Loader2 } from 'lucide-react';
 import Navbar from './components/Navbar';
@@ -44,6 +45,7 @@ const PageLoader = () => (
 
 const App = () => {
   return (
+    <AuthProvider>
     <CartProvider>
       <Router>
         <CartDrawer />
@@ -78,6 +80,7 @@ const App = () => {
         </div>
       </Router>
     </CartProvider>
+    </AuthProvider>
   );
 };
 
