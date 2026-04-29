@@ -53,6 +53,83 @@ const UserSchema = new mongoose.Schema({
         youtube: { type: String, default: '' },
         portfolioUrl: { type: String, default: '' }
     },
+    mentorProfile: {
+        isMentor: {
+            type: Boolean,
+            default: false
+        },
+        mentorSlug: {
+            type: String,
+            unique: true,
+            sparse: true,
+            trim: true
+        },
+        headline: {
+            type: String,
+            default: '',
+            trim: true
+        },
+        primarySkill: {
+            type: String,
+            default: '',
+            trim: true
+        },
+        sessionTag: {
+            type: String,
+            default: '',
+            trim: true
+        },
+        hourlyRate: {
+            type: Number,
+            default: 0
+        },
+        rating: {
+            type: Number,
+            default: 4.8,
+            min: 0,
+            max: 5
+        },
+        totalStudents: {
+            type: Number,
+            default: 0
+        },
+        totalSessions: {
+            type: Number,
+            default: 0
+        },
+        yearsExperience: {
+            type: Number,
+            default: 0
+        },
+        languages: [{
+            type: String,
+            trim: true
+        }],
+        mentorshipModes: [{
+            type: String,
+            trim: true
+        }],
+        tags: [{
+            type: String,
+            trim: true
+        }],
+        coverImage: {
+            type: String,
+            default: ''
+        },
+        accentColor: {
+            type: String,
+            default: 'indigo'
+        },
+        isVerified: {
+            type: Boolean,
+            default: false
+        },
+        availableForBooking: {
+            type: Boolean,
+            default: true
+        }
+    },
     savedItems: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product'

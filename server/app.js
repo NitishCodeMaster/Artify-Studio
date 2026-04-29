@@ -15,6 +15,7 @@ const messageRoutes = require('./routes/messageRoutes');
 const eventRoutes = require('./routes/eventRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const homeRoutes = require('./routes/homeRoutes');
+const learnRoutes = require('./routes/learnRoutes');
 
 
 app.use(cors({
@@ -40,4 +41,5 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/events', eventRoutes);
 app.use("/api/reviews", reviewRoutes);
+app.use('/api/learn', learnRoutes);
 module.exports = app;

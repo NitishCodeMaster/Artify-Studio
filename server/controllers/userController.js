@@ -7,6 +7,16 @@ const blacklistToken = require('../models/blacklistTokenModel');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 
+const buildMentorSlug = (name, userId) => {
+    const base = (name || 'mentor')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 32) || 'mentor';
+
+    return `mentor-${base}-${String(userId).slice(-6)}`;
+};
+
 module.exports.registerUser = async (req, res) => {
     try {
         const errors = validationResult(req);
@@ -154,7 +164,7 @@ exports.updateUserProfile = async (req, res) => {
         user.name = req.body.name || user.name;
         user.bio = req.body.bio || user.bio;
         user.role = req.body.role || user.role;
-        user.phoneNumber = req.body.phoneNumber || user.phoneNumber;
+        user.phone = req.body.phoneNumber || req.body.phone || user.phone;
         user.profilePic = profilePicUrl;
 
         user.originLocation = req.body.originLocation || user.originLocation;
@@ -389,5 +399,67 @@ module.exports.getWallet = async (req, res) => {
         });
     } catch (error) {
         res.status(500).json({ success: false, message: "Error fetching wallet data" });
+    }
+};
+
+module.exports.updateMentorProfile = async (req, res) => {
+    try {
+        const user = await userModel.findById(req.user._id);
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+
+        const mentorProfile = user.mentorProfile || {};
+        const isMentor = req.body.isMentor !== false;
+        const nextSlug = mentorProfile.mentorSlug || buildMentorSlug(user.name, user._id);
+
+        mentorProfile.isMentor = isMentor;
+        mentorProfile.mentorSlug = nextSlug;
+        mentorProfile.headline = req.body.headline || mentorProfile.headline || '';
+        mentorProfile.primarySkill = req.body.primarySkill || mentorProfile.primarySkill || user.artStyle || '';
+        mentorProfile.sessionTag = req.body.sessionTag || mentorProfile.sessionTag || mentorProfile.primarySkill || '';
+        mentorProfile.hourlyRate = Number(req.body.hourlyRate || mentorProfile.hourlyRate || 0);
+        mentorProfile.rating = Number(req.body.rating || mentorProfile.rating || 4.8);
+        mentorProfile.totalStudents = Number(req.body.totalStudents || mentorProfile.totalStudents || 0);
+        mentorProfile.totalSessions = Number(req.body.totalSessions || mentorProfile.totalSessions || 0);
+        mentorProfile.yearsExperience = Number(req.body.yearsExperience || mentorProfile.yearsExperience || 0);
+        mentorProfile.languages = Array.isArray(req.body.languages)
+            ? req.body.languages.filter(Boolean)
+            : typeof req.body.languages === 'string'
+                ? req.body.languages.split(',').map((item) => item.trim()).filter(Boolean)
+                : mentorProfile.languages || [];
+        mentorProfile.mentorshipModes = Array.isArray(req.body.mentorshipModes)
+            ? req.body.mentorshipModes.filter(Boolean)
+            : typeof req.body.mentorshipModes === 'string'
+                ? req.body.mentorshipModes.split(',').map((item) => item.trim()).filter(Boolean)
+                : mentorProfile.mentorshipModes || [];
+        mentorProfile.tags = Array.isArray(req.body.tags)
+            ? req.body.tags.filter(Boolean)
+            : typeof req.body.tags === 'string'
+                ? req.body.tags.split(',').map((item) => item.trim()).filter(Boolean)
+                : mentorProfile.tags || [];
+        mentorProfile.coverImage = req.body.coverImage || mentorProfile.coverImage || user.profilePic || '';
+        mentorProfile.accentColor = req.body.accentColor || mentorProfile.accentColor || 'indigo';
+        mentorProfile.availableForBooking = req.body.availableForBooking !== false;
+        mentorProfile.isVerified = typeof req.body.isVerified === 'boolean'
+            ? req.body.isVerified
+            : mentorProfile.isVerified || false;
+
+        user.mentorProfile = mentorProfile;
+        if (!user.role || user.role === 'Artist') {
+            user.role = mentorProfile.primarySkill || 'Mentor';
+        }
+
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Mentor profile updated successfully",
+            mentorProfile: user.mentorProfile,
+            user
+        });
+    } catch (error) {
+        console.error("Mentor Profile Update Error:", error);
+        res.status(500).json({ success: false, message: error.message });
     }
 };

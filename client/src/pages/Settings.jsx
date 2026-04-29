@@ -1,21 +1,34 @@
 import React, { useState, useRef } from 'react';
 import api from '../utils/api';
 import { Footer } from '../components/Footer';
-import { Loader2, Camera, Mail, Phone, UserCircle2, Sparkles, Tag, MapPin, Brush, Award } from 'lucide-react';
+import { Loader2, Camera, Mail, Phone, UserCircle2, Sparkles, Tag, MapPin, Brush, Award, GraduationCap, Globe2, Wallet, BookOpenCheck, ArrowLeft } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import AvatarEditor from 'react-avatar-editor';
+import { useNavigate } from 'react-router-dom';
 
 export function Settings() {
+    const navigate = useNavigate();
     const user = JSON.parse(localStorage.getItem('user'));
 
     const [name, setName] = useState(user?.name || '');
     const [bio, setBio] = useState(user?.bio || '');
     const [role, setRole] = useState(user?.role || 'Artist');
-    const [phoneNumber, setPhoneNumber] = useState(user?.phoneNumber || '');
+    const [phoneNumber, setPhoneNumber] = useState(user?.phoneNumber || user?.phone || '');
     const [profilePic, setProfilePic] = useState(user?.profilePic || '');
     const [originLocation, setOriginLocation] = useState(user?.originLocation || '');
     const [artStyle, setArtStyle] = useState(user?.artStyle || '');
     const [experience, setExperience] = useState(user?.experience || '');
+    const [isMentor, setIsMentor] = useState(Boolean(user?.mentorProfile?.isMentor));
+    const [mentorHeadline, setMentorHeadline] = useState(user?.mentorProfile?.headline || '');
+    const [primarySkill, setPrimarySkill] = useState(user?.mentorProfile?.primarySkill || '');
+    const [sessionTag, setSessionTag] = useState(user?.mentorProfile?.sessionTag || '');
+    const [hourlyRate, setHourlyRate] = useState(user?.mentorProfile?.hourlyRate || '');
+    const [yearsExperience, setYearsExperience] = useState(user?.mentorProfile?.yearsExperience || '');
+    const [languages, setLanguages] = useState((user?.mentorProfile?.languages || []).join(', '));
+    const [mentorshipModes, setMentorshipModes] = useState((user?.mentorProfile?.mentorshipModes || []).join(', '));
+    const [mentorTags, setMentorTags] = useState((user?.mentorProfile?.tags || []).join(', '));
+    const [accentColor, setAccentColor] = useState(user?.mentorProfile?.accentColor || 'indigo');
+    const [profileMode, setProfileMode] = useState(Boolean(user?.mentorProfile?.isMentor) ? 'mentor' : 'artist');
 
     const [submitting, setSubmitting] = useState(false);
     const fileInputRef = useRef(null);
@@ -69,12 +82,33 @@ export function Settings() {
         e.preventDefault();
         setSubmitting(true);
         try {
-            const res = await api.put('/users/profile', {
+            const profileRes = await api.put('/users/profile', {
                 name, bio, role, phoneNumber, profilePic, originLocation, artStyle, experience
             });
 
-            if (res.data.success) {
-                localStorage.setItem('user', JSON.stringify(res.data.user));
+            let mergedUser = profileRes.data.user;
+
+            if (isMentor || user?.mentorProfile?.isMentor) {
+                const mentorRes = await api.put('/users/mentor-profile', {
+                    isMentor,
+                    headline: mentorHeadline,
+                    primarySkill,
+                    sessionTag,
+                    hourlyRate,
+                    yearsExperience,
+                    languages,
+                    mentorshipModes,
+                    tags: mentorTags,
+                    coverImage: profilePic,
+                    accentColor,
+                });
+
+                mergedUser = mentorRes.data.user;
+            }
+
+            if (profileRes.data.success) {
+                localStorage.setItem('user', JSON.stringify(mergedUser));
+                window.dispatchEvent(new Event('userChanged'));
                 toast.success("Profile details updated! 🪄");
                 setTimeout(() => window.location.reload(), 1500);
             }
@@ -143,10 +177,42 @@ export function Settings() {
             )}
 
             <div className="max-w-[900px] mx-auto px-6 pt-32 pb-24 relative z-10">
+                <div className="mb-8 flex items-center justify-between gap-4">
+                    <button
+                        type="button"
+                        onClick={() => navigate(-1)}
+                        className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-sm font-medium text-white/75 transition-all hover:bg-white/[0.06] hover:text-white"
+                    >
+                        <ArrowLeft size={16} />
+                        Back
+                    </button>
+
+                    <div className="inline-flex rounded-full border border-white/10 bg-white/[0.03] p-1">
+                        <button
+                            type="button"
+                            onClick={() => setProfileMode('artist')}
+                            className={`rounded-full px-4 py-2 text-sm font-semibold transition-all ${profileMode === 'artist' ? 'bg-amber-500 text-black' : 'text-white/60 hover:text-white'}`}
+                        >
+                            Artist Profile
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setProfileMode('mentor')}
+                            className={`rounded-full px-4 py-2 text-sm font-semibold transition-all ${profileMode === 'mentor' ? 'bg-indigo-400 text-black' : 'text-white/60 hover:text-white'}`}
+                        >
+                            Mentor Profile
+                        </button>
+                    </div>
+                </div>
+
                 <h1 className="text-4xl font-black mb-2 text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">
-                    Artist Dashboard
+                    {profileMode === 'mentor' ? 'Mentor Dashboard' : 'Artist Dashboard'}
                 </h1>
-                <p className="text-white/50 mb-12">Showcase your true identity, heritage, and art to the world.</p>
+                <p className="text-white/50 mb-12">
+                    {profileMode === 'mentor'
+                        ? 'Build your dedicated mentor identity, booking style, and learning presence.'
+                        : 'Showcase your true identity, heritage, and art to the world.'}
+                </p>
 
                 <form onSubmit={handleUpdate} className="space-y-12">
 
@@ -167,43 +233,108 @@ export function Settings() {
                         </div>
                     </div>
 
-                    <div className="space-y-6">
-                        <h2 className="text-2xl font-bold flex items-center gap-2"><Sparkles className="text-amber-500" /> Core Identity</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label className="text-sm text-white/60 mb-2 block">Display Name</label>
-                                <input type="text" value={name} onChange={e => setName(e.target.value)} className="w-full bg-white/[0.03] p-4 rounded-xl border border-white/10 focus:border-amber-500 outline-none" />
+                    {profileMode === 'artist' && (
+                        <>
+                            <div className="space-y-6">
+                                <h2 className="text-2xl font-bold flex items-center gap-2"><Sparkles className="text-amber-500" /> Core Identity</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label className="text-sm text-white/60 mb-2 block">Display Name</label>
+                                        <input type="text" value={name} onChange={e => setName(e.target.value)} className="w-full bg-white/[0.03] p-4 rounded-xl border border-white/10 focus:border-amber-500 outline-none" />
+                                    </div>
+                                    <div>
+                                        <label className="text-sm text-white/60 mb-2 flex items-center gap-1.5"><Tag size={16} /> Artist Type / Role</label>
+                                        <input type="text" value={role} onChange={e => setRole(e.target.value)} placeholder="e.g., Guitarist, Singer, Event Organizer" className="w-full bg-white/[0.03] p-4 rounded-xl border border-white/10 focus:border-amber-500 outline-none" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="text-sm text-white/60 mb-2 block">Artist Bio</label>
+                                    <textarea value={bio} onChange={e => setBio(e.target.value)} maxLength={200} rows={3} placeholder="Tell the community your story..." className="w-full bg-white/[0.03] p-4 rounded-xl border border-white/10 focus:border-amber-500 outline-none resize-none" />
+                                </div>
                             </div>
-                            <div>
-                                <label className="text-sm text-white/60 mb-2 flex items-center gap-1.5"><Tag size={16} /> Artist Type / Role</label>
-                                <input type="text" value={role} onChange={e => setRole(e.target.value)} placeholder="e.g., Guitarist, Singer, Event Organizer" className="w-full bg-white/[0.03] p-4 rounded-xl border border-white/10 focus:border-amber-500 outline-none" />
-                            </div>
-                        </div>
-                        <div>
-                            <label className="text-sm text-white/60 mb-2 block">Artist Bio</label>
-                            <textarea value={bio} onChange={e => setBio(e.target.value)} maxLength={200} rows={3} placeholder="Tell the community your story..." className="w-full bg-white/[0.03] p-4 rounded-xl border border-white/10 focus:border-amber-500 outline-none resize-none" />
-                        </div>
-                    </div>
 
-                    <div className="space-y-6 p-8 rounded-3xl bg-amber-500/5 border border-amber-500/20">
-                        <h2 className="text-2xl font-bold flex items-center gap-2 text-amber-500"><MapPin /> Heritage & Craft</h2>
-                        <p className="text-sm text-white/50 mb-4">Let buyers know where your art comes from. Great for traditional and local artists.</p>
+                            <div className="space-y-6 p-8 rounded-3xl bg-amber-500/5 border border-amber-500/20">
+                                <h2 className="text-2xl font-bold flex items-center gap-2 text-amber-500"><MapPin /> Heritage & Craft</h2>
+                                <p className="text-sm text-white/50 mb-4">Let buyers know where your art comes from. Great for traditional and local artists.</p>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label className="text-sm text-white/60 mb-2 flex items-center gap-1.5"><MapPin size={16} /> Origin / Village / City</label>
+                                        <input type="text" value={originLocation} onChange={e => setOriginLocation(e.target.value)} placeholder="e.g., Mithila, Bihar or Bastar, CG" className="w-full bg-black/40 p-4 rounded-xl border border-white/10 focus:border-amber-500 outline-none" />
+                                    </div>
+                                    <div>
+                                        <label className="text-sm text-white/60 mb-2 flex items-center gap-1.5"><Brush size={16} /> Specific Art Style</label>
+                                        <input type="text" value={artStyle} onChange={e => setArtStyle(e.target.value)} placeholder="e.g., Madhubani, Tribal Bamboo Craft, Rock Music" className="w-full bg-black/40 p-4 rounded-xl border border-white/10 focus:border-amber-500 outline-none" />
+                                    </div>
+                                    <div className="md:col-span-2">
+                                        <label className="text-sm text-white/60 mb-2 flex items-center gap-1.5"><Award size={16} /> Years of Experience</label>
+                                        <input type="text" value={experience} onChange={e => setExperience(e.target.value)} placeholder="e.g., 10 Years, or Since Childhood" className="w-full bg-black/40 p-4 rounded-xl border border-white/10 focus:border-amber-500 outline-none" />
+                                    </div>
+                                </div>
+                            </div>
+                        </>
+                    )}
+
+                    {profileMode === 'mentor' && (
+                    <div className="space-y-6 p-8 rounded-3xl bg-indigo-500/5 border border-indigo-500/20">
+                        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                             <div>
-                                <label className="text-sm text-white/60 mb-2 flex items-center gap-1.5"><MapPin size={16} /> Origin / Village / City</label>
-                                <input type="text" value={originLocation} onChange={e => setOriginLocation(e.target.value)} placeholder="e.g., Mithila, Bihar or Bastar, CG" className="w-full bg-black/40 p-4 rounded-xl border border-white/10 focus:border-amber-500 outline-none" />
+                                <h2 className="text-2xl font-bold flex items-center gap-2 text-indigo-300"><GraduationCap /> Mentor Identity</h2>
+                                <p className="mt-2 text-sm text-white/50">Turn this account into a real mentor profile with a unique mentor slug and public learn-page visibility.</p>
                             </div>
-                            <div>
-                                <label className="text-sm text-white/60 mb-2 flex items-center gap-1.5"><Brush size={16} /> Specific Art Style</label>
-                                <input type="text" value={artStyle} onChange={e => setArtStyle(e.target.value)} placeholder="e.g., Madhubani, Tribal Bamboo Craft, Rock Music" className="w-full bg-black/40 p-4 rounded-xl border border-white/10 focus:border-amber-500 outline-none" />
-                            </div>
-                            <div className="md:col-span-2">
-                                <label className="text-sm text-white/60 mb-2 flex items-center gap-1.5"><Award size={16} /> Years of Experience</label>
-                                <input type="text" value={experience} onChange={e => setExperience(e.target.value)} placeholder="e.g., 10 Years, or Since Childhood" className="w-full bg-black/40 p-4 rounded-xl border border-white/10 focus:border-amber-500 outline-none" />
-                            </div>
+                            <label className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-white/80">
+                                <input type="checkbox" checked={isMentor} onChange={(e) => setIsMentor(e.target.checked)} className="accent-indigo-400" />
+                                Available as Mentor
+                            </label>
                         </div>
+
+                        {isMentor && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="md:col-span-2">
+                                    <label className="text-sm text-white/60 mb-2 block">Mentor Headline</label>
+                                    <input type="text" value={mentorHeadline} onChange={e => setMentorHeadline(e.target.value)} placeholder="e.g., Helping indie musicians perform with confidence and structure" className="w-full bg-black/40 p-4 rounded-xl border border-white/10 focus:border-indigo-500 outline-none" />
+                                </div>
+                                <div>
+                                    <label className="text-sm text-white/60 mb-2 flex items-center gap-1.5"><BookOpenCheck size={16} /> Primary Skill</label>
+                                    <input type="text" value={primarySkill} onChange={e => setPrimarySkill(e.target.value)} placeholder="e.g., Guitar & Music Theory" className="w-full bg-black/40 p-4 rounded-xl border border-white/10 focus:border-indigo-500 outline-none" />
+                                </div>
+                                <div>
+                                    <label className="text-sm text-white/60 mb-2 flex items-center gap-1.5"><Tag size={16} /> Session Tag</label>
+                                    <input type="text" value={sessionTag} onChange={e => setSessionTag(e.target.value)} placeholder="e.g., Beginner to Stage Ready" className="w-full bg-black/40 p-4 rounded-xl border border-white/10 focus:border-indigo-500 outline-none" />
+                                </div>
+                                <div>
+                                    <label className="text-sm text-white/60 mb-2 flex items-center gap-1.5"><Wallet size={16} /> Hourly Rate</label>
+                                    <input type="number" value={hourlyRate} onChange={e => setHourlyRate(e.target.value)} placeholder="25" className="w-full bg-black/40 p-4 rounded-xl border border-white/10 focus:border-indigo-500 outline-none" />
+                                </div>
+                                <div>
+                                    <label className="text-sm text-white/60 mb-2 flex items-center gap-1.5"><Award size={16} /> Mentor Experience (Years)</label>
+                                    <input type="number" value={yearsExperience} onChange={e => setYearsExperience(e.target.value)} placeholder="7" className="w-full bg-black/40 p-4 rounded-xl border border-white/10 focus:border-indigo-500 outline-none" />
+                                </div>
+                                <div>
+                                    <label className="text-sm text-white/60 mb-2 flex items-center gap-1.5"><Globe2 size={16} /> Languages</label>
+                                    <input type="text" value={languages} onChange={e => setLanguages(e.target.value)} placeholder="English, Hindi" className="w-full bg-black/40 p-4 rounded-xl border border-white/10 focus:border-indigo-500 outline-none" />
+                                </div>
+                                <div>
+                                    <label className="text-sm text-white/60 mb-2 block">Mentorship Modes</label>
+                                    <input type="text" value={mentorshipModes} onChange={e => setMentorshipModes(e.target.value)} placeholder="1-on-1, Online, Group" className="w-full bg-black/40 p-4 rounded-xl border border-white/10 focus:border-indigo-500 outline-none" />
+                                </div>
+                                <div className="md:col-span-2">
+                                    <label className="text-sm text-white/60 mb-2 block">Mentor Tags</label>
+                                    <input type="text" value={mentorTags} onChange={e => setMentorTags(e.target.value)} placeholder="Performance, Theory, Feedback" className="w-full bg-black/40 p-4 rounded-xl border border-white/10 focus:border-indigo-500 outline-none" />
+                                </div>
+                                <div className="md:col-span-2">
+                                    <label className="text-sm text-white/60 mb-2 block">Accent Tone</label>
+                                    <select value={accentColor} onChange={e => setAccentColor(e.target.value)} className="w-full bg-black/40 p-4 rounded-xl border border-white/10 focus:border-indigo-500 outline-none">
+                                        <option value="indigo">Indigo</option>
+                                        <option value="amber">Amber</option>
+                                        <option value="violet">Violet</option>
+                                        <option value="emerald">Emerald</option>
+                                    </select>
+                                </div>
+                            </div>
+                        )}
                     </div>
+                    )}
 
                     <div className="space-y-6">
                         <h2 className="text-2xl font-bold flex items-center gap-2 text-white/80"><Phone className="text-green-500" /> Contact Info (Private)</h2>

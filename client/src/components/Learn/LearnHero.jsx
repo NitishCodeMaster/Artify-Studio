@@ -2,7 +2,7 @@ import React from 'react';
 import { Search, Sparkles, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-export function LearnHero({ searchQuery, setSearchQuery }) {
+export function LearnHero({ searchQuery, setSearchQuery, stats, onFindMentor }) {
     return (
         <div className="text-center max-w-4xl mx-auto mb-20 px-6">
             <motion.div
@@ -47,6 +47,21 @@ export function LearnHero({ searchQuery, setSearchQuery }) {
             >
                 Book 1-on-1 mentorship sessions, join live masterclasses, and level up your skills with verified pros.
             </motion.p>
+
+            <motion.div
+                initial={{ opacity: 0, y: 18 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.45 }}
+                transition={{ duration: 0.5, delay: 0.15 }}
+                className="mb-8 flex flex-wrap items-center justify-center gap-3"
+            >
+                <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-white/65">
+                    {stats?.mentors || 0}+ live mentors
+                </div>
+                <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-white/65">
+                    {stats?.workshops || 0}+ active workshops
+                </div>
+            </motion.div>
  
             <motion.div
                 initial={{ opacity: 0, y: 18 }}
@@ -65,7 +80,10 @@ export function LearnHero({ searchQuery, setSearchQuery }) {
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="bg-transparent text-white w-full focus:outline-none placeholder-white/30"
                     />
-                    <button className="bg-white text-black px-6 py-3 rounded-full font-bold hover:bg-gray-200 transition-colors flex items-center gap-2">
+                    <button
+                        onClick={onFindMentor}
+                        className="bg-white text-black px-6 py-3 rounded-full font-bold hover:bg-gray-200 transition-colors flex items-center gap-2"
+                    >
                         Find Mentor
                         <ArrowRight size={16} />
                     </button>

@@ -22,13 +22,9 @@ const Home = () => {
     const handleWatchDemo = () => {
         const spotlightSection = document.getElementById('artist-spotlight');
         if (!spotlightSection) return;
-
-        const navOffset = 8;
-        const targetTop = spotlightSection.getBoundingClientRect().top + window.scrollY - navOffset;
-
-        window.scrollTo({
-            top: targetTop,
+        spotlightSection.scrollIntoView({
             behavior: 'smooth',
+            block: 'start',
         });
     };
 
@@ -179,7 +175,7 @@ const Home = () => {
             </section>
 
 
-            <div id="artist-spotlight" className="bg-black relative z-20">
+            <div id="artist-spotlight" className="scroll-mt-24 bg-black relative z-20">
                 <ArtistSpotlight />
             </div>
 

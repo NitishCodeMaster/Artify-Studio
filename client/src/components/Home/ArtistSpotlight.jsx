@@ -103,7 +103,7 @@ export default function ArtistSpotlight() {
     const navigate = useNavigate();
 
     return (
-        <section id="community" className="relative pt-16 bg-black overflow-hidden">
+        <section id="artist-spotlight" className="relative pt-16 bg-black overflow-hidden">
 
             <div className="absolute inset-0 bg-black"></div>
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/20 via-black to-black pointer-events-none"></div>

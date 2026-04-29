@@ -25,6 +25,7 @@ router.get('/top-creators', authUser, userController.getTopCreators);
 router.get('/profile/:id', userController.getUserProfileById);
 
 router.put('/profile', authUser, userController.updateUserProfile);
+router.put('/mentor-profile', authUser, userController.updateMentorProfile);
 
 router.post('/forgot-password', userController.forgotPassword);
 
