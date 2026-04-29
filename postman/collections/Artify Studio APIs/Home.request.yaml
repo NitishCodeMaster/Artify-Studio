@@ -1,0 +1,5 @@
+$kind: http-request
+name: Home
+url: "{{baseurl}}/events/get-all"
+method: GET
+order: 4011678724703675

@@ -1,6 +1,5 @@
 import React, { useState, useRef } from 'react';
 import api from '../utils/api';
-import Navbar from '../components/Navbar';
 import { Footer } from '../components/Footer';
 import { Loader2, Camera, Mail, Phone, UserCircle2, Sparkles, Tag, MapPin, Brush, Award } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
@@ -89,8 +88,6 @@ export function Settings() {
     return (
         <div className="bg-[#030303] min-h-screen text-white font-sans relative">
             <Toaster position="bottom-right" />
-            <Navbar />
-
             {selectedImage && (
                 <div className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4">
                     <div className="bg-[#111] border border-white/10 p-6 md:p-8 rounded-3xl w-full max-w-md flex flex-col items-center shadow-2xl shadow-amber-500/10">

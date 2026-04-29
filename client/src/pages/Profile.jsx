@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../utils/api';
-import Navbar from '../components/Navbar';
 import { Footer } from '../components/Footer';
 import { Loader2, UserCircle2, MapPin, Calendar, Award, Brush, Edit3 } from 'lucide-react';
 import PostCard from '../components/Community/postCard';
@@ -53,8 +52,6 @@ const Profile = () => {
 
     return (
         <div className="bg-[#050505] min-h-screen text-white font-sans selection:bg-amber-500/30">
-            <Navbar />
-
             <div className="relative w-full h-[160px] md:h-[200px] mt-20">
                 <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/80 via-purple-900/50 to-black"></div>
             </div>

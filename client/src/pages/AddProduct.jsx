@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import Navbar from '../components/Navbar';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import api from '../utils/api';
@@ -76,8 +75,6 @@ const AddProduct = () => {
         <div className="bg-[#030303] min-h-screen text-white relative overflow-hidden">
 
             <div className="absolute top-0 left-0 w-full h-[600px] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-amber-900/20 via-[#030303] to-[#030303] pointer-events-none"></div>
-
-            <Navbar />
 
             <div className="pt-32 pb-20 px-6 max-w-[1200px] mx-auto relative z-10">
                 <button

@@ -48,7 +48,7 @@ io.on("connection", (socket) => {
         for (let [userId, socketId] of onlineUsers.entries()) {
             if (socketId === socket.id) {
                 onlineUsers.delete(userId);
-                console.log(`❌ User ${userId} disconnected`);
+                console.log(` User ${userId} disconnected`);
                 break;
             }
         }

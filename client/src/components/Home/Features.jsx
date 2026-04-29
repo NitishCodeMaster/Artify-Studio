@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import {
     Music,
     Palette,
@@ -69,7 +70,13 @@ export default function Features() {
 
             <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 w-full h-full flex flex-col justify-center">
 
-                <div className="flex flex-col md:flex-row justify-between items-end mb-24 gap-8 border-b border-white/10 pb-12 relative">
+                <motion.div
+                    initial={{ opacity: 0, y: 18 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.35 }}
+                    transition={{ duration: 0.55 }}
+                    className="flex flex-col md:flex-row justify-between items-end mb-24 gap-8 border-b border-white/10 pb-12 relative"
+                >
 
                     <svg className="absolute -top-16 left-0 w-24 h-24 text-white/20 hidden md:block" viewBox="0 0 100 100" fill="none" stroke="currentColor">
                         <path d="M10 50 Q 50 10 90 50" strokeWidth="2" strokeDasharray="5,5" />
@@ -78,14 +85,23 @@ export default function Features() {
 
                     <div className="max-w-2xl relative">
                         <div className="flex items-center gap-2 mb-2 text-indigo-400">
-                            <Sparkles size={16} />
+                            <motion.div
+                                animate={{ rotate: [0, 10, -8, 0], scale: [1, 1.08, 1] }}
+                                transition={{ duration: 3.1, repeat: Infinity, ease: "easeInOut" }}
+                            >
+                                <Sparkles size={16} />
+                            </motion.div>
                             <span className="text-xs font-mono uppercase tracking-widest">Discover Your Potential</span>
                         </div>
                         <h2 className="text-4xl md:text-6xl font-bold text-white mb-6 font-playfair leading-[1.1]">
                             Crafted for <br />
-                            <span className="ml-2 md:ml-20 bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent italic">
+                            <motion.span
+                                animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
+                                transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                                className="ml-2 md:ml-20 bg-[length:200%_200%] bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent italic"
+                            >
                                 Creative Souls
-                            </span>
+                            </motion.span>
                         </h2>
                         <p className="text-white/50 text-md font-poppins max-w-lg leading-relaxed">
                             Artify empowers artists to showcase their talent, collaborate with creatives,
@@ -96,8 +112,13 @@ export default function Features() {
                     <div className="hidden md:block py-4">
                         <div className="flex -space-x-8 hover:space-x-2 transition-all duration-500">
                             {userImages.map((img, i) => (
-                                <div
+                                <motion.div
                                     key={i}
+                                    initial={{ opacity: 0, rotate: i % 2 === 0 ? -12 : 12, y: 18 }}
+                                    whileInView={{ opacity: 1, rotate: i % 2 === 0 ? -6 : 6, y: i % 2 === 0 ? 8 : -4 }}
+                                    viewport={{ once: true, amount: 0.4 }}
+                                    transition={{ duration: 0.45, delay: i * 0.06 }}
+                                    whileHover={{ scale: 1.12, rotate: 0, y: 0 }}
                                     className={`relative group w-14 h-16 bg-white p-1 shadow-lg transform transition-transform duration-300 hover:scale-125 hover:z-20 hover:rotate-0
                                     ${i % 2 === 0 ? '-rotate-6 translate-y-2' : 'rotate-6 -translate-y-1'}`}
                                 >
@@ -106,7 +127,7 @@ export default function Features() {
                                         alt="Artist"
                                         className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-300"
                                     />
-                                </div>
+                                </motion.div>
                             ))}
 
                             <div className="w-14 h-16 bg-black flex flex-col items-center justify-center text-white shadow-xl rotate-12 z-10 border border-white/20">
@@ -115,12 +136,17 @@ export default function Features() {
                             </div>
                         </div>
                     </div>
-                </div>
+                </motion.div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                     {features.map((feature, index) => (
-                        <div
+                        <motion.div
                             key={index}
+                            initial={{ opacity: 0, y: 24 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true, amount: 0.25 }}
+                            transition={{ duration: 0.45, delay: index * 0.08 }}
+                            whileHover={{ y: -8 }}
                             className={`group relative h-full p-1 rounded-[2rem] bg-white/5 transition-all duration-500 hover:-translate-y-2`}
                         >
                             <div className={`absolute inset-0 rounded-[2rem] bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-500`}></div>
@@ -145,7 +171,7 @@ export default function Features() {
                                     </p>
                                 </div>
                             </div>
-                        </div>
+                        </motion.div>
                     ))}
                 </div>
             </div>

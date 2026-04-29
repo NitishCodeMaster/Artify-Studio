@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import Navbar from '../components/Navbar';
 import { MessageSquare, Search, Send, Loader2, ArrowLeft, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { io } from "socket.io-client";
@@ -151,8 +150,6 @@ const Messages = () => {
 
     return (
         <div className="bg-[#050505] min-h-screen text-white font-sans flex flex-col h-screen overflow-hidden">
-            <Navbar />
-
             <div className="flex-1 max-w-[1400px] w-full mx-auto px-4 sm:px-6 pt-28 pb-6 flex flex-col h-full">
 
                 <button

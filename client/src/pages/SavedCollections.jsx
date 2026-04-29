@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Navbar from '../components/Navbar';
 import { Footer } from '../components/Footer';
 import { Bookmark, Brush, Loader2, Trash2, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -54,7 +53,6 @@ const SavedCollections = () => {
 
     return (
         <div className="bg-[#050505] min-h-screen text-white font-sans">
-            <Navbar />
             <div className="max-w-[1200px] mx-auto px-6 pt-32 pb-20">
                 <button onClick={() => navigate(-1)} className="text-white/50 hover:text-amber-500 mb-8 font-medium transition-colors text-sm">← Back</button>
 

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import Navbar from '../components/Navbar';
 import { Lock, ArrowRight, Loader2, CheckCircle2 } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import api from '../utils/api';
@@ -45,8 +44,6 @@ export const ResetPassword = () => {
     return (
         <section className="min-h-screen bg-[#050505] flex flex-col relative overflow-hidden">
             <Toaster position="bottom-right" toastOptions={{ style: { background: '#1a1a1a', color: '#fff', border: '1px solid #333' } }} />
-            <Navbar />
-
             <div className="absolute inset-0 z-0">
                 <img src={bgImage} alt="Art background" className="w-full h-full object-cover opacity-30 scale-105" />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-[#050505]"></div>

@@ -13,6 +13,8 @@ const postRoutes = require('./routes/postRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const messageRoutes = require('./routes/messageRoutes');
 const eventRoutes = require('./routes/eventRoutes');
+const reviewRoutes = require('./routes/reviewRoutes');
+const homeRoutes = require('./routes/homeRoutes');
 
 
 app.use(cors({
@@ -31,10 +33,11 @@ app.get("/", (req, res) => {
 
 app.use('/api/users', userRoutes);
 app.use('/api/sellers', sellerRoutes);
+app.use("/api/home", homeRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/events', eventRoutes);
-
+app.use("/api/reviews", reviewRoutes);
 module.exports = app;

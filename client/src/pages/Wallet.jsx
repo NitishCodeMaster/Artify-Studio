@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Navbar from '../components/Navbar';
 import { Footer } from '../components/Footer';
 import { Wallet as WalletIcon, ArrowUpRight, ArrowDownLeft, History, Plus, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -28,7 +27,6 @@ const Wallet = () => {
 
     return (
         <div className="bg-[#050505] min-h-screen text-white font-sans selection:bg-amber-500/30">
-            <Navbar />
             <div className="max-w-[800px] mx-auto px-6 pt-32 pb-20">
                 <button onClick={() => navigate(-1)} className="text-white/50 hover:text-amber-500 mb-8 font-medium transition-colors text-sm">
                     ← Back

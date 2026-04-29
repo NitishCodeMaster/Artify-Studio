@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../utils/api';
-import Navbar from '../components/Navbar';
 import { Footer } from '../components/Footer';
 import MarketHero from '../components/MarketPlace/MarketHero';
 import ProductCard from '../components/MarketPlace/ProductCard';
@@ -105,8 +104,6 @@ const Marketplace = () => {
             <Toaster position="bottom-right" toastOptions={{
                 style: { background: '#111', color: '#fff', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }
             }} />
-
-            <Navbar />
 
             <div className="relative z-10">
                 <MarketHero

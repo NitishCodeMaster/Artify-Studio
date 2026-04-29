@@ -6,12 +6,14 @@ exports.createEvent = async (req, res) => {
     try {
         const userId = req.user._id || req.user.id;
         const { title, description, date, time, price, location, category, bannerImage, maxSeats } = req.body;
+
         if (!title || !description || !date || !time || !location || !category) {
             return res.status(400).json({
                 success: false,
-                message: "Please provide all required fields (Title, Description, Date, Time, Location)"
+                message: "Please provide all required fields (Title, Description, Date, Time, Location, Category)"
             });
         }
+
         const eventDateTime = new Date(`${date}T${time}`);
 
         const event = await Event.create({
@@ -39,31 +41,35 @@ exports.createEvent = async (req, res) => {
                 sender: userId,
                 type: 'event',
                 title: `New ${category} Event! 🎉`,
-                message: `${title} is happening at ${location}. Don't miss out!`,
-                link: `/events/${event._id}`
+                message: `${title} is happening at ${location}.`,
+                link: `/events/${event._id}`,
+                eventId: event._id
             }));
+
             await Notification.insertMany(notifications);
 
             targetUsers.forEach(u => {
                 try {
-                    const socketId = onlineUsers?.get?.(u._id.toString());
-
-                    if (socketId && io.sockets.sockets.get(socketId)) {
+                    const socketId = onlineUsers.get(u._id.toString());
+                    if (socketId) {
                         io.to(socketId).emit("new_notification", {
                             title: `New ${category} Event 🔔`,
                             message: title,
-                            eventId: event._id
+                            eventId: event._id,
+                            link: `/events/${event._id}`
                         });
-                        console.log("Sending to:", socketId);
+                        console.log(`✅ Notification sent to user ${u._id} on socket ${socketId}`);
                     }
                 } catch (err) {
-                    console.log("Socket error:", err.message);
+                    console.log("Socket emit error:", err.message);
                 }
             });
+            io.emit("new_event", event);
         }
+
         res.status(201).json({ success: true, message: "Event published successfully! 🎊", event });
     } catch (error) {
-        console.error(error);
+        console.error("Create Event Error:", error);
         res.status(500).json({ success: false, message: "Error creating event" });
     }
 };
@@ -131,23 +137,27 @@ exports.deleteEvent = async (req, res) => {
         if (event.organizer.toString() !== userId.toString()) {
             return res.status(403).json({
                 success: false,
-                message: "Not allowed"
+                message: "You are not authorized to delete this event"
             });
         }
 
         await event.deleteOne();
-        await Notification.deleteMany({
-            link: `/events/${eventId}`
-        });
+        await Notification.deleteMany({ eventId: eventId });
+        req.app.get('io').emit("notification_deleted", { eventId });
+
+        const io = req.app.get('io');
+        io.emit("event_deleted", { eventId: eventId.toString() });
+        
         res.status(200).json({
             success: true,
-            message: "Event deleted successfully!"
+            message: "Event and related notifications deleted successfully! 🗑️"
         });
 
     } catch (error) {
+        console.error("Delete Error:", error);
         res.status(500).json({
             success: false,
-            message: error.message
+            message: "Error deleting event"
         });
     }
 };

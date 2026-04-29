@@ -8,6 +8,7 @@ const notificationSchema = new mongoose.Schema({
     message: { type: String, required: true },
     link: { type: String },
     eventId: { type: mongoose.Schema.Types.ObjectId, ref: 'Event' },
+    link: String,
     isRead: { type: Boolean, default: false }
 }, { timestamps: true });
 

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import Navbar from '../components/Navbar';
 import { Mail, ArrowLeft, Loader2, KeyRound, CheckCircle2 } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import api from '../utils/api';
@@ -34,8 +33,6 @@ export const ForgotPassword = () => {
     return (
         <section className="min-h-screen bg-[#050505] flex flex-col relative overflow-hidden">
             <Toaster position="bottom-right" toastOptions={{ style: { background: '#1a1a1a', color: '#fff', border: '1px solid #333' } }} />
-            <Navbar />
-
             {/* 🌟 Artistic Background with Overlay */}
             <div className="absolute inset-0 z-0">
                 <img src={bgImage} alt="Art background" className="w-full h-full object-cover opacity-30 scale-105" />

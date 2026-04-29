@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
-import Navbar from '../components/Navbar';
 import { Footer } from '../components/Footer';
 import { Package, Clock, ShieldCheck, ChevronRight, Loader2, IndianRupee } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -33,8 +32,6 @@ const Dashboard = () => {
     return (
         <div className="bg-[#030303] min-h-screen text-white font-sans selection:bg-amber-500/30 relative">
              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-amber-600/10 blur-[120px] pointer-events-none rounded-full"></div>
-
-            <Navbar />
 
             <div className="max-w-[1000px] mx-auto px-6 pt-32 pb-24 relative z-10">
 

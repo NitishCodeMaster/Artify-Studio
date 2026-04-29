@@ -16,6 +16,7 @@ import { PublicProfile } from './pages/PublicProfile';
 import Messages from './pages/Messages';
 import SavedCollections from './pages/SavedCollections';
 import Wallet from './pages/Wallet';
+import EventDetails from './components/Events/EventDetails';
 
 const Home = lazy(() => import('./pages/Home'));
 const Discover = lazy(() => import('./pages/Discover'));
@@ -46,40 +47,41 @@ const PageLoader = () => (
 const App = () => {
   return (
     <AuthProvider>
-    <CartProvider>
-      <Router>
-        <CartDrawer />
-        <Navbar />
-        <Toaster position="bottom-right" toastOptions={{ style: { background: '#1a1a1a', color: '#fff', border: '1px solid #333' } }} />
-        <ScrollToTop />
-        <div className="min-h-screen bg-[#050505]">
-          <Suspense fallback={<PageLoader />}>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/discover" element={<Discover />} />
-              <Route path="/events" element={<Events />} />
-              <Route path="/marketplace" element={<MarketPlace />} />
-              <Route path="/community" element={<PrivateRoute><Community /></PrivateRoute>} />
-              <Route path="/learn" element={<PrivateRoute><Learn /></PrivateRoute>} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
-              <Route path="/add-product" element={<AddProduct />} />
-              <Route path="/product/:id" element={<ProductDetails />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/my-profile" element={<Profile />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/reset-password/:token" element={<ResetPassword />} />
-              <Route path="/profile/:id" element={<PublicProfile />} />
-              <Route path="/messages" element={<Messages />} />
-              <Route path="/saved" element={<SavedCollections />} />
-              <Route path="/wallet" element={<Wallet />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
-        </div>
-      </Router>
-    </CartProvider>
+      <CartProvider>
+        <Router>
+          <CartDrawer />
+          <Navbar />
+          <Toaster position="bottom-right" toastOptions={{ style: { background: '#1a1a1a', color: '#fff', border: '1px solid #333' } }} />
+          <ScrollToTop />
+          <div className="min-h-screen bg-[#050505]">
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/discover" element={<Discover />} />
+                <Route path="/events" element={<Events />} />
+                <Route path="/event/:id" element={<EventDetails />} />
+                <Route path="/marketplace" element={<MarketPlace />} />
+                <Route path="/community" element={<PrivateRoute><Community /></PrivateRoute>} />
+                <Route path="/learn" element={<PrivateRoute><Learn /></PrivateRoute>} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/add-product" element={<AddProduct />} />
+                <Route path="/product/:id" element={<ProductDetails />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/my-profile" element={<Profile />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password/:token" element={<ResetPassword />} />
+                <Route path="/profile/:id" element={<PublicProfile />} />
+                <Route path="/messages" element={<Messages />} />
+                <Route path="/saved" element={<SavedCollections />} />
+                <Route path="/wallet" element={<Wallet />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+          </div>
+        </Router>
+      </CartProvider>
     </AuthProvider>
   );
 };

@@ -24,7 +24,6 @@ const CreateEventModal = ({ isOpen, onClose, refresh }) => {
         e.preventDefault();
         setLoading(true);
         try {
-            console.log("Token sending:", localStorage.getItem('token'));
             const res = await api.post('/events/create', formData);
             if (res.data.success) {
                 toast.success("Event Live ho gaya! ");
@@ -32,7 +31,13 @@ const CreateEventModal = ({ isOpen, onClose, refresh }) => {
                 onClose();
             }
         } catch (error) {
-            toast.error(error.response?.data?.message || "Kuch error aaya!");
+            const message = error.response?.data?.message || error.message || "Kuch error aaya!";
+            if (message.toLowerCase().includes('session expired') || message.toLowerCase().includes('invalid token')) {
+                toast.error("Session expire ho gayi hai. Dobara login karke event post karo.");
+                onClose();
+                return;
+            }
+            toast.error(message);
         } finally {
             setLoading(false);
         }

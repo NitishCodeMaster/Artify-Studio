@@ -1,4 +1,6 @@
 import React from 'react';
+import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { Star, Palette, Music, Mic2, Zap, ArrowRight, Users, Sparkles, Mic, Wind, MapPin, BadgeCheck, Crown } from 'lucide-react';
 import { ImageWithFallback } from '../placeholder/ImageWithFallback';
 
@@ -98,6 +100,8 @@ const artists = [
 ];
 
 export default function ArtistSpotlight() {
+    const navigate = useNavigate();
+
     return (
         <section id="community" className="relative pt-16 bg-black overflow-hidden">
 
@@ -107,11 +111,22 @@ export default function ArtistSpotlight() {
 
             <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8">
 
-                <div className="relative text-center mb-24 max-w-3xl mx-auto">
+                <motion.div
+                    initial={{ opacity: 0, y: 18 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.3 }}
+                    transition={{ duration: 0.65 }}
+                    className="relative text-center mb-24 max-w-3xl mx-auto"
+                >
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-32 bg-indigo-500/15 blur-[80px] rounded-full pointer-events-none"></div>
 
                     <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-950/30 border border-indigo-500/30 mb-6 backdrop-blur-md">
-                        <Sparkles size={14} className="text-indigo-300 fill-indigo-300/20 animate-pulse" />
+                        <motion.div
+                            animate={{ rotate: [0, 10, -8, 0], scale: [1, 1.08, 1] }}
+                            transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
+                        >
+                            <Sparkles size={14} className="text-indigo-300 fill-indigo-300/20" />
+                        </motion.div>
                         <span className="text-xs font-bold text-indigo-200 tracking-[0.2em] uppercase font-poppins">
                             The Artify Spotlight
                         </span>
@@ -133,15 +148,28 @@ export default function ArtistSpotlight() {
                         Beyond just talent—these are the storytellers, the rhythm-makers, and the visionaries.
                         Explore the hand-picked artists who are redefining the <span className="text-white font-medium">Artify 🎨✨💜 Experience</span>.
                     </p>
-                </div>
+                </motion.div>
 
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-y-16 gap-x-6 md:gap-x-12">
                     {artists.map((artist) => (
-                        <div key={artist.id} className="group relative flex flex-col items-center text-center cursor-pointer">
+                        <motion.div
+                            key={artist.id}
+                            initial={{ opacity: 0, y: 22 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true, amount: 0.2 }}
+                            transition={{ duration: 0.45, delay: artist.id * 0.04 }}
+                            whileHover={{ y: -6 }}
+                            className="group relative flex flex-col items-center text-center cursor-pointer"
+                        >
 
                             <div className="relative mb-5">
                                 <div className={`absolute -inset-[3px] rounded-full border-2 border-dashed ${artist.borderColor} opacity-60 group-hover:opacity-100 group-hover:rotate-45 transition-all duration-700`}></div>
                                 <div className={`absolute inset-0 rounded-full bg-gradient-to-tr ${artist.color} opacity-0 blur-xl group-hover:opacity-40 transition-opacity duration-500`}></div>
+                                <motion.div
+                                    animate={{ rotate: [0, 360] }}
+                                    transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
+                                    className={`absolute -inset-4 rounded-full border border-white/5 [mask-image:linear-gradient(to_bottom,transparent,white,transparent)]`}
+                                />
 
                                 <div className={`relative w-36 h-36 md:w-44 md:h-44 rounded-full p-1.5 bg-black border border-white/10 ${artist.glow} transition-shadow duration-500`}>
                                     <div className="w-full h-full rounded-full overflow-hidden bg-black relative">
@@ -201,16 +229,28 @@ export default function ArtistSpotlight() {
                                     </span>
                                 </div>
                             </div>
-                        </div>
+                        </motion.div>
                     ))}
                 </div>
 
-                <div className="mt-16 text-center">
-                    <button className="group inline-flex items-center gap-2 px-8 py-3 rounded-full bg-white text-black font-bold text-sm hover:bg-indigo-50 transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.25)]">
-                        <span>Explore Community</span>
-                        <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-300" />
+                <motion.div
+                    initial={{ opacity: 0, y: 18 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.5 }}
+                    transition={{ duration: 0.55 }}
+                    className="mt-16 text-center"
+                >
+                    <button
+                        onClick={() => navigate('/community')}
+                        className="group relative inline-flex items-center gap-3 overflow-hidden rounded-full bg-white px-8 py-3 text-sm font-bold text-black transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:bg-indigo-50 hover:shadow-[0_0_30px_rgba(255,255,255,0.25)]"
+                    >
+                        <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-black/[0.05] to-white/0 translate-x-[-120%] group-hover:translate-x-[120%] transition-transform duration-1000" />
+                        <span className="relative">Join the Community</span>
+                        <span className="relative flex h-7 w-7 items-center justify-center rounded-full bg-black/5 transition-transform duration-300 group-hover:translate-x-1">
+                            <ArrowRight size={16} />
+                        </span>
                     </button>
-                </div>
+                </motion.div>
 
             </div>
         </section>

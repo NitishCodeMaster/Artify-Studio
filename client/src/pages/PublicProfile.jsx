@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import Navbar from '../components/Navbar';
 import { Footer } from '../components/Footer';
 import { MapPin, Brush, Award, Calendar, Mail, Phone, Loader2, ArrowLeft, Share2, Star } from 'lucide-react';
 import api from '../utils/api';
@@ -88,7 +87,6 @@ export const PublicProfile = () => {
     if (error || !profile) {
         return (
             <div className="min-h-screen bg-[#030303] text-white flex flex-col items-center justify-center">
-                <Navbar />
                 <h2 className="text-2xl font-bold text-white/50 mb-4">{error}</h2>
                 <button onClick={() => navigate(-1)} className="text-amber-500 hover:underline flex items-center gap-2">
                     <ArrowLeft size={16} /> Go Back
@@ -99,7 +97,6 @@ export const PublicProfile = () => {
 
     return (
         <div className="bg-[#030303] min-h-screen text-white font-sans overflow-x-hidden">
-            <Navbar />
             <div className="w-full h-[300px] md:h-[400px] relative">
                 <button
                     onClick={() => navigate(-1)}

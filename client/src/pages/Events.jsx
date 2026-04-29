@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { socket } from "../socket";
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 
-import Navbar from '../components/Navbar';
 import EventHero from '../components/Events/EventHero';
 import ArtistView from '../components/Events/ArtistView';
 import AudienceView from '../components/Events/AudienceView';
@@ -38,8 +38,26 @@ const Events = () => {
         }
     };
 
+
     useEffect(() => {
         fetchEvents();
+    }, []);
+
+    useEffect(() => {
+        socket.on("new_event", (event) => {
+            console.log(" New Event:", event);
+
+            setEvents(prev => [event, ...prev]);
+        });
+
+        socket.on("event_deleted", ({ eventId }) => {
+            setEvents(prev => prev.filter(e => e._id !== eventId));
+        });
+
+        return () => {
+            socket.off("new_event");
+            socket.off("event_deleted");
+        };
     }, []);
 
     const filteredEvents = activeVibe === 'all'
@@ -48,8 +66,6 @@ const Events = () => {
 
     return (
         <div className="bg-[#050505] min-h-screen text-white font-sans selection:bg-indigo-500/30">
-            <Navbar />
-
             <AnimatePresence mode="wait">
                 {selectedEvent ? (
                     <EventDetails
