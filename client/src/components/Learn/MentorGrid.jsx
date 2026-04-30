@@ -29,13 +29,13 @@ export function MentorGrid({ mentors = [], filter = '', loading = false }) {
     });
 
     return (
-        <div id="mentor-grid" className="mb-24 scroll-mt-28">
+        <div id="mentor-grid" className="mb-16 scroll-mt-28">
             <motion.div
                 initial={{ opacity: 0, y: 18 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.35 }}
                 transition={{ duration: 0.45 }}
-                className="mb-10 flex items-end justify-between px-4"
+                className="mb-8 flex items-end justify-between px-1"
             >
                 <div>
                     <h3 className="text-3xl font-bold text-white">Top Rated Mentors</h3>
@@ -46,7 +46,7 @@ export function MentorGrid({ mentors = [], filter = '', loading = false }) {
                 </button>
             </motion.div>
 
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
                 {loading && [1, 2, 3].map((item) => <MentorSkeleton key={item} />)}
 
                 {!loading && visibleMentors.map((mentor, index) => (

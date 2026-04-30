@@ -204,7 +204,7 @@ const Messages = () => {
 
     return (
         <div className="bg-[#050505] min-h-screen text-white font-sans flex flex-col h-screen overflow-hidden">
-            <div className="flex-1 max-w-[1400px] w-full mx-auto px-4 sm:px-6 pt-28 pb-6 flex flex-col h-full">
+            <div className="flex-1 max-w-[1400px] w-full mx-auto px-4 sm:px-6 pt-20 pb-6 flex flex-col h-full">
 
                 <button
                     onClick={() => navigate(-1)}

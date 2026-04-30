@@ -19,8 +19,8 @@ const Sidebar = ({ categories, activeCategory, setActiveCategory, setSearchQuery
     ];
 
     return (
-        <aside className="hidden lg:block w-72 flex-shrink-0 z-40">
-            <div className="sticky top-28 space-y-8">
+        <aside className="hidden lg:block w-72 xl:w-80 flex-shrink-0 z-40">
+            <div className="sticky top-24 space-y-6">
 
                 <div className="bg-[#0a0a0a]/80 backdrop-blur-2xl border border-white/10 rounded-[2rem] p-5 shadow-2xl relative overflow-hidden">
                     {/* 🌟 FIX 1: 'pointer-events-none' add kiya taaki ye clicks block na kare */}

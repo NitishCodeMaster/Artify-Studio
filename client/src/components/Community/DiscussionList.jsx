@@ -27,7 +27,8 @@ export function DiscussionList() {
     const socket = io("http://localhost:5000");
 
     const breakpointColumnsObj = {
-        default: 2,
+        default: 3,
+        1500: 2,
         1100: 2,
         700: 1
     };
@@ -159,7 +160,7 @@ export function DiscussionList() {
     };
 
     return (
-        <div className="lg:col-span-2 space-y-8">
+        <div className="space-y-8 min-w-0">
             <div className="p-[1px] bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-3xl shadow-2xl shadow-indigo-500/10">
                 <div className="p-6 rounded-[23px] bg-[#0a0a0a]">
                     <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">

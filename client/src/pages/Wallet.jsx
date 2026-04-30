@@ -27,7 +27,7 @@ const Wallet = () => {
 
     return (
         <div className="bg-[#050505] min-h-screen text-white font-sans selection:bg-amber-500/30">
-            <div className="max-w-[800px] mx-auto px-6 pt-32 pb-20">
+            <div className="max-w-[800px] mx-auto px-6 pt-20 pb-14">
                 <button onClick={() => navigate(-1)} className="text-white/50 hover:text-amber-500 mb-8 font-medium transition-colors text-sm">
                     ← Back
                 </button>

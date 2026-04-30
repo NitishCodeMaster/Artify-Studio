@@ -5,7 +5,7 @@ import { Footer } from '../components/Footer';
 import MarketHero from '../components/MarketPlace/MarketHero';
 import ProductCard from '../components/MarketPlace/ProductCard';
 import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
-import { Search, PackageX, Sparkles, Filter, Plus } from 'lucide-react';
+import { Search, PackageX, Sparkles, Filter, Plus, ShieldCheck, Video, BadgeIndianRupee } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -99,7 +99,9 @@ const Marketplace = () => {
     return (
         <div className="bg-[#030303] min-h-screen text-white font-sans selection:bg-amber-500/30 relative overflow-hidden">
 
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-amber-600/10 blur-[120px] pointer-events-none rounded-full"></div>
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[420px] bg-amber-600/10 blur-[120px] pointer-events-none rounded-full"></div>
+            <div className="absolute left-0 top-[420px] h-[520px] w-[360px] bg-gradient-to-br from-amber-500/10 to-transparent blur-3xl pointer-events-none"></div>
+            <div className="absolute right-0 top-[260px] h-[620px] w-[420px] bg-gradient-to-bl from-orange-500/10 to-transparent blur-3xl pointer-events-none"></div>
 
             <Toaster position="bottom-right" toastOptions={{
                 style: { background: '#111', color: '#fff', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }
@@ -113,9 +115,9 @@ const Marketplace = () => {
                 />
             </div>
 
-            <div className="max-w-[1320px] mx-auto px-6 pb-24 relative z-10" ref={productGridRef}>
+            <div className="max-w-[1760px] mx-auto px-6 lg:px-8 pb-20 relative z-10" ref={productGridRef}>
 
-                <div className="sticky top-24 z-30 bg-[#030303]/90 backdrop-blur-xl border-b border-white/5 pt-4 pb-6 mb-12 -mx-6 px-6 lg:mx-0 lg:px-6 lg:rounded-2xl lg:border lg:mt-[-30px] shadow-2xl">
+                <div className="sticky top-24 z-30 bg-[#030303]/90 backdrop-blur-xl border-b border-white/5 pt-4 pb-6 mb-8 -mx-6 px-6 lg:mx-0 lg:px-6 lg:rounded-2xl lg:border lg:mt-[-18px] shadow-2xl">
                     <div className="flex flex-col lg:flex-row justify-between items-center gap-6">
 
                         <div className="flex overflow-x-auto hide-scrollbar w-full lg:w-auto gap-8 pb-2 lg:pb-0">
@@ -165,9 +167,24 @@ const Marketplace = () => {
                     </div>
                 </div>
 
+                <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
+                    <div className="rounded-2xl border border-amber-500/15 bg-amber-500/[0.06] p-4">
+                        <div className="mb-2 flex items-center gap-2 text-sm font-bold text-amber-300"><ShieldCheck size={16} /> Verified Listings</div>
+                        <p className="text-xs leading-relaxed text-white/45">Photo, condition notes, and seller profile together help buyers trust each piece.</p>
+                    </div>
+                    <div className="rounded-2xl border border-green-500/15 bg-green-500/[0.05] p-4">
+                        <div className="mb-2 flex items-center gap-2 text-sm font-bold text-green-300"><Video size={16} /> Video Proof</div>
+                        <p className="text-xs leading-relaxed text-white/45">Used instruments with demo videos stand out faster in the collection.</p>
+                    </div>
+                    <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                        <div className="mb-2 flex items-center gap-2 text-sm font-bold text-white"><BadgeIndianRupee size={16} /> Fair Deals</div>
+                        <p className="text-xs leading-relaxed text-white/45">Compare market value and asking price before adding anything to cart.</p>
+                    </div>
+                </div>
+
                 {loading ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                        {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => <ProductSkeleton key={n} />)}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-7">
+                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => <ProductSkeleton key={n} />)}
                     </div>
                 ) : error ? (
                     <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -179,7 +196,7 @@ const Marketplace = () => {
                     </div>
                 ) : (
                     <>
-                        <div className="flex items-center justify-between mb-8">
+                        <div className="flex items-center justify-between mb-6">
                             <h2 className="text-xl font-bold flex items-center gap-2">
                                 <Sparkles className="text-amber-400" size={20} />
                                 {activeCategory === 'all' ? 'Rare & Authentic Finds' : `${categories.find(c => c.id === activeCategory)?.label}`}
@@ -189,7 +206,7 @@ const Marketplace = () => {
                             </span>
                         </div>
 
-                        <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-x-8">
+                        <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 2xl:columns-5 gap-x-7">
                             <AnimatePresence>
                                 {filteredProducts.map(product => (
                                     <motion.div

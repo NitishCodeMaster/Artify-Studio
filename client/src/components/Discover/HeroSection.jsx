@@ -8,13 +8,13 @@ import spot2 from '../../assets/Images/ArtistSpotlight/dancer.avif';
 
 const HeroSection = ({ searchQuery, setSearchQuery }) => {
     return (
-        <section className="relative pt-40 pb-20 border-b border-white/5 bg-black overflow-hidden">
+        <section className="relative pt-24 pb-12 border-b border-white/5 bg-black overflow-hidden">
             <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none opacity-50 animate-pulse"></div>
             <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[100px] pointer-events-none opacity-30"></div>
 
-            <div className="max-w-[1400px] mx-auto px-6 grid lg:grid-cols-12 gap-12 items-center relative z-10">
+            <div className="max-w-[1680px] mx-auto px-6 lg:px-8 grid lg:grid-cols-12 gap-10 xl:gap-16 items-center relative z-10">
 
-                <div className="lg:col-span-7">
+                <div className="lg:col-span-6 xl:col-span-5">
                     <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="relative z-20">
 
                         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#1A1A1A] border border-white/10 mb-6 shadow-xl">
@@ -25,13 +25,13 @@ const HeroSection = ({ searchQuery, setSearchQuery }) => {
                             <span className="text-[11px] font-bold tracking-widest uppercase text-white/80"><span className="text-white">120+</span> Gigs Posted Today</span>
                         </motion.div>
 
-                        <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 leading-[1.1] font-playfair">
+                        <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-5 leading-[1.05] font-playfair">
                             Discover the <br />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 italic pr-2 animate-pulse">Extraordinary.</span>
                         </h1>
-                        <p className="text-white/60 text-lg max-w-lg mb-8 leading-relaxed font-light">Join the ecosystem where <strong>15k+ creators</strong> scout talent, book live performers, and trade premium gear securely.</p>
+                        <p className="text-white/60 text-lg max-w-xl mb-7 leading-relaxed font-light">Join the ecosystem where <strong>15k+ creators</strong> scout talent, book live performers, and trade premium gear securely.</p>
 
-                        <div className="flex items-center gap-4 mb-8">
+                        <div className="flex items-center gap-4 mb-7">
                             <div className="flex -space-x-3">
                                 {[img1, img3, spot1].map((img, i) => (
                                     <div key={i} className="w-10 h-10 rounded-full border-2 border-black overflow-hidden relative"><img src={img} className="w-full h-full object-cover" alt="user" /></div>
@@ -44,7 +44,7 @@ const HeroSection = ({ searchQuery, setSearchQuery }) => {
                             </div>
                         </div>
 
-                        <div className="w-full max-w-md relative group z-30">
+                        <div className="w-full max-w-xl relative group z-30">
                             <div className="absolute -inset-1 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-700"></div>
                             <div className="relative flex items-center bg-[#0a0a0a] rounded-full px-2 py-2 shadow-2xl border border-white/10 group-hover:border-white/30 transition-all">
                                 <div className="pl-4 pr-3 text-white/40 group-focus-within:text-indigo-400 transition-colors"><Search size={20} /></div>
@@ -53,7 +53,7 @@ const HeroSection = ({ searchQuery, setSearchQuery }) => {
                             </div>
                         </div>
 
-                        <div className="mt-8">
+                        <div className="mt-6">
                             <p className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-3 flex items-center gap-2"><TrendingUp size={12} className="text-indigo-400" /> Trending Searches:</p>
                             <div className="flex flex-wrap gap-2">
                                  {['Painter', 'Singer', 'Model', 'Guitar'].map((tag, i) => (
@@ -71,16 +71,16 @@ const HeroSection = ({ searchQuery, setSearchQuery }) => {
                     </motion.div>
                 </div>
 
-                <div className="hidden lg:block lg:col-span-5 relative h-[550px] w-full perspective-1000">
+                <div className="hidden lg:block lg:col-span-6 xl:col-span-7 relative h-[430px] xl:h-[470px] w-full perspective-1000">
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-r from-indigo-500/30 to-purple-500/30 rounded-full blur-[100px] animate-pulse"></div>
                     <motion.div animate={{ rotate: 360 }} transition={{ duration: 20, repeat: Infinity, ease: "linear" }} className="absolute top-0 right-10 w-32 h-32 border-2 border-white/5 rounded-full border-dashed z-0"></motion.div>
 
-                    <motion.div animate={{ y: [0, -15, 0] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }} className="absolute right-0 top-10 w-[340px] h-[440px] rounded-[40px] rotate-6 overflow-hidden border border-white/20 shadow-2xl shadow-indigo-500/20 z-10 group">
+                    <motion.div animate={{ y: [0, -15, 0] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }} className="absolute right-0 top-4 w-[340px] xl:w-[390px] h-[360px] xl:h-[410px] rounded-[40px] rotate-6 overflow-hidden border border-white/20 shadow-2xl shadow-indigo-500/20 z-10 group">
                         <img src={spot2} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="visual" />
                         <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/80 via-transparent to-transparent mix-blend-multiply"></div>
                     </motion.div>
 
-                    <motion.div animate={{ y: [0, 15, 0] }} transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }} className="absolute right-32 top-20 w-[300px] h-[400px] rounded-[30px] -rotate-6 overflow-hidden border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.5)] bg-[#1a1a1a] z-20 group">
+                    <motion.div animate={{ y: [0, 15, 0] }} transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }} className="absolute right-32 xl:right-44 top-12 w-[300px] xl:w-[340px] h-[340px] xl:h-[380px] rounded-[30px] -rotate-6 overflow-hidden border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.5)] bg-[#1a1a1a] z-20 group">
                         <div className="absolute inset-0 bg-[#1a1a1a] animate-pulse"></div>
                         <img src={img1} className="relative w-full h-full object-cover z-10" alt="Main Visual" />
                         <div className="absolute bottom-4 left-4 right-4 p-3 bg-black/40 backdrop-blur-xl rounded-2xl border border-white/10 flex items-center justify-between shadow-2xl z-20">
@@ -105,7 +105,7 @@ const HeroSection = ({ searchQuery, setSearchQuery }) => {
                         </div>
                     </motion.div>
 
-                    <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0, y: [0, -8, 0] }} transition={{ opacity: { duration: 0.5, delay: 1 }, y: { duration: 5, repeat: Infinity, ease: "easeInOut" } }} className="absolute top-32 -left-8 z-30">
+                    <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0, y: [0, -8, 0] }} transition={{ opacity: { duration: 0.5, delay: 1 }, y: { duration: 5, repeat: Infinity, ease: "easeInOut" } }} className="absolute top-24 left-2 z-30">
                         <div className="flex items-center gap-3 bg-[#0a0a0a]/90 backdrop-blur-2xl border border-white/10 py-2.5 pl-2.5 pr-5 rounded-full shadow-[0_8px_32px_0_rgba(34,211,238,0.15)] ring-1 ring-white/5 hover:border-cyan-500/30 transition-all cursor-pointer group">
                             <div className="relative">
                                 <div className="absolute inset-0 bg-cyan-500/30 blur-md rounded-full group-hover:bg-cyan-400/50 transition-all duration-500"></div>
@@ -131,7 +131,7 @@ const HeroSection = ({ searchQuery, setSearchQuery }) => {
                         </div>
                     </motion.div>
 
-                    <motion.div animate={{ scale: [1, 1.05, 1], y: [0, -5, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} className="absolute bottom-28 -right-6 z-30">
+                    <motion.div animate={{ scale: [1, 1.05, 1], y: [0, -5, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} className="absolute bottom-20 right-2 z-30">
                         <div className="absolute inset-0 bg-yellow-500/20 blur-xl rounded-full opacity-40"></div>
                         <div className="flex items-center gap-3 bg-[#0a0a0a]/90 backdrop-blur-xl border border-white/10 px-4 py-3 rounded-2xl shadow-2xl ring-1 ring-white/5 hover:border-yellow-500/30 transition-colors">
                             <div className="flex -space-x-3">

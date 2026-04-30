@@ -66,7 +66,7 @@ const getOptimizedImage = (url, width = 600, height = 600) => {
 };
 
 const MyOwnPremiumProfileCard = ({ user }) => (
-    <div className="col-span-1 md:col-span-2 lg:col-span-3 xl:col-span-4 p-[1px] bg-gradient-to-r from-amber-400 via-orange-500 to-amber-400 rounded-3xl shadow-[0_0_30px_rgba(245,158,11,0.1)] group overflow-hidden mb-8">
+    <div className="col-span-1 md:col-span-2 lg:col-span-3 xl:col-span-4 2xl:col-span-5 p-[1px] bg-gradient-to-r from-amber-400 via-orange-500 to-amber-400 rounded-3xl shadow-[0_0_30px_rgba(245,158,11,0.1)] group overflow-hidden mb-6">
         <div className="bg-[#050505] p-6 sm:p-8 rounded-[23px] h-full flex flex-col sm:flex-row items-center gap-6 sm:gap-8 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-[80px]"></div>
 
@@ -199,9 +199,9 @@ const ContentFeed = ({ activeCategory, searchQuery, setActiveCategory }) => {
                 i.role.toLowerCase().includes(searchQuery.toLowerCase())
             );
             return (
-                <div className="space-y-6 pt-10">
+                <div className="space-y-6">
                     <h2 className="text-2xl font-black text-white px-2">Search Results for "{searchQuery}"</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5 gap-5">
                         {results.map(item => <StandardCard key={item.id} item={item} navigate={navigate} />)}
                         {results.length === 0 && <p className="col-span-full text-center text-white/40 py-10 border border-dashed border-white/10 rounded-2xl">No creators found.</p>}
                     </div>
@@ -210,7 +210,7 @@ const ContentFeed = ({ activeCategory, searchQuery, setActiveCategory }) => {
         }
 
         return (
-            <div className="space-y-16">
+            <div className="space-y-12">
                 {myOwnCard && <MyOwnPremiumProfileCard user={myOwnCard} />}
 
                 {Categories.map(cat => {
@@ -221,8 +221,8 @@ const ContentFeed = ({ activeCategory, searchQuery, setActiveCategory }) => {
                     if (items.length === 0) return null;
 
                     return (
-                        <div key={cat} className="space-y-8">
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.05] pb-6 px-2">
+                        <div key={cat} className="space-y-6">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.05] pb-5 px-2">
                                 <div className="flex items-center gap-4">
                                     <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-white/10 to-transparent flex items-center justify-center text-amber-500 border border-white/10 shadow-lg backdrop-blur-sm"><Icon size={24} /></div>
                                     <div>
@@ -232,7 +232,7 @@ const ContentFeed = ({ activeCategory, searchQuery, setActiveCategory }) => {
                                 </div>
                                 <button onClick={() => setActiveCategory(cat)} className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white/90 text-sm font-bold border border-white/10 active:scale-95 transition-all w-full sm:w-auto">Explore All <ArrowRight size={16} /></button>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5 gap-5">
                                 {items.map(item => <StandardCard key={item.id} item={item} navigate={navigate} />)}
                             </div>
                         </div>
@@ -245,7 +245,7 @@ const ContentFeed = ({ activeCategory, searchQuery, setActiveCategory }) => {
 
     return (
         <AnimatePresence mode="wait">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.3 }}>
+            <motion.div className="min-w-0 flex-1" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.3 }}>
                 {renderContent()}
             </motion.div>
         </AnimatePresence>

@@ -33,7 +33,7 @@ const Dashboard = () => {
         <div className="bg-[#030303] min-h-screen text-white font-sans selection:bg-amber-500/30 relative">
              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-amber-600/10 blur-[120px] pointer-events-none rounded-full"></div>
 
-            <div className="max-w-[1000px] mx-auto px-6 pt-32 pb-24 relative z-10">
+            <div className="max-w-[1000px] mx-auto px-6 pt-20 pb-14 relative z-10">
 
                  <div className="flex items-center gap-6 mb-12 p-8 rounded-3xl bg-white/[0.02] border border-white/5 backdrop-blur-xl">
                     <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center text-4xl font-black text-black shadow-[0_0_30px_rgba(245,158,11,0.3)]">

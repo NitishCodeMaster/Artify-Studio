@@ -53,7 +53,14 @@ const App = () => {
             <CartDrawer />
           </Suspense>
           <Navbar />
-          <Toaster position="bottom-right" toastOptions={{ style: { background: '#1a1a1a', color: '#fff', border: '1px solid #333' } }} />
+          <Toaster
+            position="bottom-right"
+            toastOptions={{
+              duration: 2600,
+              removeDelay: 400,
+              style: { background: '#1a1a1a', color: '#fff', border: '1px solid #333' }
+            }}
+          />
           <ScrollToTop />
           <div className="min-h-screen bg-[#050505]">
             <Suspense fallback={<PageLoader />}>

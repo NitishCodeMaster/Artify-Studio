@@ -177,8 +177,8 @@ export function Settings() {
                 </div>
             )}
 
-            <div className="max-w-[900px] mx-auto px-6 pt-32 pb-24 relative z-10">
-                <div className="mb-8 flex items-center justify-between gap-4">
+            <div className="max-w-[1180px] mx-auto px-6 pt-20 pb-14 relative z-10">
+                <div className="mb-5 flex items-center justify-between gap-4">
                     <button
                         type="button"
                         onClick={() => navigate(-1)}
@@ -206,20 +206,20 @@ export function Settings() {
                     </div>
                 </div>
 
-                <h1 className="text-4xl font-black mb-2 text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">
+                <h1 className="text-3xl md:text-4xl font-black mb-2 text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">
                     {profileMode === 'mentor' ? 'Mentor Dashboard' : 'Artist Dashboard'}
                 </h1>
-                <p className="text-white/50 mb-12">
+                <p className="text-white/50 mb-7">
                     {profileMode === 'mentor'
                         ? 'Build your dedicated mentor identity, booking style, and learning presence.'
                         : 'Showcase your true identity, heritage, and art to the world.'}
                 </p>
 
-                <form onSubmit={handleUpdate} className="space-y-12">
+                <form onSubmit={handleUpdate} className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6 items-start">
 
-                    <div className="flex flex-col sm:flex-row items-center gap-8 p-8 rounded-3xl bg-white/[0.02] border border-white/5">
+                    <div className="lg:sticky lg:top-24 flex flex-col items-center gap-5 p-5 rounded-2xl bg-white/[0.02] border border-white/5">
                         <div className="relative group shrink-0">
-                            <div className="w-28 h-28 rounded-full bg-[#0a0a0a] border border-white/10 flex items-center justify-center overflow-hidden">
+                            <div className="w-24 h-24 rounded-full bg-[#0a0a0a] border border-white/10 flex items-center justify-center overflow-hidden">
                                 {profilePic ? <img src={profilePic} alt="Profile" className="w-full h-full object-cover" /> : <UserCircle2 size={70} className="text-white/10" />}
                             </div>
                             <input type="file" ref={fileInputRef} hidden accept="image/*" onChange={handleFileSelect} />
@@ -228,59 +228,77 @@ export function Settings() {
                                 <Camera size={18} />
                             </button>
                         </div>
-                        <div className="text-center sm:text-left">
-                            <h3 className="text-xl font-bold mb-1">Profile Picture</h3>
+                        <div className="text-center">
+                            <h3 className="text-lg font-bold mb-1">Profile Picture</h3>
                             <p className="text-sm text-white/50">Upload a clear picture of you or your artwork.</p>
                         </div>
+
+                        <div className="w-full border-t border-white/10 pt-5">
+                            <h2 className="text-base font-bold flex items-center gap-2 text-white/80 mb-4"><Phone className="text-green-500" size={18} /> Contact Info</h2>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="text-xs text-white/50 mb-2 flex items-center gap-1.5"><Mail size={14} /> Email</label>
+                                    <input type="email" value={user?.email || ''} disabled className="w-full bg-white/[0.01] p-3 rounded-xl border border-white/5 text-white/30 cursor-not-allowed" />
+                                </div>
+                                <div>
+                                    <label className="text-xs text-white/50 mb-2 flex items-center gap-1.5"><Phone size={14} /> Phone Number</label>
+                                    <input type="tel" value={phoneNumber} onChange={e => setPhoneNumber(getIndianPhone10(e.target.value))} placeholder="9876543210" maxLength={10} pattern="[0-9]{10}" className="w-full bg-white/[0.03] p-3 rounded-xl border border-white/10 focus:border-amber-500 outline-none" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" disabled={submitting} className="w-full px-6 py-3 rounded-full bg-amber-500 hover:bg-amber-400 text-black font-black transition-all shadow-[0_0_30px_rgba(245,158,11,0.2)] flex items-center justify-center">
+                            {submitting ? <Loader2 className="animate-spin" size={20} /> : 'Save Profile'}
+                        </button>
                     </div>
 
                     {profileMode === 'artist' && (
-                        <>
-                            <div className="space-y-6">
-                                <h2 className="text-2xl font-bold flex items-center gap-2"><Sparkles className="text-amber-500" /> Core Identity</h2>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-6">
+                            <div className="space-y-5 p-5 rounded-2xl bg-white/[0.02] border border-white/5">
+                                <h2 className="text-xl font-bold flex items-center gap-2"><Sparkles className="text-amber-500" /> Core Identity</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label className="text-sm text-white/60 mb-2 block">Display Name</label>
-                                        <input type="text" value={name} onChange={e => setName(e.target.value)} className="w-full bg-white/[0.03] p-4 rounded-xl border border-white/10 focus:border-amber-500 outline-none" />
+                                        <input type="text" value={name} onChange={e => setName(e.target.value)} className="w-full bg-white/[0.03] p-3 rounded-xl border border-white/10 focus:border-amber-500 outline-none" />
                                     </div>
                                     <div>
                                         <label className="text-sm text-white/60 mb-2 flex items-center gap-1.5"><Tag size={16} /> Artist Type / Role</label>
-                                        <input type="text" value={role} onChange={e => setRole(e.target.value)} placeholder="e.g., Guitarist, Singer, Event Organizer" className="w-full bg-white/[0.03] p-4 rounded-xl border border-white/10 focus:border-amber-500 outline-none" />
+                                        <input type="text" value={role} onChange={e => setRole(e.target.value)} placeholder="e.g., Guitarist, Singer, Event Organizer" className="w-full bg-white/[0.03] p-3 rounded-xl border border-white/10 focus:border-amber-500 outline-none" />
                                     </div>
                                 </div>
                                 <div>
                                     <label className="text-sm text-white/60 mb-2 block">Artist Bio</label>
-                                    <textarea value={bio} onChange={e => setBio(e.target.value)} maxLength={200} rows={3} placeholder="Tell the community your story..." className="w-full bg-white/[0.03] p-4 rounded-xl border border-white/10 focus:border-amber-500 outline-none resize-none" />
+                                    <textarea value={bio} onChange={e => setBio(e.target.value)} maxLength={200} rows={3} placeholder="Tell the community your story..." className="w-full bg-white/[0.03] p-3 rounded-xl border border-white/10 focus:border-amber-500 outline-none resize-none" />
                                 </div>
                             </div>
 
-                            <div className="space-y-6 p-8 rounded-3xl bg-amber-500/5 border border-amber-500/20">
-                                <h2 className="text-2xl font-bold flex items-center gap-2 text-amber-500"><MapPin /> Heritage & Craft</h2>
-                                <p className="text-sm text-white/50 mb-4">Let buyers know where your art comes from. Great for traditional and local artists.</p>
+                            <div className="space-y-5 p-5 rounded-2xl bg-amber-500/5 border border-amber-500/20">
+                                <h2 className="text-xl font-bold flex items-center gap-2 text-amber-500"><MapPin /> Heritage & Craft</h2>
+                                <p className="text-sm text-white/50">Let buyers know where your art comes from. Great for traditional and local artists.</p>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label className="text-sm text-white/60 mb-2 flex items-center gap-1.5"><MapPin size={16} /> Origin / Village / City</label>
-                                        <input type="text" value={originLocation} onChange={e => setOriginLocation(e.target.value)} placeholder="e.g., Mithila, Bihar or Bastar, CG" className="w-full bg-black/40 p-4 rounded-xl border border-white/10 focus:border-amber-500 outline-none" />
+                                        <input type="text" value={originLocation} onChange={e => setOriginLocation(e.target.value)} placeholder="e.g., Mithila, Bihar or Bastar, CG" className="w-full bg-black/40 p-3 rounded-xl border border-white/10 focus:border-amber-500 outline-none" />
                                     </div>
                                     <div>
                                         <label className="text-sm text-white/60 mb-2 flex items-center gap-1.5"><Brush size={16} /> Specific Art Style</label>
-                                        <input type="text" value={artStyle} onChange={e => setArtStyle(e.target.value)} placeholder="e.g., Madhubani, Tribal Bamboo Craft, Rock Music" className="w-full bg-black/40 p-4 rounded-xl border border-white/10 focus:border-amber-500 outline-none" />
+                                        <input type="text" value={artStyle} onChange={e => setArtStyle(e.target.value)} placeholder="e.g., Madhubani, Tribal Bamboo Craft, Rock Music" className="w-full bg-black/40 p-3 rounded-xl border border-white/10 focus:border-amber-500 outline-none" />
                                     </div>
                                     <div className="md:col-span-2">
                                         <label className="text-sm text-white/60 mb-2 flex items-center gap-1.5"><Award size={16} /> Years of Experience</label>
-                                        <input type="text" value={experience} onChange={e => setExperience(e.target.value)} placeholder="e.g., 10 Years, or Since Childhood" className="w-full bg-black/40 p-4 rounded-xl border border-white/10 focus:border-amber-500 outline-none" />
+                                        <input type="text" value={experience} onChange={e => setExperience(e.target.value)} placeholder="e.g., 10 Years, or Since Childhood" className="w-full bg-black/40 p-3 rounded-xl border border-white/10 focus:border-amber-500 outline-none" />
                                     </div>
                                 </div>
                             </div>
-                        </>
+                        </div>
                     )}
 
                     {profileMode === 'mentor' && (
-                    <div className="space-y-6 p-8 rounded-3xl bg-indigo-500/5 border border-indigo-500/20">
+                    <div className="space-y-5 p-5 rounded-2xl bg-indigo-500/5 border border-indigo-500/20">
                         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                             <div>
-                                <h2 className="text-2xl font-bold flex items-center gap-2 text-indigo-300"><GraduationCap /> Mentor Identity</h2>
+                                <h2 className="text-xl font-bold flex items-center gap-2 text-indigo-300"><GraduationCap /> Mentor Identity</h2>
                                 <p className="mt-2 text-sm text-white/50">Turn this account into a real mentor profile with a unique mentor slug and public learn-page visibility.</p>
                             </div>
                             <label className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-white/80">
@@ -290,42 +308,42 @@ export function Settings() {
                         </div>
 
                         {isMentor && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="md:col-span-2">
                                     <label className="text-sm text-white/60 mb-2 block">Mentor Headline</label>
-                                    <input type="text" value={mentorHeadline} onChange={e => setMentorHeadline(e.target.value)} placeholder="e.g., Helping indie musicians perform with confidence and structure" className="w-full bg-black/40 p-4 rounded-xl border border-white/10 focus:border-indigo-500 outline-none" />
+                                    <input type="text" value={mentorHeadline} onChange={e => setMentorHeadline(e.target.value)} placeholder="e.g., Helping indie musicians perform with confidence and structure" className="w-full bg-black/40 p-3 rounded-xl border border-white/10 focus:border-indigo-500 outline-none" />
                                 </div>
                                 <div>
                                     <label className="text-sm text-white/60 mb-2 flex items-center gap-1.5"><BookOpenCheck size={16} /> Primary Skill</label>
-                                    <input type="text" value={primarySkill} onChange={e => setPrimarySkill(e.target.value)} placeholder="e.g., Guitar & Music Theory" className="w-full bg-black/40 p-4 rounded-xl border border-white/10 focus:border-indigo-500 outline-none" />
+                                    <input type="text" value={primarySkill} onChange={e => setPrimarySkill(e.target.value)} placeholder="e.g., Guitar & Music Theory" className="w-full bg-black/40 p-3 rounded-xl border border-white/10 focus:border-indigo-500 outline-none" />
                                 </div>
                                 <div>
                                     <label className="text-sm text-white/60 mb-2 flex items-center gap-1.5"><Tag size={16} /> Session Tag</label>
-                                    <input type="text" value={sessionTag} onChange={e => setSessionTag(e.target.value)} placeholder="e.g., Beginner to Stage Ready" className="w-full bg-black/40 p-4 rounded-xl border border-white/10 focus:border-indigo-500 outline-none" />
+                                    <input type="text" value={sessionTag} onChange={e => setSessionTag(e.target.value)} placeholder="e.g., Beginner to Stage Ready" className="w-full bg-black/40 p-3 rounded-xl border border-white/10 focus:border-indigo-500 outline-none" />
                                 </div>
                                 <div>
                                     <label className="text-sm text-white/60 mb-2 flex items-center gap-1.5"><Wallet size={16} /> Hourly Rate</label>
-                                    <input type="number" value={hourlyRate} onChange={e => setHourlyRate(e.target.value)} placeholder="25" className="w-full bg-black/40 p-4 rounded-xl border border-white/10 focus:border-indigo-500 outline-none" />
+                                    <input type="number" value={hourlyRate} onChange={e => setHourlyRate(e.target.value)} placeholder="25" className="w-full bg-black/40 p-3 rounded-xl border border-white/10 focus:border-indigo-500 outline-none" />
                                 </div>
                                 <div>
                                     <label className="text-sm text-white/60 mb-2 flex items-center gap-1.5"><Award size={16} /> Mentor Experience (Years)</label>
-                                    <input type="number" value={yearsExperience} onChange={e => setYearsExperience(e.target.value)} placeholder="7" className="w-full bg-black/40 p-4 rounded-xl border border-white/10 focus:border-indigo-500 outline-none" />
+                                    <input type="number" value={yearsExperience} onChange={e => setYearsExperience(e.target.value)} placeholder="7" className="w-full bg-black/40 p-3 rounded-xl border border-white/10 focus:border-indigo-500 outline-none" />
                                 </div>
                                 <div>
                                     <label className="text-sm text-white/60 mb-2 flex items-center gap-1.5"><Globe2 size={16} /> Languages</label>
-                                    <input type="text" value={languages} onChange={e => setLanguages(e.target.value)} placeholder="English, Hindi" className="w-full bg-black/40 p-4 rounded-xl border border-white/10 focus:border-indigo-500 outline-none" />
+                                    <input type="text" value={languages} onChange={e => setLanguages(e.target.value)} placeholder="English, Hindi" className="w-full bg-black/40 p-3 rounded-xl border border-white/10 focus:border-indigo-500 outline-none" />
                                 </div>
                                 <div>
                                     <label className="text-sm text-white/60 mb-2 block">Mentorship Modes</label>
-                                    <input type="text" value={mentorshipModes} onChange={e => setMentorshipModes(e.target.value)} placeholder="1-on-1, Online, Group" className="w-full bg-black/40 p-4 rounded-xl border border-white/10 focus:border-indigo-500 outline-none" />
+                                    <input type="text" value={mentorshipModes} onChange={e => setMentorshipModes(e.target.value)} placeholder="1-on-1, Online, Group" className="w-full bg-black/40 p-3 rounded-xl border border-white/10 focus:border-indigo-500 outline-none" />
                                 </div>
                                 <div className="md:col-span-2">
                                     <label className="text-sm text-white/60 mb-2 block">Mentor Tags</label>
-                                    <input type="text" value={mentorTags} onChange={e => setMentorTags(e.target.value)} placeholder="Performance, Theory, Feedback" className="w-full bg-black/40 p-4 rounded-xl border border-white/10 focus:border-indigo-500 outline-none" />
+                                    <input type="text" value={mentorTags} onChange={e => setMentorTags(e.target.value)} placeholder="Performance, Theory, Feedback" className="w-full bg-black/40 p-3 rounded-xl border border-white/10 focus:border-indigo-500 outline-none" />
                                 </div>
                                 <div className="md:col-span-2">
                                     <label className="text-sm text-white/60 mb-2 block">Accent Tone</label>
-                                    <select value={accentColor} onChange={e => setAccentColor(e.target.value)} className="w-full bg-black/40 p-4 rounded-xl border border-white/10 focus:border-indigo-500 outline-none">
+                                    <select value={accentColor} onChange={e => setAccentColor(e.target.value)} className="w-full bg-black/40 p-3 rounded-xl border border-white/10 focus:border-indigo-500 outline-none">
                                         <option value="indigo">Indigo</option>
                                         <option value="amber">Amber</option>
                                         <option value="violet">Violet</option>
@@ -337,25 +355,6 @@ export function Settings() {
                     </div>
                     )}
 
-                    <div className="space-y-6">
-                        <h2 className="text-2xl font-bold flex items-center gap-2 text-white/80"><Phone className="text-green-500" /> Contact Info (Private)</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label className="text-sm text-white/60 mb-2 flex items-center gap-1.5"><Mail size={16} /> Email (Cannot Change)</label>
-                                <input type="email" value={user?.email || ''} disabled className="w-full bg-white/[0.01] p-4 rounded-xl border border-white/5 text-white/30 cursor-not-allowed" />
-                            </div>
-                            <div>
-                                <label className="text-sm text-white/60 mb-2 flex items-center gap-1.5"><Phone size={16} /> Phone Number</label>
-                                <input type="tel" value={phoneNumber} onChange={e => setPhoneNumber(getIndianPhone10(e.target.value))} placeholder="9876543210" maxLength={10} pattern="[0-9]{10}" className="w-full bg-white/[0.03] p-4 rounded-xl border border-white/10 focus:border-amber-500 outline-none" />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="border-t border-white/10 pt-10 flex justify-end">
-                        <button type="submit" disabled={submitting} className="px-10 py-4 rounded-full bg-amber-500 hover:bg-amber-400 text-black text-lg font-black transition-all shadow-[0_0_30px_rgba(245,158,11,0.2)]">
-                            {submitting ? <Loader2 className="animate-spin" size={20} /> : 'Save Profile'}
-                        </button>
-                    </div>
                 </form>
             </div>
             <Footer />

@@ -36,7 +36,7 @@ const EventHero = ({ events }) => {
         : event.date;
 
     return (
-        <div className="relative w-full h-[650px] md:h-[800px] overflow-hidden bg-[#050505] font-sans">
+        <div className="relative w-full h-[600px] md:h-[680px] overflow-hidden bg-[#050505] font-sans">
             <AnimatePresence mode="wait">
                 <motion.div
                     key={event._id || event.id}

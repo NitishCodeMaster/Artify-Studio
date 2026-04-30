@@ -127,53 +127,55 @@ const ProductDetails = () => {
     }
 
     return (
-        <div className="bg-[#050505] min-h-screen text-white pb-20">
-            <div className="max-w-[1100px] mx-auto px-6 pt-32">
+        <div className="bg-[#050505] min-h-screen text-white pb-12">
+            <div className="max-w-[1280px] mx-auto px-6 pt-20">
                 <button
                     onClick={() => navigate('/marketplace')}
-                    className="flex items-center gap-2 text-white/50 hover:text-white mb-8 transition-colors"
+                    className="flex items-center gap-2 text-white/50 hover:text-white mb-5 transition-colors"
                 >
                     <ArrowLeft size={18} /> Back to Marketplace
                 </button>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-12 bg-white/5 p-6 md:p-10 rounded-3xl border border-white/10 backdrop-blur-md shadow-2xl">
+                <div className="grid grid-cols-1 lg:grid-cols-[1.08fr_0.92fr] gap-6 bg-white/5 p-5 md:p-6 rounded-3xl border border-white/10 backdrop-blur-md shadow-2xl">
 
-                    <div className="rounded-2xl overflow-hidden bg-black/40 border border-white/10 flex items-center justify-center p-4">
-                        <img
-                            src={product.images?.[0]?.url || 'https://via.placeholder.com/600'}
-                            alt={product.name}
-                            className="w-full max-h-[500px] object-contain rounded-xl hover:scale-105 transition-transform duration-500"
-                        />
+                    <div className="space-y-4 min-w-0">
+                        <div className="rounded-2xl overflow-hidden bg-black/40 border border-white/10 flex items-center justify-center p-3">
+                            <img
+                                src={product.images?.[0]?.url || 'https://via.placeholder.com/600'}
+                                alt={product.name}
+                                className="w-full max-h-[320px] object-contain rounded-xl hover:scale-[1.02] transition-transform duration-500"
+                            />
+                        </div>
+
+                        {demoVideo && (
+                            <div className="rounded-2xl overflow-hidden bg-black/40 border border-green-500/20 p-3">
+                                <div className="mb-2 flex items-center justify-between gap-3">
+                                    <div className="flex items-center gap-2 text-green-300 text-sm font-bold">
+                                        <ShieldCheck size={17} /> Seller demo video
+                                    </div>
+                                    <div className="hidden sm:flex items-center gap-1.5 text-xs text-white/40">
+                                        <PlayCircle size={14} /> Condition and sound proof
+                                    </div>
+                                </div>
+                                <video src={demoVideo} controls preload="metadata" className="max-h-[240px] w-full rounded-xl bg-black object-contain" />
+                            </div>
+                        )}
                     </div>
 
-                    {demoVideo && (
-                        <div className="md:col-span-2 rounded-2xl overflow-hidden bg-black/40 border border-green-500/20 p-4">
-                            <div className="mb-3 flex items-center justify-between gap-3">
-                                <div className="flex items-center gap-2 text-green-300 text-sm font-bold">
-                                    <ShieldCheck size={18} /> Seller demo video
-                                </div>
-                                <div className="flex items-center gap-1.5 text-xs text-white/40">
-                                    <PlayCircle size={14} /> Condition and sound proof
-                                </div>
-                            </div>
-                            <video src={demoVideo} controls preload="metadata" className="max-h-[460px] w-full rounded-xl bg-black object-contain" />
-                        </div>
-                    )}
-
-                    <div className="flex flex-col justify-center">
-                        <span className="text-sm font-bold text-indigo-400 uppercase tracking-widest mb-3">
+                    <div className="flex min-w-0 flex-col justify-center rounded-2xl border border-white/5 bg-black/20 p-5">
+                        <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-3">
                             {product.category}
                         </span>
 
-                        <h1 className="text-4xl md:text-5xl font-black text-white mb-6 leading-tight">
+                        <h1 className="text-3xl md:text-4xl font-black text-white mb-4 leading-tight">
                             {product.name}
                         </h1>
 
-                        <div className="text-3xl font-bold text-white mb-6 border-b border-white/10 pb-6">
+                        <div className="text-3xl font-bold text-white mb-5 border-b border-white/10 pb-5">
                             ₹{product.price}
                         </div>
 
-                        <p className="text-white/60 text-lg leading-relaxed mb-8">
+                        <p className="text-white/60 text-base leading-relaxed mb-6 max-h-[190px] overflow-y-auto pr-2 custom-scrollbar">
                             {product.description}
                         </p>
 

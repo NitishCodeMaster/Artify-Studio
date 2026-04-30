@@ -65,9 +65,10 @@ const AddProduct = () => {
             await api.post('/products/new', productData);
 
             toast.success("Masterpiece Added Successfully! 🎉", {
+                duration: 2200,
                 style: { borderRadius: '10px', background: '#333', color: '#fff' }
             });
-             navigate('/marketplace');
+            setTimeout(() => navigate('/marketplace'), 350);
         } catch (err) {
             console.log(err);
             toast.error("Error adding product! Backend check karo. 🚨", {
@@ -96,7 +97,7 @@ const AddProduct = () => {
 
             <div className="absolute top-0 left-0 w-full h-[600px] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-amber-900/20 via-[#030303] to-[#030303] pointer-events-none"></div>
 
-            <div className="pt-32 pb-20 px-6 max-w-[1200px] mx-auto relative z-10">
+            <div className="pt-20 pb-14 px-6 max-w-[1200px] mx-auto relative z-10">
                 <button
                     onClick={() => navigate(-1)}
                     className="group flex items-center gap-2 text-white/50 hover:text-amber-400 font-medium text-sm mb-8 transition-colors w-fit"
@@ -109,7 +110,7 @@ const AddProduct = () => {
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
 
-                    <div className="lg:col-span-5 space-y-10 lg:sticky lg:top-32">
+                    <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-24">
                         <div>
                             <h1 className="text-4xl md:text-5xl font-black text-white leading-tight mb-4">
                                 Sell with proof, <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">build buyer trust.</span>

@@ -12,19 +12,19 @@ const MarketHero = ({ searchQuery, setSearchQuery, onSearch }) => {
     };
 
     return (
-        <div className="relative w-full h-[500px] flex flex-col items-center justify-center bg-[#030303] overflow-hidden">
+        <div className="relative w-full h-[390px] md:h-[430px] flex flex-col items-center justify-center bg-[#030303] overflow-hidden">
             
             {/* Elegant Backgrounds */}
             <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.15]"></div>
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-amber-500/10 rounded-full blur-[120px]" />
             <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-orange-500/10 rounded-full blur-[120px]" />
 
-            <div className="relative z-10 text-center px-6 max-w-3xl w-full">
+            <div className="relative z-10 text-center px-6 max-w-4xl w-full">
 
                 <motion.div
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 mb-8 backdrop-blur-md"
+                    className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 mb-5 backdrop-blur-md"
                 >
                     <Sparkles size={14} className="text-amber-400" />
                     <span className="text-xs font-bold text-amber-500 uppercase tracking-[0.2em]">The Elite Collection</span>
@@ -34,7 +34,7 @@ const MarketHero = ({ searchQuery, setSearchQuery, onSearch }) => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="text-5xl md:text-7xl font-bold text-white mb-8 leading-tight tracking-tight"
+                    className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight tracking-tight"
                 >
                     Curated Artifacts & <br />
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-orange-400">Vintage Masterpieces.</span>

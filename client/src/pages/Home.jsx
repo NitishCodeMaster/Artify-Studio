@@ -31,7 +31,7 @@ const Home = () => {
     return (
         <main className="bg-black text-white selection:bg-indigo-500/30 font-sans w-full overflow-x-hidden">
 
-            <section className="relative min-h-screen flex items-center overflow-hidden pb-20 bg-black">
+            <section className="relative flex min-h-[calc(100vh-72px)] items-center overflow-hidden bg-black pb-12 pt-24">
 
                 <div className="absolute inset-0 pointer-events-none">
 
@@ -47,7 +47,7 @@ const Home = () => {
 
                 <div className="relative z-10 w-full mx-auto px-6 lg:px-24">
                     <div className="grid lg:grid-cols-2 gap-16 items-center">
-                        <div className="space-y-8">
+                        <div className="space-y-6">
 
                             <motion.div
                                 initial={{ opacity: 0, y: 14 }}
@@ -142,7 +142,7 @@ const Home = () => {
                                     hidden: {},
                                     show: { transition: { staggerChildren: 0.12, delayChildren: 0.28 } }
                                 }}
-                                className="flex gap-12 pt-8 border-t border-white/10 mt-8"
+                                className="flex gap-10 pt-6 border-t border-white/10 mt-6"
                             >
                                 {[
                                     { label: "Artists Joined", value: "50K+" },

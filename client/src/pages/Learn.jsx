@@ -51,12 +51,12 @@ export default function Learn() {
 
   return (
     <>
-      <section className="relative py-24 bg-[#050505] min-h-screen overflow-hidden">
+      <section className="relative py-16 bg-[#050505] min-h-screen overflow-hidden">
 
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:60px_60px]"></div>
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-pink-600/10 rounded-full blur-[120px] pointer-events-none"></div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8">
+        <div className="relative z-10 max-w-[1680px] mx-auto px-6 lg:px-8">
 
           <LearnHero
             searchQuery={searchQuery}
@@ -82,7 +82,7 @@ export default function Learn() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.35 }}
             transition={{ duration: 0.5 }}
-            className="mt-24 p-8 rounded-[2rem] bg-gradient-to-r from-indigo-900/40 to-purple-900/40 border border-white/10 text-center relative overflow-hidden"
+            className="mt-16 p-8 rounded-[2rem] bg-gradient-to-r from-indigo-900/40 to-purple-900/40 border border-white/10 text-center relative overflow-hidden"
           >
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.1),transparent_45%)] pointer-events-none"></div>
             <h3 className="text-2xl font-bold text-white mb-2">Are you an expert?</h3>
