@@ -5,6 +5,7 @@ import { Loader2, Camera, Mail, Phone, UserCircle2, Sparkles, Tag, MapPin, Brush
 import toast, { Toaster } from 'react-hot-toast';
 import AvatarEditor from 'react-avatar-editor';
 import { useNavigate } from 'react-router-dom';
+import { getIndianPhone10 } from '../utils/razorpay';
 
 export function Settings() {
     const navigate = useNavigate();
@@ -18,7 +19,7 @@ export function Settings() {
     const [originLocation, setOriginLocation] = useState(user?.originLocation || '');
     const [artStyle, setArtStyle] = useState(user?.artStyle || '');
     const [experience, setExperience] = useState(user?.experience || '');
-    const [isMentor, setIsMentor] = useState(Boolean(user?.mentorProfile?.isMentor));
+    const [isMentor, setIsMentor] = useState(!!user?.mentorProfile?.isMentor);
     const [mentorHeadline, setMentorHeadline] = useState(user?.mentorProfile?.headline || '');
     const [primarySkill, setPrimarySkill] = useState(user?.mentorProfile?.primarySkill || '');
     const [sessionTag, setSessionTag] = useState(user?.mentorProfile?.sessionTag || '');
@@ -70,7 +71,7 @@ export function Settings() {
                     toast.success("Photo cropped & uploaded magically! ✨");
                     setSelectedImage(null); 
                 }
-            } catch (err) {
+            } catch {
                 toast.error("Photo upload failed!");
             } finally {
                 setUploadingImage(false);
@@ -83,7 +84,7 @@ export function Settings() {
         setSubmitting(true);
         try {
             const profileRes = await api.put('/users/profile', {
-                name, bio, role, phoneNumber, profilePic, originLocation, artStyle, experience
+                name, bio, role, phoneNumber: getIndianPhone10(phoneNumber), profilePic, originLocation, artStyle, experience
             });
 
             let mergedUser = profileRes.data.user;
@@ -108,9 +109,9 @@ export function Settings() {
 
             if (profileRes.data.success) {
                 localStorage.setItem('user', JSON.stringify(mergedUser));
+                localStorage.setItem('artify_user', JSON.stringify(mergedUser));
                 window.dispatchEvent(new Event('userChanged'));
                 toast.success("Profile details updated! 🪄");
-                setTimeout(() => window.location.reload(), 1500);
             }
         } catch (error) {
             toast.error(error.response?.data?.message || "Failed to update profile");
@@ -345,7 +346,7 @@ export function Settings() {
                             </div>
                             <div>
                                 <label className="text-sm text-white/60 mb-2 flex items-center gap-1.5"><Phone size={16} /> Phone Number</label>
-                                <input type="tel" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} placeholder="+91 9876543210" className="w-full bg-white/[0.03] p-4 rounded-xl border border-white/10 focus:border-amber-500 outline-none" />
+                                <input type="tel" value={phoneNumber} onChange={e => setPhoneNumber(getIndianPhone10(e.target.value))} placeholder="9876543210" maxLength={10} pattern="[0-9]{10}" className="w-full bg-white/[0.03] p-4 rounded-xl border border-white/10 focus:border-amber-500 outline-none" />
                             </div>
                         </div>
                     </div>

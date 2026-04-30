@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { User, Mail, Lock, Phone, ArrowRight, Loader2, CheckCircle } from 'lucide-react';
+import api from '../utils/api';
+import { getIndianPhone10 } from '../utils/razorpay';
 
 const leftSideImage = "https://images.unsplash.com/photo-1547891654-e66ed7ebb968?w=600&q=80";
 const rightSideImage = "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=600&q=80";
@@ -19,9 +20,13 @@ export default function Signup() {
   const navigate = useNavigate();
 
   const handleChange = (e) => {
+    const value = e.target.name === 'phone'
+      ? getIndianPhone10(e.target.value)
+      : e.target.value;
+
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: value
     });
   };
 
@@ -34,9 +39,10 @@ export default function Signup() {
     setLoading(true);
 
     try {
-      const { confirmPassword, ...dataToSend } = formData;
+      const dataToSend = { ...formData };
+      delete dataToSend.confirmPassword;
 
-      const res = await axios.post('http://localhost:5000/api/users/register', dataToSend);
+      await api.post('/users/register', dataToSend);
 
       alert('Account created successfully! Please Login.');
       navigate('/login');
@@ -87,7 +93,7 @@ export default function Signup() {
 
           <div className="relative group">
             <Phone className="absolute left-4 top-3.5 text-white/30 group-focus-within:text-indigo-400 transition-colors" size={20} />
-            <input type="tel" name="phone" placeholder="Phone Number" required
+            <input type="tel" name="phone" placeholder="10-digit phone number" required value={formData.phone} maxLength={10} pattern="[0-9]{10}"
               className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-indigo-500/50 focus:bg-white/5 transition-all"
               onChange={handleChange} />
           </div>

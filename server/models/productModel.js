@@ -31,6 +31,13 @@ const productSchema = new mongoose.Schema({
             url: { type: String, required: true }
         }
     ],
+    videos: [
+        {
+            public_id: { type: String },
+            url: { type: String },
+            duration: { type: Number }
+        }
+    ],
     seller: {
         type: mongoose.Schema.ObjectId,
         ref: 'User',

@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import api from '../utils/api';
-import { UploadCloud, Tag, AlertCircle, Feather, BookOpen, CheckCircle, ArrowLeft } from 'lucide-react';
+import { Tag, AlertCircle, Feather, BookOpen, CheckCircle, ArrowLeft, Video, Image as ImageIcon, ShieldCheck } from 'lucide-react';
 
 const AddProduct = () => {
     const [formData, setFormData] = useState({
@@ -13,9 +12,11 @@ const AddProduct = () => {
         price: '',
         category: 'handcrafted',
         condition: 'brand_new',
-        imageUrl: ''
+        imageUrl: '',
+        videoUrl: ''
     });
     const [preview, setPreview] = useState(null);
+    const [videoPreview, setVideoPreview] = useState(null);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
@@ -31,6 +32,24 @@ const AddProduct = () => {
         }
     };
 
+    const handleVideoChange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const maxSizeMb = 30;
+        if (file.size > maxSizeMb * 1024 * 1024) {
+            toast.error(`Video ${maxSizeMb}MB se chhota upload karo.`);
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onloadend = () => {
+            setFormData({ ...formData, videoUrl: reader.result });
+            setVideoPreview(reader.result);
+        };
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -39,6 +58,7 @@ const AddProduct = () => {
             const productData = {
                 ...formData,
                 images: [{ url: formData.imageUrl }],
+                videos: formData.videoUrl ? [{ url: formData.videoUrl }] : [],
                 seller: user._id || user.id
             };
 
@@ -92,10 +112,10 @@ const AddProduct = () => {
                     <div className="lg:col-span-5 space-y-10 lg:sticky lg:top-32">
                         <div>
                             <h1 className="text-4xl md:text-5xl font-black text-white leading-tight mb-4">
-                                Share your heritage, <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">tell your story.</span>
+                                Sell with proof, <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">build buyer trust.</span>
                             </h1>
                             <p className="text-white/60 text-lg leading-relaxed">
-                                List your cultural artifacts, handmade crafts, and traditional art for the world to see.
+                                List your handmade art, cultural pieces, or second-hand instruments with photo and optional video demo.
                             </p>
                         </div>
 
@@ -105,8 +125,8 @@ const AddProduct = () => {
                                     <BookOpen className="text-amber-400" />
                                 </div>
                                 <div>
-                                    <h3 className="text-white font-bold text-lg mb-1">Sell The Story</h3>
-                                    <p className="text-white/50 text-sm leading-relaxed">Buyers love the history, folk tales, and memories behind every authentic piece.</p>
+                                    <h3 className="text-white font-bold text-lg mb-1">Show The Sound</h3>
+                                    <p className="text-white/50 text-sm leading-relaxed">For used instruments, add a short video so buyers can see condition and hear tone.</p>
                                 </div>
                             </div>
 
@@ -123,10 +143,10 @@ const AddProduct = () => {
 
                         <div className="p-6 rounded-2xl bg-gradient-to-br from-amber-900/20 to-orange-900/20 border border-amber-500/20 shadow-lg shadow-amber-500/5">
                             <h4 className="text-amber-400 font-bold mb-3 flex items-center gap-2">
-                                <CheckCircle size={18} /> Artisan Tip
-                            </h4>
-                            <p className="text-white/70 text-sm leading-relaxed">
-                                Mention the materials used, time spent, and the folk story behind the piece to increase its value.
+                                    <CheckCircle size={18} /> Seller Tip
+                                </h4>
+                                <p className="text-white/70 text-sm leading-relaxed">
+                                Record 10-20 seconds in good light. Show scratches, brand, sound test, and accessories honestly.
                             </p>
                         </div>
                     </div>
@@ -209,9 +229,10 @@ const AddProduct = () => {
                                     </div>
                                 </div>
 
-                                <div>
-                                    <label className="block text-xs font-bold text-white/50 uppercase tracking-wider mb-2">Photo</label>
-                                    <div className="border-2 border-dashed border-white/20 rounded-xl p-6 text-center hover:border-amber-500 transition-colors relative bg-black/40 overflow-hidden group">
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-bold text-white/50 uppercase tracking-wider mb-2">Photo</label>
+                                        <div className="border-2 border-dashed border-white/20 rounded-xl p-6 text-center hover:border-amber-500 transition-colors relative bg-black/40 overflow-hidden group min-h-[260px]">
                                         <input
                                             type="file"
                                             accept="image/*"
@@ -230,12 +251,42 @@ const AddProduct = () => {
                                         ) : (
                                             <div className="flex flex-col items-center py-6">
                                                 <div className="w-16 h-16 rounded-full bg-amber-500/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                                                    <UploadCloud className="w-8 h-8 text-amber-400" />
+                                                    <ImageIcon className="w-8 h-8 text-amber-400" />
                                                 </div>
                                                 <p className="text-sm text-white font-medium">Upload Item Photo</p>
                                                 <p className="text-xs text-white/40 mt-1">Clear, well-lit photos sell faster</p>
                                             </div>
                                         )}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-bold text-white/50 uppercase tracking-wider mb-2">Video demo optional</label>
+                                        <div className="border-2 border-dashed border-white/20 rounded-xl p-6 text-center hover:border-amber-500 transition-colors relative bg-black/40 overflow-hidden group min-h-[260px]">
+                                            <input
+                                                type="file"
+                                                accept="video/*"
+                                                onChange={handleVideoChange}
+                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                            />
+
+                                            {videoPreview ? (
+                                                <div className="relative z-0">
+                                                    <video src={videoPreview} controls className="h-48 w-full object-contain mx-auto rounded-lg" />
+                                                    <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-green-500/20 bg-green-500/10 px-3 py-1 text-xs font-bold text-green-300">
+                                                        <ShieldCheck size={14} /> Trust video ready
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="flex flex-col items-center py-6">
+                                                    <div className="w-16 h-16 rounded-full bg-amber-500/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                                        <Video className="w-8 h-8 text-amber-400" />
+                                                    </div>
+                                                    <p className="text-sm text-white font-medium">Upload Demo Video</p>
+                                                    <p className="text-xs text-white/40 mt-1">Best for second-hand instruments. Max 30MB.</p>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
 

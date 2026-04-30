@@ -2,9 +2,10 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, LogOut, User, ShoppingBag, Bell, ChevronDown } from 'lucide-react';
-import { socket } from "../socket";
 import toast from 'react-hot-toast';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
+import api from '../utils/api';
 
 const navLinks = [
     { name: "Home", path: "/" },
@@ -29,8 +30,12 @@ const Navbar = () => {
     const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [userProfile, setUserProfile] = useState(null);
+    const [userProfile, setUserProfile] = useState(() => {
+        const storedUser = localStorage.getItem('user');
+        return storedUser ? JSON.parse(storedUser) : null;
+    });
     const { cart, setIsCartOpen } = useCart();
+    const { logout } = useAuth();
     const [unreadCount, setUnreadCount] = useState(0);
     const [showNotifications, setShowNotifications] = useState(false);
     const [notifications, setNotifications] = useState([]);
@@ -39,6 +44,7 @@ const Navbar = () => {
     const notifRef = useRef(null);
     const profileRef = useRef(null);
     const lastScrollY = useRef(0);
+    const userId = userProfile?._id || userProfile?.id;
 
     const isMarket = marketRoutes.some((route) => location.pathname.startsWith(route));
 
@@ -58,17 +64,15 @@ const Navbar = () => {
     }), [isMarket]);
 
     useEffect(() => {
-        socket.connect();
+        if (!userId) {
+            return;
+        }
 
-        socket.on("connect", () => {
-            const storedUser = JSON.parse(localStorage.getItem("user"));
+        let active = true;
+        let activeSocket;
+        let registerUser;
 
-            if (storedUser?._id || storedUser?.id) {
-                socket.emit("register_user", storedUser._id || storedUser.id);
-            }
-        });
-
-        socket.on("new_notification", (data) => {
+        const handleNewNotification = (data) => {
             setNotifications((prev) => {
                 const updated = [data, ...prev];
                 localStorage.setItem("notifications", JSON.stringify(updated));
@@ -76,13 +80,35 @@ const Navbar = () => {
             });
 
             setUnreadCount((prev) => prev + 1);
+        };
+
+        import("../socket").then(({ socket }) => {
+            if (!active) {
+                return;
+            }
+
+            activeSocket = socket;
+            registerUser = () => socket.emit("register_user", userId);
+
+            socket.connect();
+            socket.on("connect", registerUser);
+            socket.on("new_notification", handleNewNotification);
+
+            if (socket.connected) {
+                registerUser();
+            }
         });
 
         return () => {
-            socket.off("connect");
-            socket.off("new_notification");
+            active = false;
+            if (activeSocket) {
+                if (registerUser) {
+                    activeSocket.off("connect", registerUser);
+                }
+                activeSocket.off("new_notification", handleNewNotification);
+            }
         };
-    }, []);
+    }, [userId]);
 
     useEffect(() => {
         const stored = localStorage.getItem("notifications");
@@ -161,11 +187,9 @@ const Navbar = () => {
     }, []);
 
     const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+        logout();
         setUserProfile(null);
         navigate('/login');
-        window.location.reload();
     };
 
     const iconButtonClass = "relative flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-white/70 transition-all duration-300 hover:border-white/20 hover:bg-white/[0.08] hover:text-white";
@@ -283,9 +307,9 @@ const Navbar = () => {
                                                                 }
 
                                                                 try {
-                                                                    const res = await fetch(`http://localhost:5000/api/events/${n.eventId}`);
-                                                                    navigate(res.ok ? `/events/${n.eventId}` : "/events");
-                                                                } catch (err) {
+                                                                    await api.get(`/events/${n.eventId}`);
+                                                                    navigate(`/event/${n.eventId}`);
+                                                                } catch {
                                                                     toast("This event is no longer available");
                                                                     navigate("/events");
 

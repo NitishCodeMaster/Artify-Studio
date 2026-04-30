@@ -17,6 +17,13 @@ const buildMentorSlug = (name, userId) => {
     return `mentor-${base}-${String(userId).slice(-6)}`;
 };
 
+const normalizePhone = (value) => {
+    const digits = String(value || '').replace(/\D/g, '');
+    if (digits.length === 12 && digits.startsWith('91')) return digits.slice(2);
+    if (digits.length === 11 && digits.startsWith('0')) return digits.slice(1);
+    return digits.length > 10 ? digits.slice(-10) : digits;
+};
+
 module.exports.registerUser = async (req, res) => {
     try {
         const errors = validationResult(req);
@@ -164,7 +171,7 @@ exports.updateUserProfile = async (req, res) => {
         user.name = req.body.name || user.name;
         user.bio = req.body.bio || user.bio;
         user.role = req.body.role || user.role;
-        user.phone = req.body.phoneNumber || req.body.phone || user.phone;
+        user.phone = normalizePhone(req.body.phoneNumber || req.body.phone) || user.phone;
         user.profilePic = profilePicUrl;
 
         user.originLocation = req.body.originLocation || user.originLocation;

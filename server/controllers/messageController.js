@@ -1,6 +1,17 @@
 const Conversation = require('../models/conversationModel');
 const Message = require('../models/messageModel');
 
+const formatConversationForUser = (conversation, userId) => {
+    const otherUser = conversation.participants.find(p => p._id.toString() !== userId.toString());
+
+    return {
+        _id: conversation._id,
+        user: otherUser || { name: "Unknown User" },
+        lastMessage: conversation.lastMessage,
+        updatedAt: conversation.updatedAt
+    };
+};
+
 exports.startConversation = async (req, res) => {
     try {
         const senderId = req.user._id || req.user.id;
@@ -32,15 +43,7 @@ exports.getConversations = async (req, res) => {
             participants: { $in: [userId] }
         }).populate('participants', 'name profilePic').sort({ updatedAt: -1 });
 
-        const formattedConversations = conversations.map(conv => {
-            const otherUser = conv.participants.find(p => p._id.toString() !== userId.toString());
-            return {
-                _id: conv._id,
-                user: otherUser || { name: "Unknown User" },
-                lastMessage: conv.lastMessage,
-                updatedAt: conv.updatedAt
-            };
-        });
+        const formattedConversations = conversations.map(conv => formatConversationForUser(conv, userId));
 
         res.status(200).json({ success: true, conversations: formattedConversations });
     } catch (error) {
@@ -82,21 +85,31 @@ exports.sendMessage = async (req, res) => {
             text: text
         });
 
-        await Conversation.findByIdAndUpdate(chatId, {
+        const conversation = await Conversation.findByIdAndUpdate(chatId, {
             lastMessage: text
-        });
+        }, { new: true }).populate('participants', 'name profilePic');
 
         const io = req.app.get('io');
-
-        io.to(chatId).emit("receive_message", {
-            _id: newMessage._id,
+        const payload = {
+            _id: newMessage._id.toString(),
             conversationId: chatId,
             text: text,
-            sender: senderId,
+            sender: senderId.toString(),
             createdAt: newMessage.createdAt
-        });
+        };
 
-        res.status(201).json({ success: true, message: newMessage });
+        io.to(chatId).emit("receive_message", payload);
+
+        if (conversation) {
+            conversation.participants.forEach((participant) => {
+                io.to(`user:${participant._id.toString()}`).emit(
+                    "conversation_updated",
+                    formatConversationForUser(conversation, participant._id)
+                );
+            });
+        }
+
+        res.status(201).json({ success: true, message: payload });
     } catch (error) {
         res.status(500).json({ success: false, message: "Error" });
     }

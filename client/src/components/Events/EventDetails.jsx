@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from '../../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Calendar, MapPin, Clock, PlayCircle, Trash2, ShieldCheck, Users, Zap, Ticket } from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, Clock, Trash2, ShieldCheck, Zap, Ticket } from 'lucide-react';
 import api from '../../utils/api';
 import { toast } from 'react-hot-toast';
 import DeleteConfirmModal from './DeleteConfirmModal';
 import { ReviewSection } from './ReviewSection';
+import { buildRazorpayPrefill, loadRazorpay } from '../../utils/razorpay';
 
 const EventDetails = ({ event: propEvent, onBack, refresh, viewMode }) => {
     const { id } = useParams();
@@ -24,7 +25,7 @@ const EventDetails = ({ event: propEvent, onBack, refresh, viewMode }) => {
                 try {
                     const res = await api.get(`/events/${id}`);
                     setEvent(res.data.event);
-                } catch (err) {
+                } catch {
                     toast("Event not available");
                     navigate("/events");
                 }
@@ -32,14 +33,7 @@ const EventDetails = ({ event: propEvent, onBack, refresh, viewMode }) => {
 
             fetchEvent();
         }
-    }, [id]);
-
-    useEffect(() => {
-        const script = document.createElement('script');
-        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-        script.async = true;
-        document.body.appendChild(script);
-    }, []);
+    }, [event, id, navigate]);
 
     if (!event) {
         return <p className="text-white p-10">Loading event...</p>;
@@ -51,13 +45,14 @@ const EventDetails = ({ event: propEvent, onBack, refresh, viewMode }) => {
             toast.success("Event Deleted");
             if (refresh) refresh();
             onBack ? onBack() : navigate("/events");
-        } catch (err) {
+        } catch {
             toast.error("Delete failed");
         }
     };
 
     const handlePayment = async () => {
-        if (!window.Razorpay) {
+        const isLoaded = await loadRazorpay();
+        if (!isLoaded) {
             toast.error("Razorpay failed to load.");
             return;
         }
@@ -69,30 +64,24 @@ const EventDetails = ({ event: propEvent, onBack, refresh, viewMode }) => {
                 eventId: event._id
             });
 
-            const rawPhone = user?.phone || "";
-            const cleanPhone = rawPhone.toString().replace(/\D/g, '').slice(-10);
+            const prefill = buildRazorpayPrefill(user);
             const options = {
-                key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+                key: data.key || import.meta.env.VITE_RAZORPAY_KEY_ID,
                 amount: data.order.amount,
                 currency: "INR",
                 name: "Artify Studio",
                 description: `Ticket for ${event.title}`,
                 order_id: data.order.id,
-                prefill: {
-                    name: user?.fullname || user?.name || "Guest User",
-                    email: user?.email || "customer@example.com",
-                    contact: cleanPhone,
-                    ...(cleanPhone.length === 10 ? { contact: cleanPhone } : {})
-                },
+                prefill,
                 readonly: {
-                    contact: cleanPhone.length === 10 ? true : false,
-                    email: true,
-                    name: true
+                    contact: Boolean(prefill.contact),
+                    email: Boolean(prefill.email),
+                    name: Boolean(prefill.name)
                 },
                 theme: { color: "#6366f1" },
                 handler: async (response) => {
                     try {
-                        const verifyRes = await api.post('/payments/verify', {
+                        const verifyRes = await api.post('/payments/verify-payment', {
                             ...response,
                             eventId: event._id,
                             totalAmount: event.price
@@ -103,7 +92,7 @@ const EventDetails = ({ event: propEvent, onBack, refresh, viewMode }) => {
                             if (onBack) onBack();
                             else navigate("/events");
                         }
-                    } catch (err) {
+                    } catch {
                         toast.error("Verification failed!");
                     }
                 },

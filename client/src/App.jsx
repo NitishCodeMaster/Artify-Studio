@@ -1,26 +1,17 @@
 import React, { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
-import CartDrawer from './components/MarketPlace/CartDrawer';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { Loader2 } from 'lucide-react';
 import Navbar from './components/Navbar';
 import { Toaster } from 'react-hot-toast';
 import PrivateRoute from './components/PrivateRoute';
-import NotFound from './pages/NotFound';
-import Profile from './pages/Profile';
-import { ForgotPassword } from './pages/ForgotPassword';
-import { Settings } from './pages/Settings';
-import { ResetPassword } from './pages/ResetPassword';
-import { PublicProfile } from './pages/PublicProfile';
-import Messages from './pages/Messages';
-import SavedCollections from './pages/SavedCollections';
-import Wallet from './pages/Wallet';
-import EventDetails from './components/Events/EventDetails';
 
+const CartDrawer = lazy(() => import('./components/MarketPlace/CartDrawer'));
 const Home = lazy(() => import('./pages/Home'));
 const Discover = lazy(() => import('./pages/Discover'));
 const Events = lazy(() => import('./pages/Events'));
+const EventDetails = lazy(() => import('./components/Events/EventDetails'));
 const MarketPlace = lazy(() => import('./pages/MarketPlace'));
 const Community = lazy(() => import('./pages/Community'));
 const Learn = lazy(() => import('./pages/Learn'));
@@ -29,6 +20,15 @@ const Signup = lazy(() => import('./pages/Signup'));
 const AddProduct = lazy(() => import('./pages/AddProduct'));
 const ProductDetails = lazy(() => import('./pages/ProductDetails'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Profile = lazy(() => import('./pages/Profile'));
+const Settings = lazy(() => import('./pages/Settings').then((module) => ({ default: module.Settings })));
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword').then((module) => ({ default: module.ForgotPassword })));
+const ResetPassword = lazy(() => import('./pages/ResetPassword').then((module) => ({ default: module.ResetPassword })));
+const PublicProfile = lazy(() => import('./pages/PublicProfile').then((module) => ({ default: module.PublicProfile })));
+const Messages = lazy(() => import('./pages/Messages'));
+const SavedCollections = lazy(() => import('./pages/SavedCollections'));
+const Wallet = lazy(() => import('./pages/Wallet'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -49,7 +49,9 @@ const App = () => {
     <AuthProvider>
       <CartProvider>
         <Router>
-          <CartDrawer />
+          <Suspense fallback={null}>
+            <CartDrawer />
+          </Suspense>
           <Navbar />
           <Toaster position="bottom-right" toastOptions={{ style: { background: '#1a1a1a', color: '#fff', border: '1px solid #333' } }} />
           <ScrollToTop />

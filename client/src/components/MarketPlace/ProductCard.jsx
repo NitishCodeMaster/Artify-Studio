@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Trash2, ShoppingBag, Heart } from 'lucide-react';
+import { Trash2, ShoppingBag, Heart, PlayCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import api from '../../utils/api';
@@ -15,6 +15,7 @@ const ProductCard = ({ product, onDelete }) => {
     const sellerId = product.seller?._id || product.seller;
 
     const isOwner = currentUserId && sellerId && (currentUserId === sellerId);
+    const hasVideo = Boolean(product.videos?.[0]?.url);
 
     useEffect(() => {
         const user = JSON.parse(localStorage.getItem('user'));
@@ -117,6 +118,12 @@ const ProductCard = ({ product, onDelete }) => {
                 {discount > 0 && (
                     <div className="absolute bottom-3 right-3 px-2 py-1 bg-amber-500 text-black text-[10px] font-bold uppercase tracking-wider rounded">
                         {discount}% OFF
+                    </div>
+                )}
+
+                {hasVideo && (
+                    <div className="absolute bottom-3 left-3 inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-500/90 text-black text-[10px] font-black uppercase tracking-wider rounded">
+                        <PlayCircle size={13} /> Video Proof
                     </div>
                 )}
             </div>

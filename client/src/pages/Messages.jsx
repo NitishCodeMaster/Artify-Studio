@@ -1,32 +1,78 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageSquare, Search, Send, Loader2, ArrowLeft, Trash2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { io } from "socket.io-client";
+import { MessageSquare, Search, Send, Loader2, ArrowLeft, Trash2, Wifi } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import Swal from 'sweetalert2';
-
-const socket = io("http://localhost:5000", {
-    transports: ["websocket"],
-    autoConnect: true
-});
+import { socket } from '../socket';
 
 const Messages = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [chats, setChats] = useState([]);
     const [activeChat, setActiveChat] = useState(null);
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
     const [loading, setLoading] = useState(true);
     const [currentUser, setCurrentUser] = useState(null);
+    const [isConnected, setIsConnected] = useState(socket.connected);
     const messagesEndRef = useRef(null);
+    const openedConversationRef = useRef(false);
 
     useEffect(() => {
         const fetchUser = async () => {
             const res = await api.get('/users/profile');
-            setCurrentUser(res.data.user);
+            setCurrentUser(res.data.user || res.data);
         }
         fetchUser();
     }, []);
+
+    useEffect(() => {
+        const requestedConversationId = location.state?.conversationId;
+        if (!requestedConversationId || openedConversationRef.current || chats.length === 0) {
+            return;
+        }
+
+        const requestedChat = chats.find(chat => chat._id === requestedConversationId);
+        if (requestedChat) {
+            openedConversationRef.current = true;
+            handleSelectChat(requestedChat);
+        }
+    }, [chats, location.state]);
+
+    useEffect(() => {
+        const userId = currentUser?._id || currentUser?.id;
+        if (!userId) return;
+
+        const handleConnect = () => {
+            setIsConnected(true);
+            socket.emit("register_user", userId);
+        };
+
+        const handleDisconnect = () => setIsConnected(false);
+        const handleConversationUpdated = (conversation) => {
+            setChats((prev) => {
+                const withoutCurrent = prev.filter(chat => chat._id !== conversation._id);
+                return [conversation, ...withoutCurrent];
+            });
+
+            setActiveChat((prev) => prev?._id === conversation._id ? { ...prev, ...conversation } : prev);
+        };
+
+        socket.on("connect", handleConnect);
+        socket.on("disconnect", handleDisconnect);
+        socket.on("conversation_updated", handleConversationUpdated);
+
+        socket.connect();
+        if (socket.connected) {
+            handleConnect();
+        }
+
+        return () => {
+            socket.off("connect", handleConnect);
+            socket.off("disconnect", handleDisconnect);
+            socket.off("conversation_updated", handleConversationUpdated);
+        };
+    }, [currentUser]);
 
     useEffect(() => {
         const fetchChats = async () => {
@@ -49,17 +95,18 @@ const Messages = () => {
 
     useEffect(() => {
         if (activeChat && currentUser) {
-            socket.emit("join_chat", activeChat._id);
+            const chatId = activeChat._id;
+            socket.emit("join_chat", chatId);
 
             const handleReceive = (incomingMsg) => {
-                if (incomingMsg.conversationId === activeChat._id) {
+                if (incomingMsg.conversationId === chatId) {
                     setMessages((prev) => {
                         if (prev.find(m => m._id === incomingMsg._id)) return prev;
                         return [...prev, {
                             _id: incomingMsg._id,
                             text: incomingMsg.text,
                             createdAt: incomingMsg.createdAt,
-                            sender: incomingMsg.sender === currentUser._id ? 'me' : 'other'
+                            sender: incomingMsg.sender?.toString() === (currentUser._id || currentUser.id)?.toString() ? 'me' : 'other'
                         }];
                     });
                 }
@@ -73,6 +120,7 @@ const Messages = () => {
             socket.on("message_deleted", handleDelete);
 
             return () => {
+                socket.emit("leave_chat", chatId);
                 socket.off("receive_message", handleReceive);
                 socket.off("message_deleted", handleDelete);
             };
@@ -95,20 +143,26 @@ const Messages = () => {
         e.preventDefault();
         if (!newMessage.trim()) return;
 
-        const tempMsg = {
-            _id: Date.now(),
-            sender: 'me',
-            text: newMessage,
-            createdAt: new Date().toISOString()
-        };
+        const messageText = newMessage.trim();
 
-        setMessages((prev) => [...prev, tempMsg]);
         setNewMessage("");
 
         try {
-            await api.post(`/messages/${activeChat._id}`, { text: tempMsg.text });
+            const res = await api.post(`/messages/${activeChat._id}`, { text: messageText });
+            const savedMessage = res.data.message;
+
+            setMessages((prev) => {
+                if (!savedMessage || prev.find(m => m._id === savedMessage._id)) return prev;
+                return [...prev, {
+                    _id: savedMessage._id,
+                    sender: 'me',
+                    text: savedMessage.text,
+                    createdAt: savedMessage.createdAt
+                }];
+            });
         } catch (error) {
             console.error("Failed to send message", error);
+            setNewMessage(messageText);
         }
     };
 
@@ -212,7 +266,10 @@ const Messages = () => {
                                     </div>
                                     <div>
                                         <h3 className="font-bold text-white">{activeChat.user?.name}</h3>
-                                        <p className="text-[10px] text-green-400 uppercase tracking-widest font-bold">Online</p>
+                                        <p className={`text-[10px] uppercase tracking-widest font-bold ${isConnected ? 'text-green-400' : 'text-amber-400'}`}>
+                                            <Wifi size={11} className="inline mr-1" />
+                                            {isConnected ? 'Live chat' : 'Reconnecting'}
+                                        </p>
                                     </div>
                                 </div>
 

@@ -32,6 +32,7 @@ io.on("connection", (socket) => {
         const uid = userId.toString();
 
         onlineUsers.set(uid, socket.id);
+        socket.join(`user:${uid}`);
 
         console.log(`🟢 User ${uid} registered with socket ${socket.id}`);
         console.log("Online Users:", onlineUsers);
@@ -42,6 +43,13 @@ io.on("connection", (socket) => {
 
         socket.join(chatId);
         console.log(`📩 User joined chat room: ${chatId}`);
+    });
+
+    socket.on("leave_chat", (chatId) => {
+        if (!chatId) return;
+
+        socket.leave(chatId);
+        console.log(`📤 User left chat room: ${chatId}`);
     });
 
     socket.on("disconnect", () => {

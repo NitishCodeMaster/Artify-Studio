@@ -12,8 +12,6 @@ const razorpay = new Razorpay({
 
 exports.createOrder = async (req, res) => {
     try {
-        console.log(process.env.RAZORPAY_KEY_ID);
-        console.log("Event Model check:", typeof Event);
         const { amount, eventId } = req.body;
 
 
@@ -57,6 +55,7 @@ exports.verifyPayment = async (req, res) => {
             razorpay_payment_id,
             razorpay_signature,
             products,
+            productSnapshots,
             totalAmount,
             eventId
         } = req.body;
@@ -97,8 +96,8 @@ exports.verifyPayment = async (req, res) => {
             eventId: eventId || null
         });
 
-        if (products && products.length > 0) {
-            for (const item of products) {
+        if (productSnapshots && productSnapshots.length > 0) {
+            for (const item of productSnapshots) {
                 const sellerId = item.seller?._id || item.seller;
                 if (sellerId) {
                     await userModel.findByIdAndUpdate(sellerId, {

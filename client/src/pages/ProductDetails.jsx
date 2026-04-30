@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { Loader2, ArrowLeft, ShoppingCart, MessageCircle } from 'lucide-react';
+import { Loader2, ArrowLeft, ShoppingCart, MessageCircle, PlayCircle, ShieldCheck } from 'lucide-react';
 import { ReviewSection } from '../components/Events/ReviewSection';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import { toast } from 'react-hot-toast';
+import { buildRazorpayPrefill, loadRazorpay } from '../utils/razorpay';
 
 const ProductDetails = () => {
     const { id } = useParams();
@@ -14,9 +14,34 @@ const ProductDetails = () => {
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isProcessing, setIsProcessing] = useState(false);
+    const demoVideo = product?.videos?.[0]?.url;
+
+    const handleContactSeller = async () => {
+        const sellerId = product?.seller?._id || product?.seller;
+        const userId = user?._id || user?.id;
+
+        if (!userId) {
+            toast.error("Please login to message the seller.");
+            navigate('/login');
+            return;
+        }
+
+        if (!sellerId || sellerId === userId) {
+            toast.error("Seller chat is not available for this item.");
+            return;
+        }
+
+        try {
+            const res = await api.post(`/messages/start/${sellerId}`);
+            navigate('/messages', { state: { conversationId: res.data.conversation?._id } });
+        } catch {
+            toast.error("Could not start chat with seller.");
+        }
+    };
 
     const handleBuyNow = async () => {
-        if (!window.Razorpay) {
+        const isLoaded = await loadRazorpay();
+        if (!isLoaded) {
             toast.error("Razorpay SDK fail to load. Please check your internet.");
             return;
         }
@@ -30,23 +55,20 @@ const ProductDetails = () => {
             });
 
             const options = {
-                key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+                key: data.key || import.meta.env.VITE_RAZORPAY_KEY_ID,
                 amount: data.order.amount,
                 currency: "INR",
                 name: "Artify Marketplace",
                 description: `Buying ${product.name}`,
                 order_id: data.order.id,
-                prefill: {
-                    name: user?.name || "Customer",
-                    email: user?.email || "",
-                    contact: user?.phone || ""
-                },
+                prefill: buildRazorpayPrefill(user),
                 theme: { color: "#fbbf24" },
                 handler: async (response) => {
                     try {
-                        const verifyRes = await api.post('/payments/verify', {
+                        const verifyRes = await api.post('/payments/verify-payment', {
                             ...response,
-                            productId: product._id,
+                            products: [product._id],
+                            productSnapshots: [product],
                             totalAmount: product.price
                         });
 
@@ -54,7 +76,7 @@ const ProductDetails = () => {
                             toast.success("Order Placed Successfully! 🛍️");
                             navigate("/dashboard");
                         }
-                    } catch (err) {
+                    } catch {
                         toast.error("Payment verification failed!");
                     }
                 },
@@ -75,7 +97,7 @@ const ProductDetails = () => {
     useEffect(() => {
         const fetchProduct = async () => {
             try {
-                const res = await axios.get(`http://localhost:5000/api/products/${id}`);
+                const res = await api.get(`/products/${id}`);
                 setProduct(res.data.product);
                 setLoading(false);
             } catch (err) {
@@ -124,6 +146,20 @@ const ProductDetails = () => {
                         />
                     </div>
 
+                    {demoVideo && (
+                        <div className="md:col-span-2 rounded-2xl overflow-hidden bg-black/40 border border-green-500/20 p-4">
+                            <div className="mb-3 flex items-center justify-between gap-3">
+                                <div className="flex items-center gap-2 text-green-300 text-sm font-bold">
+                                    <ShieldCheck size={18} /> Seller demo video
+                                </div>
+                                <div className="flex items-center gap-1.5 text-xs text-white/40">
+                                    <PlayCircle size={14} /> Condition and sound proof
+                                </div>
+                            </div>
+                            <video src={demoVideo} controls preload="metadata" className="max-h-[460px] w-full rounded-xl bg-black object-contain" />
+                        </div>
+                    )}
+
                     <div className="flex flex-col justify-center">
                         <span className="text-sm font-bold text-indigo-400 uppercase tracking-widest mb-3">
                             {product.category}
@@ -149,7 +185,7 @@ const ProductDetails = () => {
                             >
                                 <ShoppingCart size={20} /> Buy Now
                             </button>
-                            <button className="flex-1 bg-white/5 hover:bg-white/10 border border-white/20 hover:border-white/40 text-white font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-2">
+                            <button onClick={handleContactSeller} className="flex-1 bg-white/5 hover:bg-white/10 border border-white/20 hover:border-white/40 text-white font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-2">
                                 <MessageCircle size={20} /> Contact Seller
                             </button>
                         </div>

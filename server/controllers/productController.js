@@ -23,7 +23,7 @@ exports.getAllProducts = async (req, res) => {
 
 exports.createProduct = async (req, res) => {
     try {
-        let imageUrl = req.body.images[0].url; 
+        let imageUrl = req.body.images?.[0]?.url; 
  
         if (imageUrl) {
             const uploadedResponse = await cloudinary.uploader.upload(imageUrl, {
@@ -32,6 +32,19 @@ exports.createProduct = async (req, res) => {
  
             req.body.images[0].url = uploadedResponse.secure_url;
             req.body.images[0].public_id = uploadedResponse.public_id;
+        }
+
+        const videoUrl = req.body.videos?.[0]?.url;
+
+        if (videoUrl) {
+            const uploadedVideo = await cloudinary.uploader.upload(videoUrl, {
+                folder: "artify_studio_products/videos",
+                resource_type: "video"
+            });
+
+            req.body.videos[0].url = uploadedVideo.secure_url;
+            req.body.videos[0].public_id = uploadedVideo.public_id;
+            req.body.videos[0].duration = uploadedVideo.duration;
         }
  
         const product = await Product.create(req.body);
@@ -54,6 +67,14 @@ exports.deleteProduct = async (req, res) => {
             for (const image of product.images) {
                 if (image.public_id) {
                     await cloudinary.uploader.destroy(image.public_id);
+                }
+            }
+        }
+
+        if (product.videos && product.videos.length > 0) {
+            for (const video of product.videos) {
+                if (video.public_id) {
+                    await cloudinary.uploader.destroy(video.public_id, { resource_type: "video" });
                 }
             }
         }

@@ -4,23 +4,33 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../../context/CartContext';
 import api from '../../utils/api';
 import { useNavigate } from "react-router-dom";
+import { buildRazorpayPrefill, loadRazorpay } from '../../utils/razorpay';
+import { useAuth } from '../../context/AuthContext';
 
 const CartDrawer = () => {
     const { cart, isCartOpen, setIsCartOpen, removeFromCart, cartTotal, clearCart } = useCart();
     const navigate = useNavigate();
+    const { user } = useAuth();
 
     const handleCheckout = async () => {
         try {
+            const isLoaded = await loadRazorpay();
+            if (!isLoaded) {
+                alert("Razorpay could not load. Please check your internet and try again.");
+                return;
+            }
+
             const orderRes = await api.post('/payments/create-order', { amount: cartTotal });
             const order = orderRes.data.order;
 
             const options = {
-                key: "rzp_test_STXE15b8MhnWM5",
+                key: orderRes.data.key || import.meta.env.VITE_RAZORPAY_KEY_ID,
                 amount: order.amount,
                 currency: "INR",
                 name: "Artify Studio",
                 description: "Purchase Unique Masterpieces",
                 order_id: order.id,
+                prefill: buildRazorpayPrefill(user),
                 theme: { color: "#f59e0b" },
 
                 handler: async function (response) {
@@ -30,6 +40,7 @@ const CartDrawer = () => {
                             razorpay_payment_id: response.razorpay_payment_id,
                             razorpay_signature: response.razorpay_signature,
                             products: cart.map(item => item._id),
+                            productSnapshots: cart,
                             totalAmount: cartTotal
                         });
 
