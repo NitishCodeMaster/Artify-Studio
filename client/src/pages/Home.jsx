@@ -31,7 +31,7 @@ const Home = () => {
     return (
         <main className="bg-black text-white selection:bg-indigo-500/30 font-sans w-full overflow-x-hidden">
 
-            <section className="relative flex min-h-[calc(100vh-72px)] items-center overflow-hidden bg-black pb-12 pt-24">
+            <section className="relative flex min-h-[calc(100vh-72px)] items-start overflow-hidden bg-black pb-12 pt-20">
 
                 <div className="absolute inset-0 pointer-events-none">
 

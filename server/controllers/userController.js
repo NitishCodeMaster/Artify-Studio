@@ -31,7 +31,7 @@ module.exports.registerUser = async (req, res) => {
             return res.status(400).json({ errors: errors.array() });
         }
 
-        const { name, email, password, phone, } = req.body;
+        const { name, email, password, phone, signupAs } = req.body;
 
         const userExists = await userModel.findOne({ email });
 
@@ -39,7 +39,33 @@ module.exports.registerUser = async (req, res) => {
             return res.status(400).json({ message: 'User already exists' });
         }
 
-        const user = await userModel.create({ name, email, password, phone });
+        const mentorProfile = signupAs === 'mentor'
+            ? {
+                isMentor: true,
+                headline: 'Helping creators sharpen their craft with practical guidance.',
+                primarySkill: 'Creative Mentorship',
+                sessionTag: 'Beginner to Confident',
+                rating: 4.8,
+                availableForBooking: true,
+                accentColor: 'indigo',
+                mentorshipModes: ['1-on-1', 'Online'],
+                tags: ['Creative Mentorship', 'Feedback']
+            }
+            : undefined;
+
+        const user = await userModel.create({
+            name,
+            email,
+            password,
+            phone,
+            role: signupAs === 'mentor' ? 'Creative Mentorship' : 'Artist',
+            mentorProfile
+        });
+
+        if (signupAs === 'mentor') {
+            user.mentorProfile.mentorSlug = buildMentorSlug(user.name, user._id);
+            await user.save();
+        }
 
         const token = jwt.sign(
             { id: user._id, role: 'user' },
@@ -63,6 +89,7 @@ module.exports.registerUser = async (req, res) => {
                 email: user.email,
                 profilePic: user.profilePic,
                 role: user.role,
+                mentorProfile: user.mentorProfile,
             },
         });
 
@@ -78,7 +105,7 @@ module.exports.loginUser = async (req, res) => {
             return res.status(400).json({ errors: errors.array() });
         }
 
-        const { email, password } = req.body;
+        const { email, password, loginAs } = req.body;
 
         const user = await userModel.findOne({ email }).select('+password');
 
@@ -89,6 +116,22 @@ module.exports.loginUser = async (req, res) => {
         const isMatch = await user.matchPassword(password);
         if (!isMatch) {
             return res.status(400).json({ message: 'Invalid password' });
+        }
+
+        if (loginAs === 'mentor' && !user.mentorProfile?.isMentor) {
+            const mentorProfile = user.mentorProfile || {};
+            mentorProfile.isMentor = true;
+            mentorProfile.mentorSlug = mentorProfile.mentorSlug || buildMentorSlug(user.name, user._id);
+            mentorProfile.headline = mentorProfile.headline || user.bio || 'Helping creators sharpen their craft with practical guidance.';
+            mentorProfile.primarySkill = mentorProfile.primarySkill || user.artStyle || user.role || 'Creative Mentorship';
+            mentorProfile.sessionTag = mentorProfile.sessionTag || mentorProfile.primarySkill;
+            mentorProfile.rating = mentorProfile.rating || 4.8;
+            mentorProfile.availableForBooking = true;
+            mentorProfile.accentColor = mentorProfile.accentColor || 'indigo';
+            mentorProfile.mentorshipModes = mentorProfile.mentorshipModes?.length ? mentorProfile.mentorshipModes : ['1-on-1', 'Online'];
+            mentorProfile.tags = mentorProfile.tags?.length ? mentorProfile.tags : [mentorProfile.primarySkill, 'Feedback'];
+            user.mentorProfile = mentorProfile;
+            await user.save();
         }
 
         const token = jwt.sign(
@@ -114,6 +157,11 @@ module.exports.loginUser = async (req, res) => {
                 email: user.email,
                 profilePic: user.profilePic,
                 role: user.role,
+                bio: user.bio,
+                artStyle: user.artStyle,
+                originLocation: user.originLocation,
+                experience: user.experience,
+                mentorProfile: user.mentorProfile,
             },
         });
     } catch (error) {

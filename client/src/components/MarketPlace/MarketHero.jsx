@@ -12,7 +12,7 @@ const MarketHero = ({ searchQuery, setSearchQuery, onSearch }) => {
     };
 
     return (
-        <div className="relative w-full h-[390px] md:h-[430px] flex flex-col items-center justify-center bg-[#030303] overflow-hidden">
+        <div className="relative w-full min-h-[320px] md:min-h-[350px] flex flex-col items-center justify-start bg-[#030303] overflow-hidden pt-10">
             
             {/* Elegant Backgrounds */}
             <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.15]"></div>

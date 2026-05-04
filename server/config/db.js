@@ -1,12 +1,22 @@
 const mongoose = require("mongoose");
 
 const connectDB = async () => {
+    if (!process.env.MONGO_URI) {
+        throw new Error("MONGO_URI is missing in server/.env");
+    }
+
     try {
-        await mongoose.connect(process.env.MONGO_URI);
-        console.log("MongoDB Atlas Connected");
+        mongoose.set("bufferCommands", false);
+
+        await mongoose.connect(process.env.MONGO_URI, {
+            serverSelectionTimeoutMS: 30000,
+        });
+
+        console.log("✅ MongoDB Atlas Connected");
     } catch (error) {
-        console.error("🔴 Error connecting to database:", error);
-        process.exit(1);
+        console.error("🔴 Error connecting to MongoDB.");
+        console.error("Check MongoDB Atlas Network Access, database user/password, and MONGO_URI in server/.env.");
+        throw error;
     }
 };
 

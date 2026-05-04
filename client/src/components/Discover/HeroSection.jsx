@@ -8,7 +8,7 @@ import spot2 from '../../assets/Images/ArtistSpotlight/dancer.avif';
 
 const HeroSection = ({ searchQuery, setSearchQuery }) => {
     return (
-        <section className="relative pt-24 pb-12 border-b border-white/5 bg-black overflow-hidden">
+        <section className="relative pt-8 pb-10 border-b border-white/5 bg-black overflow-hidden">
             <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none opacity-50 animate-pulse"></div>
             <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[100px] pointer-events-none opacity-30"></div>
 

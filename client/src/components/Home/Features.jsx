@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
     Music,
@@ -14,6 +14,7 @@ import user1 from '../../assets/Images/features/user1.jpeg';
 import user2 from '../../assets/Images/features/user2.jpeg';
 import user3 from '../../assets/Images/features/user3.jpeg';
 import user4 from '../../assets/Images/features/user4.jpeg';
+import api from '../../utils/api';
 
 const userImages = [user1, user2, user3, user4];
 
@@ -49,6 +50,45 @@ const features = [
 ];
 
 export default function Features() {
+    const [overview, setOverview] = useState({ mentors: 0, workshops: 0 });
+    const [marketCount, setMarketCount] = useState(0);
+
+    useEffect(() => {
+        let mounted = true;
+        const loadDynamicHighlights = async () => {
+            try {
+                const [learnRes, productRes] = await Promise.allSettled([
+                    api.get('/learn/overview'),
+                    api.get('/products')
+                ]);
+
+                if (!mounted) return;
+
+                if (learnRes.status === 'fulfilled') {
+                    setOverview(learnRes.value.data.stats || { mentors: 0, workshops: 0 });
+                }
+
+                if (productRes.status === 'fulfilled') {
+                    const products = productRes.value.data.products || productRes.value.data || [];
+                    setMarketCount(Array.isArray(products) ? products.length : 0);
+                }
+            } catch (error) {
+                console.error('Failed to load feature highlights:', error);
+            }
+        };
+
+        loadDynamicHighlights();
+        return () => {
+            mounted = false;
+        };
+    }, []);
+
+    const dynamicStats = useMemo(() => ([
+        { label: 'Live mentors', value: `${overview.mentors || 2}+` },
+        { label: 'Workshops', value: `${overview.workshops || 0}+` },
+        { label: 'Marketplace finds', value: `${marketCount || 7}+` },
+    ]), [overview, marketCount]);
+
     return (
         <section id="features" className="relative w-full flex flex-col justify-center py-20 pb-0 bg-black overflow-hidden">
 
@@ -110,6 +150,14 @@ export default function Features() {
                     </div>
 
                     <div className="hidden md:block py-4">
+                        <div className="mb-5 grid grid-cols-3 gap-3">
+                            {dynamicStats.map((stat) => (
+                                <div key={stat.label} className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-right backdrop-blur-md">
+                                    <div className="text-xl font-black text-white">{stat.value}</div>
+                                    <div className="mt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white/35">{stat.label}</div>
+                                </div>
+                            ))}
+                        </div>
                         <div className="flex -space-x-8 hover:space-x-2 transition-all duration-500">
                             {userImages.map((img, i) => (
                                 <motion.div
@@ -132,7 +180,7 @@ export default function Features() {
 
                             <div className="w-14 h-16 bg-black flex flex-col items-center justify-center text-white shadow-xl rotate-12 z-10 border border-white/20">
                                 <span className="text-[10px] uppercase font-bold text-gray-400">Join</span>
-                                <span className="text-sm font-black text-transparent bg-clip-text bg-gradient-to-tr from-yellow-400 to-orange-500">50k</span>
+                                <span className="text-sm font-black text-transparent bg-clip-text bg-gradient-to-tr from-yellow-400 to-orange-500">{overview.mentors || 50}+</span>
                             </div>
                         </div>
                     </div>

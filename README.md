@@ -1,203 +1,324 @@
-<!--
-  Artify - Full-stack Artist Community & Marketplace
-  Production-ready, developer-friendly README for the repository root.
--->
+![Artify Studio Banner](./screenshots/Banner.png)
 
-# 🎨 Artify — Artist Community & Marketplace
+# Artify Studio
 
-> A full-stack platform for artists to showcase work, discover gigs and teachers, and buy/sell second-hand musical instruments.
+Artify Studio is a full-stack creative community and marketplace platform where artists, musicians, dancers, mentors, learners, and sellers can connect in one modern web experience.
 
-Built as a modern web application with a React frontend and a Node/Express + MongoDB backend. This repository contains two top-level projects: `client/` (frontend) and `server/` (backend).
+The project helps creators showcase their talent, discover events, join workshops, explore mentors, share community posts, chat in real time, and buy or sell musical instruments.
 
 ---
 
-## 🧭 Table of Contents
-- [Overview](#overview)
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Installation](#installation)
-- [Environment Variables](#environment-variables)
-- [Project Structure](#project-structure)
-- [API Summary](#api-summary)
-- [Development Scripts](#development-scripts)
-- [Contributing](#contributing)
-- [Author](#author)
+## Live Demo
+
+Deployment link will be added here:
+
+```text
+Coming Soon
+```
 
 ---
 
-## 🔍 Overview
+## Features
 
-Artify is a community-first marketplace where musicians and performing artists can connect, find events, discover teachers, and trade instruments. The platform supports role-based users (regular users and sellers), secure authentication, geo-based shop discovery, and a simple marketplace for listings.
+### Authentication
 
-This repository contains:
-- `client/` — React frontend (UI, pages, components)
-- `server/` — Node.js + Express backend (APIs, authentication, database models)
+- User signup, login, logout, and protected routes
+- JWT-based authentication
+- Password reset flow
+- Separate seller authentication flow
 
-## ✨ Features
+### Artist & Profile System
 
-- Secure authentication with JWT and token blacklist
-- Role-based access control (User, Seller)
-- User profile creation and skills showcase
-- Seller onboarding and item/shop listings
-- GeoJSON-based nearby shop discovery
-- Responsive React frontend with Tailwind CSS
+- User profile management
+- Public creator profiles
+- Mentor profile update option
+- Saved products and wallet section
 
-## 🛠️ Tech Stack
+### Learn & Mentor System
 
-- Frontend: React, Tailwind CSS, Axios
-- Backend: Node.js, Express, Mongoose
-- Database: MongoDB Atlas
-- Auth & Security: JWT, bcrypt, cookie-parser, CORS
+- Dynamic Learn Page
+- Become a Mentor from Profile Settings
+- Public Mentor Profiles
+- Mentor Identity System
+- Unique Mentor Visibility
+
+### Workshop
+
+- Live Workshop Section
+- Mentor-based workshop creation
+- Interactive learning experience
+
+### Events
+
+- Event listing and event details
+- Create events
+- Add event reviews
+- Delete user-created events
+
+### Community
+
+- Create community posts
+- Like and comment on posts
+- Delete posts
+- Discover creator activity
+
+### Marketplace
+
+- Browse marketplace products
+- Upload Images & Videos
+- Product details page
+- Add product listing
+- Seller-wise product listing
+- Cart and saved product support
+
+### Payments
+
+- Razorpay order creation
+- Razorpay payment verification
+- User order history
+
+### Messaging
+
+- Real-time chat using Socket.IO
+- User conversations
+- Send and delete messages
+
+### Modern UI/UX
+
+- Responsive dark theme interface
+- Smooth animations with Framer Motion and GSAP
+- Clean component-based frontend structure
+
+### Performance & Optimization
+
+- Dynamic API-based rendering
+- Optimized frontend structure
+- Continuous debugging & improvements
+
+## Key Highlights
+
+- Full-stack MERN application
+- Real-time chat using Socket.IO
+- Razorpay payment integration
+- Cloudinary media upload integration
+- Role-based mentor system
+- Event creation and management system
+- Community + Marketplace + Learning platform
+- Dynamic workshop and mentor features
 
 ---
 
-## 🚀 Installation (Quick Start)
+## Tech Stack
 
-Prerequisites
-- Node.js (v16+ recommended)
-- npm or yarn
-- MongoDB Atlas account or any MongoDB connection
+### Frontend
 
-Clone the repository
+- React.js
+- Vite
+- Tailwind CSS
+- React Router DOM
+- Axios
+- Framer Motion
+- GSAP
+- Socket.IO Client
+
+### Backend
+
+- Node.js
+- Express.js
+- MongoDB
+- Mongoose
+- JWT
+- bcrypt
+- Socket.IO
+
+### Services & Tools
+
+- Cloudinary
+- Razorpay
+- Nodemailer
+- Git & GitHub
+
+---
+
+## Project Structure
+
+```bash
+Artify/
+├── client/                 # React frontend
+│   ├── src/
+│   │   ├── assets/         # Images and static assets
+│   │   ├── components/     # Reusable UI components
+│   │   ├── context/        # Auth and cart context
+│   │   ├── pages/          # App pages
+│   │   └── utils/          # API and helper utilities
+│   ├── .env.example
+│   └── package.json
+│
+├── server/                 # Express backend
+│   ├── config/             # Database configuration
+│   ├── controllers/        # Route business logic
+│   ├── middleware/         # Auth middleware
+│   ├── models/             # Mongoose models
+│   ├── routes/             # API routes
+│   ├── utils/              # Cron jobs and helpers
+│   ├── .env.example
+│   └── package.json
+│ 
+├── screenshots/            
+│   ├── Banner.png
+│   ├── Events.png
+│   ├── Home.png
+│   ├── Learn.png
+│   ├── Marketplace.png
+│   └── Mentor.png
+│
+├── .gitignore
+└── README.md
+```
+
+---
+
+## Installation & Setup
+
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/NitishCodeMaster/Artify.git
 cd Artify
 ```
 
-Install and run the backend
+### 2. Install Dependencies
 
-```pwsh
-cd server
-npm install
-# create and configure .env (see Environment Variables below)
-npm run dev   # starts server with nodemon (development)
-```
+Frontend:
 
-Install and run the frontend
-
-```pwsh
+```bash
 cd client
 npm install
-npm run dev   # or `npm start` depending on the client setup
 ```
 
-Open the frontend in the browser (likely `http://localhost:3000` or `http://localhost:5173` depending on the client) and the API at `http://localhost:5000` (or the `PORT` you configured).
+Backend:
 
----
+```bash
+cd server
+npm install
+```
 
-## 🔐 Environment Variables
+### 3. Setup Environment Variables
 
-Create a `.env` file in `server/` and (if required) in `client/`.
+Use the `.env.example` files only as templates:
 
-Server (`server/.env`) - example keys:
+- `server/.env.example` shows the backend keys.
+- `client/.env.example` shows the frontend keys.
+
+Your real files should be named `.env` inside `server/` and `client/`. Real `.env` files are ignored by Git and should not be uploaded to GitHub.
+
+### 4. Start the Backend
+
+```bash
+cd server
+npm run dev
+```
+
+Backend runs on:
 
 ```text
-PORT=5000
-MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret
-COOKIE_SECRET=your_cookie_secret
+http://localhost:5000
 ```
 
-Client environment variables vary by toolchain:
-- For Create React App: use `REACT_APP_API_URL=http://localhost:5000`
-- For Vite: use `VITE_API_URL=http://localhost:5000`
+### 5. Start the Frontend
 
-Keep secrets out of version control. Consider adding a `.env.example` documenting keys (without real secrets).
-
----
-
-## 🗂️ Project Structure
-
-Top-level layout:
-
-```
-Artify/
-├─ client/        # React frontend (UI)
-├─ server/        # Node + Express backend (APIs)
-│   ├─ config/    # DB and config
-│   ├─ controllers/# Business logic
-│   ├─ middleware/ # auth, error handlers
-│   ├─ models/    # Mongoose models
-│   ├─ routes/    # Express routes
-│   └─ server.js  # app entrypoint
-└─ README.md      # <-- you are here
-```
-
-Refer to `server/README.md` for backend-specific details and `client/README.md` (if present) for frontend setup.
-
----
-
-## 📡 API Summary
-
-This is a concise overview. For full details, read the route files in `server/routes/` and controllers in `server/controllers/`.
-
-Auth & User
-
-- `POST /users/register` — Register a new user
-- `POST /users/login` — Login (returns JWT / sets cookie)
-- `POST /users/logout` — Logout (blacklist token)
-- `GET /users/me` — Get current user's profile (protected)
-- `PUT /users/profile` — Update user profile (protected)
-
-Seller & Marketplace
-
-- `POST /sellers/register` — Register as a seller
-- `POST /sellers/create-listing` — Create an item or shop listing (protected)
-- `GET /sellers/nearby` — Find nearby shops / sellers (GeoJSON query)
-
-Notes
-- Protected endpoints require a valid JWT and appropriate role. Check `server/middleware/authMiddleware.js` for details.
-
----
-
-## ⚙️ Development Scripts
-
-Common scripts you will use (verify `package.json` files inside `client/` and `server/`):
-
-- `npm install` — install dependencies
-- `npm run dev` — start development server (frontend or backend)
-- `npm start` — production start
-
-Example: start both services (open two terminals)
-
-```pwsh
-# Terminal A
-cd server
-npm run dev
-
-# Terminal B
+```bash
 cd client
 npm run dev
 ```
 
----
+Frontend runs on:
 
-## 🤝 Contributing
-
-We welcome contributions. Please follow this workflow:
-
-1. Fork the repository and create a descriptive branch (`feature/your-feature`, `fix/issue-description`).
-2. Keep changes focused and add tests where applicable.
-3. Ensure code style and linting pass.
-4. Open a PR against `main` with a clear description and linked issue (if any).
-
-Guidelines
-- Write clear commit messages.
-- Keep secrets out of commits.
-- Add documentation updates for public-facing changes to the README or route docs.
+```text
+http://localhost:5173
+```
 
 ---
 
-## 💬 Author
+## Environment Variables
 
-Nitish Kumar — Full-Stack Developer & Music Enthusiast
+### Server
 
-If you like this project, please give it a ⭐ on GitHub and consider opening issues or PRs for improvements.
+```env
+PORT=5000
+CLIENT_URL=http://localhost:5173
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+
+CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+
+RAZORPAY_KEY_ID=your_razorpay_key_id
+RAZORPAY_KEY_SECRET=your_razorpay_key_secret
+
+EMAIL_USER=your_email_address
+EMAIL_PASS=your_email_app_password
+```
+
+### Client
+
+```env
+VITE_API_URL=http://localhost:5000/api
+VITE_RAZORPAY_KEY_ID=your_razorpay_key_id
+```
 
 ---
 
-If you'd like, I can also:
-- add a `server/.env.example` and `client/.env.example`,
-- generate an OpenAPI (Swagger) spec from the routes,
-- or create a `CONTRIBUTING.md` with a template PR checklist.
+## API Modules
+
+- `/api/users` - user auth, profile, wallet, saved items
+- `/api/sellers` - seller auth and seller profile
+- `/api/home` - home page data
+- `/api/products` - marketplace products
+- `/api/posts` - community posts, likes, comments
+- `/api/payments` - Razorpay orders and verification
+- `/api/messages` - conversations and chat messages
+- `/api/events` - events and event reviews
+- `/api/reviews` - product or platform reviews
+- `/api/learn` - mentors and workshops
+
+---
+
+## Screenshots 
+
+![Home](./screenshots/Home.png)
+![Learn](./screenshots/Learn.png)
+![Marketplace](./screenshots/Marketplace.png)
+![Events](./screenshots/Events.png)
+![Mentor](./screenshots/Mentor.png)
+![Login](./screenshots/Login.png)
+![Signup](./screenshots/Signup.png)
+
+---
+
+## Future Improvements
+
+- Admin dashboard for user, event, and marketplace management
+- AI-based artist, event, mentor, and product recommendations
+- Live classes and video workshops
+- Mentor booking system
+- Better notification system
+- Advanced search and filters
+- Verified creator and seller badges
+
+---
+
+## Author
+
+**Nitish Kumar**
+
+B.Tech CSE Student | Full Stack Developer
+
+Passionate about building creative, modern, and impactful web applications.
+
+---
+
+## Support
+
+If you like this project, consider giving it a star on GitHub.
