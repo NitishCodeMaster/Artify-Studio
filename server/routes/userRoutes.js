@@ -13,7 +13,6 @@ router.post('/register', [
         .isLength({ min: 10, max: 10 })
         .withMessage('Phone must be a 10 digit number')
 ], userController.registerUser);
-
 router.post('/login', [
     body('email').isEmail().withMessage('Please include a valid email'),
     body('password').exists().withMessage('Password is required')

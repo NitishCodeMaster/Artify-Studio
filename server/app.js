@@ -32,6 +32,10 @@ app.get("/", (req, res) => {
     res.send("hello world");
 });
 
+app.get("/api/test", (req, res) => {
+    res.json({ status: "Backend working 🚀" });
+});
+
 app.use('/api/users', userRoutes);
 app.use('/api/sellers', sellerRoutes);
 app.use("/api/home", homeRoutes);
