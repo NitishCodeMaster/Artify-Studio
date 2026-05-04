@@ -23,11 +23,9 @@ const Sidebar = ({ categories, activeCategory, setActiveCategory, setSearchQuery
             <div className="sticky top-24 space-y-6">
 
                 <div className="bg-[#0a0a0a]/80 backdrop-blur-2xl border border-white/10 rounded-[2rem] p-5 shadow-2xl relative overflow-hidden">
-                    {/* 🌟 FIX 1: 'pointer-events-none' add kiya taaki ye clicks block na kare */}
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.05),transparent_50%)] pointer-events-none"></div>
+                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.05),transparent_50%)] pointer-events-none"></div>
 
-                    {/* Categories Section */}
-                    <div className="mb-8 relative z-10">
+                     <div className="mb-8 relative z-10">
                         <h3 className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] mb-4 px-3">Discover</h3>
                         <div className="space-y-1">
                             {categories.map((cat, i) => {
@@ -48,8 +46,7 @@ const Sidebar = ({ categories, activeCategory, setActiveCategory, setSearchQuery
                         </div>
                     </div>
 
-                    {/* 🌟 Your Space (FIX 2: 'relative z-10' add kiya taaki ye background ke upar aaye) */}
-                    <div className="relative z-10">
+                     <div className="relative z-10">
                         <h3 className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] mb-4 px-3">Your Space</h3>
                         <div className="space-y-1">
                             {spaceItems.map((item, i) => {
@@ -71,8 +68,7 @@ const Sidebar = ({ categories, activeCategory, setActiveCategory, setSearchQuery
                     </div>
                 </div>
 
-                {/* Event Card */}
-                <div onClick={() => navigate('/events')} className="relative group cursor-pointer">
+                 <div onClick={() => navigate('/events')} className="relative group cursor-pointer">
                     <div className="absolute -inset-1 bg-gradient-to-b from-amber-500 to-orange-600 rounded-[2rem] blur opacity-20 group-hover:opacity-50 transition duration-500"></div>
 
                     <div className="relative bg-[#0F0F0F] border border-white/10 rounded-[2rem] overflow-hidden flex flex-col">

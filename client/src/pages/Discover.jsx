@@ -3,7 +3,7 @@ import { Layers, Music, Palette, Star, Camera, Calendar } from 'lucide-react';
 import { Footer } from '../components/Footer';
 
 import HeroSection from '../components/Discover/HeroSection';
-import Sidebar from '../components/Discover/SideBar';
+import Sidebar from '../components/Discover/Sidebar';
 import ContentFeed from '../components/Discover/ContentFeed';
 
 const categories = [
