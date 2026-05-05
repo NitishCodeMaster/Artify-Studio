@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Heart, MessageCircle, Send, UserCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../utils/api';
-import { timeAgo } from '../../utils/timeAgo';
+import { timeAgo } from '../../utils/timeago';
 import { useNavigate } from 'react-router-dom';
 
 const PostCard = ({ post }) => {
