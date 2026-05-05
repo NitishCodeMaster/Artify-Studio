@@ -35,10 +35,10 @@ export function MentorGrid({ mentors = [], filter = '', loading = false }) {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.35 }}
                 transition={{ duration: 0.45 }}
-                className="mb-8 flex items-end justify-between px-1"
+                className="mb-8 flex flex-col items-start justify-between gap-4 px-1 sm:flex-row sm:items-end"
             >
-                <div>
-                    <h3 className="text-3xl font-bold text-white">Top Rated Mentors</h3>
+                <div className="min-w-0">
+                    <h3 className="text-2xl font-bold text-white sm:text-3xl">Top Rated Mentors</h3>
                     <p className="mt-2 text-sm text-white/40">Real mentor profiles powered from artist accounts, each with a unique mentor identity.</p>
                 </div>
                 <button onClick={() => navigate('/settings')} className="text-sm font-bold uppercase tracking-wider text-pink-400 hover:text-pink-300">
@@ -46,7 +46,7 @@ export function MentorGrid({ mentors = [], filter = '', loading = false }) {
                 </button>
             </motion.div>
 
-            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+            <div className="grid gap-5 sm:gap-6 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
                 {loading && [1, 2, 3].map((item) => <MentorSkeleton key={item} />)}
 
                 {!loading && visibleMentors.map((mentor, index) => (
@@ -57,7 +57,7 @@ export function MentorGrid({ mentors = [], filter = '', loading = false }) {
                         viewport={{ once: true, amount: 0.2 }}
                         transition={{ duration: 0.4, delay: index * 0.08 }}
                         whileHover={{ y: -8 }}
-                        className={`group relative rounded-3xl border border-white/5 bg-[#0f0f0f] p-4 transition-all duration-300 hover:-translate-y-2 ${mentor.shadow} ${mentor.border}`}
+                        className={`group relative rounded-2xl border border-white/5 bg-[#0f0f0f] p-3 transition-all duration-300 hover:-translate-y-2 sm:rounded-3xl sm:p-4 ${mentor.shadow} ${mentor.border}`}
                     >
                         <div className="relative mb-5 h-64 overflow-hidden rounded-2xl">
                             <ImageWithFallback src={mentor.image} alt={mentor.name} className="h-full w-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
@@ -80,14 +80,14 @@ export function MentorGrid({ mentors = [], filter = '', loading = false }) {
                         </div>
 
                         <div className="px-2">
-                            <div className="mb-1 flex items-center justify-between gap-3">
+                            <div className="mb-1 flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
                                 <h4 className="text-xl font-bold text-white">{mentor.name}</h4>
-                                <span className="text-xs uppercase tracking-[0.22em] text-white/30">{mentor.mentorSlug}</span>
+                                <span className="break-all text-[11px] uppercase tracking-[0.18em] text-white/30 sm:text-xs sm:tracking-[0.22em]">{mentor.mentorSlug}</span>
                             </div>
                             <p className="mb-1 text-sm text-white/70">{mentor.skill}</p>
                             <p className="mb-4 line-clamp-2 text-sm leading-relaxed text-white/45">{mentor.headline}</p>
 
-                            <div className="mb-5 grid grid-cols-2 gap-3 text-xs text-white/55">
+                            <div className="mb-5 grid grid-cols-1 gap-3 text-xs text-white/55 sm:grid-cols-2">
                                 <div className="rounded-2xl border border-white/10 bg-white/[0.02] px-3 py-3">
                                     <div className="mb-1 flex items-center gap-1.5 uppercase tracking-[0.2em] text-white/30">
                                         <Users size={12} />
@@ -104,14 +104,14 @@ export function MentorGrid({ mentors = [], filter = '', loading = false }) {
                                 </div>
                             </div>
 
-                            <div className="flex items-center justify-between border-t border-white/10 pt-4">
+                            <div className="flex flex-col gap-4 border-t border-white/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
                                 <div>
                                     <div className="text-lg font-bold text-white">{mentor.price}</div>
                                     <div className="text-xs text-white/35">{mentor.experience}</div>
                                 </div>
                                 <button
                                     onClick={() => navigate(`/profile/${mentor.id}`)}
-                                    className="flex items-center gap-2 rounded-full bg-white px-5 py-2 text-sm font-bold text-black transition-colors hover:bg-gray-200"
+                                    className="flex min-h-10 items-center justify-center gap-2 rounded-full bg-white px-5 py-2 text-sm font-bold text-black transition-colors hover:bg-gray-200"
                                 >
                                     <Video size={16} />
                                     View Mentor

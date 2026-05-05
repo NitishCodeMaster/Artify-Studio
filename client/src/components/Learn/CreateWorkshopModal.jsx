@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { X, CalendarDays, Clock3, ImagePlus, Tag, Users, Sparkles, Type } from 'lucide-react';
 import { toast } from 'react-hot-toast';
@@ -19,9 +19,33 @@ const initialState = {
 export default function CreateWorkshopModal({ isOpen, onClose, onCreated }) {
     const [formData, setFormData] = useState(initialState);
     const [loading, setLoading] = useState(false);
+    const [imageName, setImageName] = useState('');
+    const fileInputRef = useRef(null);
 
     const handleChange = (key, value) => {
         setFormData((prev) => ({ ...prev, [key]: value }));
+    };
+
+    const handleImageUpload = (file) => {
+        if (!file) return;
+
+        if (!file.type.startsWith('image/')) {
+            toast.error('Please upload a valid image file.');
+            return;
+        }
+
+        if (file.size > 4 * 1024 * 1024) {
+            toast.error('Image 4MB se chhoti honi chahiye.');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = () => {
+            handleChange('coverImage', reader.result);
+            setImageName(file.name);
+        };
+        reader.onerror = () => toast.error('Image read nahi ho payi.');
+        reader.readAsDataURL(file);
     };
 
     const handleSubmit = async (e) => {
@@ -38,6 +62,7 @@ export default function CreateWorkshopModal({ isOpen, onClose, onCreated }) {
             const res = await api.post('/learn/workshops', payload);
             toast.success('Workshop live ho gaya!');
             setFormData(initialState);
+            setImageName('');
             onCreated?.(res.data.workshop);
             onClose?.();
         } catch (error) {
@@ -50,7 +75,7 @@ export default function CreateWorkshopModal({ isOpen, onClose, onCreated }) {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center px-4">
+        <div className="fixed inset-0 z-[120] flex items-center justify-center px-3 py-4 sm:px-4">
             <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -62,19 +87,19 @@ export default function CreateWorkshopModal({ isOpen, onClose, onCreated }) {
             <motion.div
                 initial={{ scale: 0.96, opacity: 0, y: 20 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
-                className="relative w-full max-w-3xl overflow-hidden rounded-[2rem] border border-white/10 bg-[#0f0f12] shadow-2xl"
+                className="relative max-h-[92vh] w-full max-w-3xl overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#0f0f12] shadow-2xl sm:rounded-[2rem]"
             >
-                <div className="flex items-center justify-between border-b border-white/5 bg-white/[0.02] px-6 py-5">
+                <div className="flex items-start justify-between gap-4 border-b border-white/5 bg-white/[0.02] px-4 py-4 sm:px-6 sm:py-5">
                     <div>
                         <p className="mb-1 text-xs font-bold uppercase tracking-[0.22em] text-pink-400">Mentor Workshop</p>
-                        <h2 className="text-xl font-bold text-white">Create Live Masterclass</h2>
+                        <h2 className="text-lg font-bold text-white sm:text-xl">Create Live Masterclass</h2>
                     </div>
-                    <button onClick={onClose} className="rounded-full p-2 transition-colors hover:bg-white/5">
+                    <button type="button" onClick={onClose} className="shrink-0 rounded-full p-2 transition-colors hover:bg-white/5">
                         <X size={20} className="text-white/55" />
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="grid max-h-[78vh] grid-cols-1 gap-6 overflow-y-auto p-8 md:grid-cols-2">
+                <form onSubmit={handleSubmit} className="grid max-h-[calc(92vh-82px)] grid-cols-1 gap-5 overflow-y-auto p-4 sm:p-6 md:grid-cols-2 md:p-8">
                     <div className="space-y-2 md:col-span-2">
                         <label className="flex items-center gap-2 text-xs font-bold uppercase text-white/40">
                             <Type size={12} />
@@ -127,7 +152,7 @@ export default function CreateWorkshopModal({ isOpen, onClose, onCreated }) {
                             type="number"
                             min="15"
                             value={formData.durationMinutes}
-                            onChange={(e) => handleChange('durationMinutes', e.target.value)}
+                            onChange={(e) => handleChange('durationMinutes', Number(e.target.value))}
                             className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition-all focus:border-indigo-500"
                         />
                     </div>
@@ -141,7 +166,7 @@ export default function CreateWorkshopModal({ isOpen, onClose, onCreated }) {
                             type="number"
                             min="0"
                             value={formData.attendeesCount}
-                            onChange={(e) => handleChange('attendeesCount', e.target.value)}
+                            onChange={(e) => handleChange('attendeesCount', Number(e.target.value))}
                             className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition-all focus:border-indigo-500"
                         />
                     </div>
@@ -175,17 +200,39 @@ export default function CreateWorkshopModal({ isOpen, onClose, onCreated }) {
                         />
                     </div>
 
-                    <div className="space-y-2 md:col-span-2">
+                    <div className="space-y-3 md:col-span-2">
                         <label className="flex items-center gap-2 text-xs font-bold uppercase text-white/40">
                             <ImagePlus size={12} />
-                            Cover Image URL
+                            Cover Photo
                         </label>
+                        <div className="grid gap-4 sm:grid-cols-[180px_1fr]">
+                            <button
+                                type="button"
+                                onClick={() => fileInputRef.current?.click()}
+                                className="flex min-h-36 flex-col items-center justify-center rounded-2xl border border-dashed border-white/15 bg-white/[0.035] px-4 py-5 text-center transition-all hover:border-indigo-400/50 hover:bg-indigo-500/10"
+                            >
+                                <ImagePlus size={26} className="mb-3 text-indigo-200" />
+                                <span className="text-sm font-bold text-white">Upload Photo</span>
+                                <span className="mt-1 text-xs text-white/40">JPG, PNG, WEBP up to 4MB</span>
+                            </button>
+                            <div className="min-h-36 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
+                                {formData.coverImage ? (
+                                    <img src={formData.coverImage} alt="Workshop cover preview" className="h-full max-h-56 w-full object-cover" />
+                                ) : (
+                                    <div className="flex h-full min-h-36 items-center justify-center px-4 text-center text-sm text-white/35">
+                                        Uploaded workshop cover preview yahan dikhega.
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                         <input
-                            value={formData.coverImage}
-                            onChange={(e) => handleChange('coverImage', e.target.value)}
-                            placeholder="https://..."
-                            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition-all focus:border-indigo-500"
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => handleImageUpload(e.target.files?.[0])}
                         />
+                        {imageName && <p className="truncate text-xs text-white/40">{imageName}</p>}
                     </div>
 
                     <div className="space-y-2 md:col-span-2">

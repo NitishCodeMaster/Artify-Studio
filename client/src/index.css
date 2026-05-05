@@ -2,7 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
- html, body {
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
   width: 100%;
   height: 100%;
   margin: 0;
@@ -11,6 +15,19 @@
   overscroll-behavior-x: none;
   background-color: #000000;
   scroll-behavior: smooth; 
+}
+
+img, video, canvas, svg {
+  max-width: 100%;
+}
+
+button, input, textarea, select {
+  font: inherit;
+}
+
+#root {
+  min-height: 100%;
+  overflow-x: clip;
 }
 
  .no-scrollbar::-webkit-scrollbar {

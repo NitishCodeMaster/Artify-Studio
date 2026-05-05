@@ -51,17 +51,17 @@ export function LiveWorkshops({ workshops = [], filter = '', loading = false, on
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.35 }}
                 transition={{ duration: 0.45 }}
-                className="mb-10 flex items-end justify-between gap-6 px-4"
+                className="mb-8 flex flex-col items-start justify-between gap-5 px-1 sm:mb-10 sm:px-4 md:flex-row md:items-end"
             >
-                <div>
-                    <h3 className="text-3xl font-bold text-white">Upcoming Live Masterclasses</h3>
+                <div className="min-w-0">
+                    <h3 className="text-2xl font-bold text-white sm:text-3xl">Upcoming Live Masterclasses</h3>
                     <p className="mt-2 text-sm text-white/40">Mentor-led workshops now come from live backend data, so this section stays fresh automatically.</p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex w-full flex-wrap items-center gap-3 md:w-auto md:justify-end">
                     {canCreateWorkshop && (
                         <button
                             onClick={onCreateWorkshop}
-                            className="inline-flex items-center gap-2 rounded-full border border-indigo-400/20 bg-indigo-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-indigo-200 transition-all hover:bg-indigo-500/15"
+                            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-indigo-400/20 bg-indigo-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-indigo-200 transition-all hover:bg-indigo-500/15"
                         >
                             <Plus size={13} />
                             Create Workshop
@@ -74,7 +74,7 @@ export function LiveWorkshops({ workshops = [], filter = '', loading = false, on
                 </div>
             </motion.div>
 
-            <div className="grid gap-6 md:grid-cols-2">
+            <div className="grid gap-5 sm:gap-6 lg:grid-cols-2">
                 {loading && [1, 2].map((item) => <WorkshopSkeleton key={item} />)}
 
                 {!loading && (
@@ -87,7 +87,7 @@ export function LiveWorkshops({ workshops = [], filter = '', loading = false, on
                                 viewport={{ once: true, amount: 0.2 }}
                                 transition={{ duration: 0.45, delay: index * 0.08 }}
                                 whileHover={{ y: -6 }}
-                                className={`group relative cursor-pointer overflow-hidden rounded-3xl border transition-all duration-300 ${activeIndex === index ? 'border-white/20' : 'border-white/10'}`}
+                                className={`group relative cursor-pointer overflow-hidden rounded-2xl border transition-all duration-300 sm:rounded-3xl ${activeIndex === index ? 'border-white/20' : 'border-white/10'}`}
                                 onClick={() => ws.mentorId && navigate(`/profile/${ws.mentorId}`)}
                             >
                                 <div className="relative h-52 overflow-hidden">
@@ -107,17 +107,17 @@ export function LiveWorkshops({ workshops = [], filter = '', loading = false, on
                                     />
                                 </div>
 
-                                <div className="relative flex h-full flex-col p-8">
-                                    <h4 className="max-w-md text-2xl font-bold text-white">{ws.title}</h4>
+                                <div className="relative flex h-full flex-col p-5 sm:p-8">
+                                    <h4 className="max-w-md text-xl font-bold text-white sm:text-2xl">{ws.title}</h4>
                                     <p className="mt-2 text-white/65">{ws.tutor}</p>
                                     <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-white/45">{ws.summary}</p>
 
-                                    <div className="mt-8 flex items-center justify-between">
+                                    <div className="mt-7 flex flex-col gap-5 sm:mt-8 sm:flex-row sm:items-center sm:justify-between">
                                         <div className="flex flex-col gap-2">
                                             <div className="flex items-center gap-2 text-sm text-white/80">
                                                 <Calendar size={16} className="text-pink-400" /> {ws.date}
                                             </div>
-                                            <div className="flex items-center gap-4 text-sm text-white/50">
+                                            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-white/50">
                                                 <span className="flex items-center gap-2">
                                                     <Users size={16} /> {ws.attendees} Registered
                                                 </span>
@@ -127,7 +127,7 @@ export function LiveWorkshops({ workshops = [], filter = '', loading = false, on
                                             </div>
                                         </div>
 
-                                        <button className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-black transition-transform group-hover:scale-110">
+                                        <button className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white text-black transition-transform group-hover:scale-110">
                                             <ArrowRight size={20} />
                                         </button>
                                     </div>

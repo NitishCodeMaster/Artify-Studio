@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 
 export function LearnHero({ searchQuery, setSearchQuery, stats, onFindMentor }) {
     return (
-        <div className="mb-14 grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr]">
+        <div className="mb-12 grid items-center gap-8 sm:mb-14 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10">
             <div>
             <motion.div
                 initial={{ opacity: 0, y: 14 }}
@@ -27,7 +27,7 @@ export function LearnHero({ searchQuery, setSearchQuery, stats, onFindMentor }) 
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.45 }}
                 transition={{ duration: 0.5, delay: 0.05 }}
-                className="text-5xl md:text-7xl font-black text-white font-playfair mb-6 leading-tight"
+                className="mb-5 text-4xl font-black leading-tight text-white sm:text-5xl md:text-6xl lg:text-7xl"
             >
                 Learn from the <br className="hidden sm:block" />
                 <motion.span
@@ -44,7 +44,7 @@ export function LearnHero({ searchQuery, setSearchQuery, stats, onFindMentor }) 
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.45 }}
                 transition={{ duration: 0.5, delay: 0.12 }}
-                className="text-lg text-white/40 leading-relaxed max-w-2xl mb-8"
+                className="mb-7 max-w-2xl text-base leading-relaxed text-white/40 sm:mb-8 sm:text-lg"
             >
                 Book 1-on-1 mentorship sessions, join live masterclasses, and level up your skills with verified pros.
             </motion.p>
@@ -56,10 +56,10 @@ export function LearnHero({ searchQuery, setSearchQuery, stats, onFindMentor }) 
                 transition={{ duration: 0.5, delay: 0.15 }}
                 className="mb-7 flex flex-wrap items-center gap-3"
             >
-                <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-white/65">
+                <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/65 sm:tracking-[0.22em]">
                     {stats?.mentors || 0}+ live mentors
                 </div>
-                <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-white/65">
+                <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/65 sm:tracking-[0.22em]">
                     {stats?.workshops || 0}+ active workshops
                 </div>
             </motion.div>
@@ -71,19 +71,19 @@ export function LearnHero({ searchQuery, setSearchQuery, stats, onFindMentor }) 
                 transition={{ duration: 0.5, delay: 0.18 }}
                 className="relative max-w-2xl group"
             >
-                <div className="absolute inset-0 bg-gradient-to-r from-pink-500 to-indigo-500 rounded-full blur opacity-25 group-hover:opacity-40 transition-opacity"></div>
-                <div className="relative flex items-center bg-[#0a0a0a] border border-white/10 rounded-full p-2 pl-6 shadow-2xl">
-                    <Search className="text-white/40 mr-3" size={20} />
+                <div className="absolute inset-0 rounded-[1.6rem] bg-gradient-to-r from-pink-500 to-indigo-500 opacity-25 blur transition-opacity group-hover:opacity-40 sm:rounded-full"></div>
+                <div className="relative flex flex-col gap-3 rounded-[1.6rem] border border-white/10 bg-[#0a0a0a] p-3 shadow-2xl sm:flex-row sm:items-center sm:rounded-full sm:pl-6">
+                    <Search className="hidden text-white/40 sm:block" size={20} />
                     <input
                         type="text"
                         placeholder="What do you want to learn? (e.g. Guitar, Oil Painting)"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="bg-transparent text-white w-full focus:outline-none placeholder-white/30"
+                        className="min-h-11 w-full bg-transparent px-2 text-white placeholder-white/30 focus:outline-none sm:px-0"
                     />
                     <button
                         onClick={onFindMentor}
-                        className="bg-white text-black px-6 py-3 rounded-full font-bold hover:bg-gray-200 transition-colors flex items-center gap-2"
+                        className="flex min-h-11 items-center justify-center gap-2 rounded-full bg-white px-5 py-3 font-bold text-black transition-colors hover:bg-gray-200 sm:px-6"
                     >
                         Find Mentor
                         <ArrowRight size={16} />
