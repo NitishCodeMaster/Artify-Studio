@@ -309,6 +309,63 @@ VITE_RAZORPAY_KEY_ID=your_razorpay_key_id
 
 ---
 
+## Recent Product Updates
+
+These updates were added to make the learning, workshop, and creator experience more dynamic and production-ready.
+
+### Learn Workshops & Live Rooms
+
+- Workshop creation now supports direct photo upload instead of only image URLs.
+- Uploaded workshop photos are displayed with an adjustable preview style, so portrait and landscape images do not get badly cropped.
+- Workshop cards open a detailed workshop modal with:
+  - Back button
+  - Full workshop image preview
+  - Schedule, duration, registered learners, and mode
+  - Mentor profile action
+  - Delete action for the mentor who created the workshop
+- Past workshops are automatically removed from the backend workshop list.
+  - The server checks workshop `startAt` plus `durationMinutes`.
+  - Expired sessions are deleted before returning live workshop data.
+  - Only present/running and future workshops remain visible.
+
+### Jitsi Live Room Integration
+
+- Each workshop gets a unique Jitsi room link based on its workshop id.
+- The live room format is:
+
+```text
+https://meet.jit.si/artify-workshop-<workshop-id>
+```
+
+- The `Join Live Room` button opens the workshop room in a new browser tab.
+- The workshop modal also includes:
+  - Copy Room Link
+  - Add to Calendar
+- Add to Calendar downloads an `.ics` invite containing the workshop title, schedule, duration, description, and Jitsi room link.
+
+### Dynamic Features Section
+
+- `Features.jsx` now uses live backend data from:
+  - `/api/learn/overview`
+  - `/api/products`
+- Feature cards now show dynamic metrics, progress bars, and route-aware actions.
+- The active feature spotlight auto-rotates and updates on hover or click.
+- A Creative Spark prompt card was added to make the homepage more interactive.
+
+### Creative Pulse Widget
+
+- A global Creative Pulse widget was added across the app.
+- It gives route-aware suggestions depending on the current page.
+- It includes quick actions that navigate to useful sections.
+- If hidden, a small restore button remains visible so the widget can be brought back anytime.
+
+### Deployment Fixes
+
+- `/api/products` now works directly in addition to `/api/products/all`.
+- This fixes frontend requests that expect the root products endpoint during deployment.
+
+---
+
 ## Author
 
 **Nitish Kumar**

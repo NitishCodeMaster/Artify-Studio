@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { X, CalendarDays, Clock3, ImagePlus, Tag, Users, Sparkles, Type } from 'lucide-react';
+import { X, CalendarDays, Clock3, ImagePlus, Tag, Users, Sparkles, Type, IndianRupee } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import api from '../../utils/api';
 
@@ -12,6 +12,8 @@ const initialState = {
     attendeesCount: 0,
     tags: '',
     mode: 'Live',
+    accessType: 'free',
+    price: 0,
     coverImage: '',
     accentColor: 'from-purple-600 to-pink-600',
 };
@@ -181,11 +183,51 @@ export default function CreateWorkshopModal({ isOpen, onClose, onCreated }) {
                             onChange={(e) => handleChange('mode', e.target.value)}
                             className="w-full rounded-xl border border-white/10 bg-[#151515] px-4 py-3 text-white outline-none transition-all focus:border-indigo-500"
                         >
-                            <option value="Live">Live</option>
                             <option value="Online">Online</option>
+                            <option value="Live">Offline</option>
                             <option value="Hybrid">Hybrid</option>
                         </select>
                     </div>
+
+                    <div className="space-y-2">
+                        <label className="flex items-center gap-2 text-xs font-bold uppercase text-white/40">
+                            <IndianRupee size={12} />
+                            Class Access
+                        </label>
+                        <div className="grid grid-cols-2 gap-2 rounded-xl border border-white/10 bg-white/[0.03] p-1">
+                            {[
+                                { label: 'Free', value: 'free' },
+                                { label: 'Paid', value: 'paid' },
+                            ].map((item) => (
+                                <button
+                                    key={item.value}
+                                    type="button"
+                                    onClick={() => handleChange('accessType', item.value)}
+                                    className={`rounded-lg px-3 py-2 text-sm font-bold transition-all ${formData.accessType === item.value ? 'bg-white text-black' : 'text-white/55 hover:bg-white/[0.05] hover:text-white'}`}
+                                >
+                                    {item.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {formData.accessType === 'paid' && (
+                        <div className="space-y-2">
+                            <label className="flex items-center gap-2 text-xs font-bold uppercase text-white/40">
+                                <IndianRupee size={12} />
+                                Price (INR)
+                            </label>
+                            <input
+                                required
+                                type="number"
+                                min="1"
+                                value={formData.price}
+                                onChange={(e) => handleChange('price', Number(e.target.value))}
+                                placeholder="499"
+                                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none transition-all focus:border-indigo-500"
+                            />
+                        </div>
+                    )}
 
                     <div className="space-y-2 md:col-span-2">
                         <label className="flex items-center gap-2 text-xs font-bold uppercase text-white/40">
@@ -215,9 +257,12 @@ export default function CreateWorkshopModal({ isOpen, onClose, onCreated }) {
                                 <span className="text-sm font-bold text-white">Upload Photo</span>
                                 <span className="mt-1 text-xs text-white/40">JPG, PNG, WEBP up to 4MB</span>
                             </button>
-                            <div className="min-h-36 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
+                            <div className="relative min-h-36 overflow-hidden rounded-2xl border border-white/10 bg-[#08080a]">
                                 {formData.coverImage ? (
-                                    <img src={formData.coverImage} alt="Workshop cover preview" className="h-full max-h-56 w-full object-cover" />
+                                    <>
+                                        <img src={formData.coverImage} alt="" className="absolute inset-0 h-full w-full scale-110 object-cover opacity-30 blur-xl" />
+                                        <img src={formData.coverImage} alt="Workshop cover preview" className="relative z-10 h-full max-h-56 w-full object-contain p-2" />
+                                    </>
                                 ) : (
                                     <div className="flex h-full min-h-36 items-center justify-center px-4 text-center text-sm text-white/35">
                                         Uploaded workshop cover preview yahan dikhega.

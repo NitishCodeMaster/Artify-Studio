@@ -1,5 +1,5 @@
-import React from 'react';
-import { Star, Video, ArrowRight, BadgeCheck, Languages, Users } from 'lucide-react';
+import React, { useMemo } from 'react';
+import { Star, Video, ArrowRight, BadgeCheck, Languages, Users, Sparkles, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { ImageWithFallback } from '../placeholder/ImageWithFallback';
@@ -18,7 +18,7 @@ const MentorSkeleton = () => (
     </div>
 );
 
-export function MentorGrid({ mentors = [], filter = '', loading = false }) {
+export function MentorGrid({ mentors = [], filter = '', loading = false, onSelectFilter }) {
     const navigate = useNavigate();
     const visibleMentors = mentors.filter((mentor) => {
         const q = filter.toLowerCase();
@@ -27,6 +27,15 @@ export function MentorGrid({ mentors = [], filter = '', loading = false }) {
             || mentor.skill.toLowerCase().includes(q)
             || mentor.specialty.toLowerCase().includes(q);
     });
+    const quickMatches = useMemo(() => {
+        const matches = mentors
+            .flatMap((mentor) => [mentor.skill, mentor.specialty])
+            .filter(Boolean)
+            .map((item) => item.split('&')[0].split(',')[0].trim())
+            .filter((item) => item.length > 2);
+
+        return [...new Set(matches)].slice(0, 5);
+    }, [mentors]);
 
     return (
         <div id="mentor-grid" className="mb-12 scroll-mt-24">
@@ -46,6 +55,42 @@ export function MentorGrid({ mentors = [], filter = '', loading = false }) {
                 </button>
             </motion.div>
 
+            {!loading && quickMatches.length > 0 && (
+                <motion.div
+                    initial={{ opacity: 0, y: 12 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.45 }}
+                    transition={{ duration: 0.35 }}
+                    className="mb-5 flex flex-wrap items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.025] p-3"
+                >
+                    <span className="inline-flex items-center gap-2 rounded-full border border-indigo-300/20 bg-indigo-400/10 px-3 py-2 text-xs font-bold uppercase tracking-[0.2em] text-indigo-100">
+                        <Sparkles size={14} className="text-pink-300" />
+                        Mentor Match
+                    </span>
+                    {quickMatches.map((match) => (
+                        <button
+                            key={match}
+                            onClick={() => onSelectFilter?.(match)}
+                            className={`rounded-full border px-3 py-2 text-xs font-semibold transition-all ${filter.toLowerCase() === match.toLowerCase()
+                                ? 'border-pink-300/60 bg-pink-400/15 text-white'
+                                : 'border-white/10 bg-black/30 text-white/55 hover:border-white/25 hover:text-white'
+                                }`}
+                        >
+                            {match}
+                        </button>
+                    ))}
+                    {filter && (
+                        <button
+                            onClick={() => onSelectFilter?.('')}
+                            className="ml-auto inline-flex items-center gap-1 rounded-full border border-white/10 px-3 py-2 text-xs font-bold text-white/45 transition-colors hover:text-white"
+                        >
+                            <X size={13} />
+                            Clear
+                        </button>
+                    )}
+                </motion.div>
+            )}
+
             <div className="grid gap-4 sm:gap-5 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
                 {loading && [1, 2, 3].map((item) => <MentorSkeleton key={item} />)}
 
@@ -59,14 +104,15 @@ export function MentorGrid({ mentors = [], filter = '', loading = false }) {
                         whileHover={{ y: -8 }}
                         className={`group relative rounded-2xl border border-white/5 bg-[#0f0f0f] p-3 transition-all duration-300 hover:-translate-y-1.5 sm:p-3.5 ${mentor.shadow} ${mentor.border}`}
                     >
-                        <div className="relative mb-4 h-56 overflow-hidden rounded-xl">
-                            <ImageWithFallback src={mentor.image} alt={mentor.name} className="h-full w-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
-                            <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full border border-white/10 bg-black/60 px-3 py-1 backdrop-blur-md">
+                        <div className="relative mb-4 h-56 overflow-hidden rounded-xl border border-white/10 bg-[#111111]">
+                            <ImageWithFallback src={mentor.image} alt="" className="absolute inset-0 h-full w-full scale-110 object-cover opacity-35 blur-xl grayscale transition-opacity duration-500 group-hover:opacity-45" />
+                            <ImageWithFallback src={mentor.image} alt={mentor.name} className="relative z-10 h-full w-full object-contain p-2 grayscale transition-all duration-500 group-hover:scale-[1.02] group-hover:grayscale-0" />
+                            <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
+                            <div className="absolute right-3 top-3 z-20 flex items-center gap-1 rounded-full border border-white/10 bg-black/60 px-3 py-1 backdrop-blur-md">
                                 <Star size={14} className="fill-yellow-400 text-yellow-400" />
                                 <span className="text-xs font-bold text-white">{mentor.rating}</span>
                             </div>
-                            <div className="absolute bottom-3 left-3 flex flex-wrap items-center gap-2">
+                            <div className="absolute bottom-3 left-3 z-20 flex flex-wrap items-center gap-2">
                                 <span className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] ${mentor.badge}`}>
                                     {mentor.specialty}
                                 </span>

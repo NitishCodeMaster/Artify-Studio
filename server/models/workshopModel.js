@@ -36,6 +36,36 @@ const WorkshopSchema = new mongoose.Schema({
         type: String,
         default: 'Live'
     },
+    accessType: {
+        type: String,
+        enum: ['free', 'paid'],
+        default: 'free'
+    },
+    price: {
+        type: Number,
+        default: 0
+    },
+    enrolledLearners: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }],
+    payments: [{
+        user: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
+        paymentId: String,
+        orderId: String,
+        amount: Number,
+        status: {
+            type: String,
+            default: 'paid'
+        },
+        paidAt: {
+            type: Date,
+            default: Date.now
+        }
+    }],
     coverImage: {
         type: String,
         default: ''

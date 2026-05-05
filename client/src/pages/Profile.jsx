@@ -52,21 +52,21 @@ const Profile = () => {
 
     return (
         <div className="bg-[#050505] min-h-screen text-white font-sans selection:bg-amber-500/30">
-            <div className="relative h-[110px] w-full md:h-[140px]">
+            <div className="relative h-[80px] w-full md:h-[110px]">
                 <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/80 via-purple-900/50 to-black"></div>
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_30%)]"></div>
             </div>
 
-            <div className="relative z-10 mx-auto -mt-10 max-w-[1280px] px-4 pb-10 sm:px-6">
+            <div className="relative z-10 mx-auto -mt-8 max-w-[1180px] px-4 pb-10 sm:px-6">
 
-                <div className="mb-6 rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,rgba(17,17,19,0.95),rgba(12,12,14,0.98))] p-5 shadow-[0_24px_60px_rgba(0,0,0,0.32)] md:p-6">
+                <div className="mb-5 rounded-[1.35rem] border border-white/10 bg-[linear-gradient(180deg,rgba(17,17,19,0.95),rgba(12,12,14,0.98))] p-4 shadow-[0_20px_55px_rgba(0,0,0,0.32)] md:p-5">
                     <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-white/60">
                         <Sparkles size={12} className="text-amber-400" />
                         My Creative Space
                     </div>
 
                     <div className="flex flex-col gap-5 md:flex-row md:items-start">
-                        <div className="h-20 w-20 shrink-0 overflow-hidden rounded-[1.35rem] border border-white/15 bg-[#111] p-1 shadow-xl md:h-24 md:w-24">
+                        <div className="h-20 w-20 shrink-0 overflow-hidden rounded-[1.2rem] border border-white/15 bg-[#111] p-1 shadow-xl md:h-24 md:w-24">
                             <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-[1.45rem] bg-[#0f0f0f]">
                                 {user.profilePic ? (
                                     <img src={user.profilePic} alt={user.name} className="h-full w-full object-cover" />
@@ -77,7 +77,7 @@ const Profile = () => {
                         </div>
 
                         <div className="flex-1 text-center md:text-left">
-                            <h1 className="mb-2 flex items-center justify-center gap-2 text-2xl font-black tracking-tight text-white md:justify-start md:text-3xl">
+                            <h1 className="mb-2 flex items-center justify-center gap-2 text-2xl font-black tracking-tight text-white md:justify-start md:text-[2rem]">
                                 {user.name}
                                 {user.role?.toLowerCase().includes('organizer') && (
                                     <span className="rounded bg-blue-500/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-blue-400">Verified</span>

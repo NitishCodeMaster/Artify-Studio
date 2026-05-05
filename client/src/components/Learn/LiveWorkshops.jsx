@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Calendar, Users, ArrowRight, Sparkles, Clock3, Plus } from 'lucide-react';
+import { Calendar, Users, ArrowRight, Sparkles, Clock3, Plus, Trash2, X, Video, UserRound, ArrowLeft, Copy, CalendarPlus, IndianRupee, LockKeyhole, BadgeCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { ImageWithFallback } from '../placeholder/ImageWithFallback';
+import { buildRazorpayPrefill, loadRazorpay } from '../../utils/razorpay';
+import api from '../../utils/api';
 
 const WorkshopSkeleton = () => (
     <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
@@ -21,14 +24,128 @@ const WorkshopSkeleton = () => (
     </div>
 );
 
-export function LiveWorkshops({ workshops = [], filter = '', loading = false, onCreateWorkshop, canCreateWorkshop = false }) {
+export function LiveWorkshops({ workshops = [], filter = '', loading = false, onCreateWorkshop, onDeleteWorkshop, canCreateWorkshop = false, currentUserId = '' }) {
     const navigate = useNavigate();
     const [activeIndex, setActiveIndex] = useState(0);
+    const [selectedWorkshop, setSelectedWorkshop] = useState(null);
+    const [processingId, setProcessingId] = useState('');
 
     const visibleWorkshops = workshops.filter((ws) => {
         const q = filter.toLowerCase();
         return !q || ws.title.toLowerCase().includes(q) || ws.tags.some((tag) => tag.toLowerCase().includes(q));
     });
+
+    const getRoomUrl = (workshop) => `https://meet.jit.si/artify-workshop-${workshop.id}`;
+
+    const openRoom = (workshop) => {
+        window.open(getRoomUrl(workshop), '_blank', 'noopener,noreferrer');
+    };
+
+    const handleJoinWorkshop = async (workshop) => {
+        if (workshop.accessType !== 'paid' || Number(workshop.price) <= 0) {
+            openRoom(workshop);
+            return;
+        }
+
+        const isLoaded = await loadRazorpay();
+        if (!isLoaded) {
+            toast.error('Razorpay load nahi ho paya.');
+            return;
+        }
+
+        try {
+            setProcessingId(workshop.id);
+            const { data } = await api.post('/payments/create-order', {
+                amount: workshop.price,
+                workshopId: workshop.id,
+            });
+            const user = JSON.parse(localStorage.getItem('user')) || {};
+            const prefill = buildRazorpayPrefill(user);
+
+            const options = {
+                key: data.key || import.meta.env.VITE_RAZORPAY_KEY_ID,
+                amount: data.order.amount,
+                currency: 'INR',
+                name: 'Artify Studio',
+                description: `Workshop seat: ${workshop.title}`,
+                order_id: data.order.id,
+                prefill,
+                readonly: {
+                    contact: Boolean(prefill.contact),
+                    email: Boolean(prefill.email),
+                    name: Boolean(prefill.name),
+                },
+                theme: { color: '#8b5cf6' },
+                handler: async (response) => {
+                    try {
+                        const verifyRes = await api.post('/payments/verify-payment', {
+                            ...response,
+                            workshopId: workshop.id,
+                            totalAmount: workshop.price,
+                        });
+
+                        if (verifyRes.data.success) {
+                            toast.success('Workshop seat booked. Opening live room...');
+                            openRoom(workshop);
+                        }
+                    } catch {
+                        toast.error('Payment verify nahi ho paya.');
+                    } finally {
+                        setProcessingId('');
+                    }
+                },
+                modal: {
+                    ondismiss: () => setProcessingId(''),
+                },
+            };
+
+            new window.Razorpay(options).open();
+        } catch (error) {
+            console.error('Workshop payment error:', error);
+            toast.error(error.response?.data?.message || 'Payment start nahi ho paya.');
+            setProcessingId('');
+        }
+    };
+
+    const copyRoomLink = async (workshop) => {
+        try {
+            await navigator.clipboard.writeText(getRoomUrl(workshop));
+            toast.success('Live room link copied.');
+        } catch {
+            toast.error('Room link copy nahi ho paya.');
+        }
+    };
+
+    const downloadCalendarInvite = (workshop) => {
+        const start = new Date(workshop.startAt || Date.now());
+        const end = new Date(start.getTime() + Number(workshop.durationMinutes || 60) * 60 * 1000);
+        const formatDate = (date) => date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+        const roomUrl = getRoomUrl(workshop);
+        const ics = [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'PRODID:-//Artify Studio//Workshop//EN',
+            'BEGIN:VEVENT',
+            `UID:${workshop.id}@artify-studio`,
+            `DTSTAMP:${formatDate(new Date())}`,
+            `DTSTART:${formatDate(start)}`,
+            `DTEND:${formatDate(end)}`,
+            `SUMMARY:${workshop.title}`,
+            `DESCRIPTION:${(workshop.summary || '').replace(/\n/g, ' ')} Join room: ${roomUrl}`,
+            `LOCATION:${roomUrl}`,
+            'END:VEVENT',
+            'END:VCALENDAR',
+        ].join('\r\n');
+
+        const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${workshop.title.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}-artify.ics`;
+        link.click();
+        URL.revokeObjectURL(url);
+        toast.success('Calendar invite downloaded.');
+    };
 
     useEffect(() => {
         if (visibleWorkshops.length <= 1) return;
@@ -87,13 +204,17 @@ export function LiveWorkshops({ workshops = [], filter = '', loading = false, on
                                 viewport={{ once: true, amount: 0.2 }}
                                 transition={{ duration: 0.45, delay: index * 0.08 }}
                                 whileHover={{ y: -6 }}
-                                className={`group relative cursor-pointer overflow-hidden rounded-2xl border transition-all duration-300 ${activeIndex === index ? 'border-white/20' : 'border-white/10'}`}
-                                onClick={() => ws.mentorId && navigate(`/profile/${ws.mentorId}`)}
+                                className={`group relative cursor-pointer overflow-hidden rounded-2xl border bg-[#070707] transition-all duration-300 hover:border-pink-400/35 ${activeIndex === index ? 'border-white/20' : 'border-white/10'}`}
+                                onClick={() => setSelectedWorkshop(ws)}
                             >
-                                <div className="relative h-48 overflow-hidden">
-                                    <ImageWithFallback src={ws.image} alt={ws.title} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                                <div className="relative h-48 overflow-hidden bg-[#101010]">
+                                    <ImageWithFallback src={ws.image} alt="" className="absolute inset-0 h-full w-full scale-110 object-cover opacity-35 blur-xl" />
+                                    <ImageWithFallback src={ws.image} alt={ws.title} className="relative z-10 h-full w-full object-contain p-2 transition-transform duration-700 group-hover:scale-[1.02]" />
                                     <div className="absolute inset-0 bg-gradient-to-t from-[#060606] via-black/35 to-transparent" />
-                                    <div className="absolute left-4 top-4 flex gap-2">
+                                    <div className="absolute left-4 top-4 z-20 flex flex-wrap gap-2">
+                                        <span className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-wider backdrop-blur-md ${ws.accessType === 'paid' ? 'border-amber-400/25 bg-amber-500/15 text-amber-100' : 'border-emerald-400/25 bg-emerald-500/15 text-emerald-100'}`}>
+                                            {ws.accessType === 'paid' ? `₹${ws.price}` : 'Free'}
+                                        </span>
                                         {ws.tags.map((tag) => (
                                             <span key={tag} className="rounded-full border border-white/10 bg-black/35 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-md">
                                                 {tag}
@@ -105,6 +226,19 @@ export function LiveWorkshops({ workshops = [], filter = '', loading = false, on
                                         transition={{ duration: 2.8, ease: 'linear' }}
                                         className={`absolute left-0 right-0 top-0 h-[2px] origin-left bg-gradient-to-r ${ws.color}`}
                                     />
+                                    {String(ws.mentorId) === String(currentUserId) && (
+                                        <button
+                                            type="button"
+                                            onClick={(event) => {
+                                                event.stopPropagation();
+                                                onDeleteWorkshop?.(ws);
+                                            }}
+                                            className="absolute right-4 top-4 z-30 flex h-9 w-9 items-center justify-center rounded-full border border-red-400/25 bg-red-500/15 text-red-200 backdrop-blur-md transition-all hover:bg-red-500 hover:text-white"
+                                            aria-label={`Delete ${ws.title}`}
+                                        >
+                                            <Trash2 size={15} />
+                                        </button>
+                                    )}
                                 </div>
 
                                 <div className="relative flex h-full flex-col p-5 sm:p-6">
@@ -122,12 +256,15 @@ export function LiveWorkshops({ workshops = [], filter = '', loading = false, on
                                                     <Users size={16} /> {ws.attendees} Registered
                                                 </span>
                                                 <span className="flex items-center gap-2">
+                                                    <IndianRupee size={16} /> {ws.accessType === 'paid' ? `₹${ws.price}` : 'Free'}
+                                                </span>
+                                                <span className="flex items-center gap-2">
                                                     <Clock3 size={16} /> {ws.durationMinutes} min
                                                 </span>
                                             </div>
                                         </div>
 
-                                        <button className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-black transition-transform group-hover:scale-110">
+                                        <button className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-black transition-transform group-hover:scale-110" aria-label={`Open ${ws.title}`}>
                                             <ArrowRight size={18} />
                                         </button>
                                     </div>
@@ -156,6 +293,131 @@ export function LiveWorkshops({ workshops = [], filter = '', loading = false, on
                     ))}
                 </div>
             )}
+
+            <AnimatePresence>
+                {selectedWorkshop && (
+                    <div className="fixed inset-0 z-[9999] flex items-start justify-center px-3 pb-4 pt-24">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setSelectedWorkshop(null)}
+                            className="absolute inset-0 bg-black/80 backdrop-blur-md"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, y: 22, scale: 0.97 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: 16, scale: 0.98 }}
+                            className="relative max-h-[calc(100vh-7rem)] w-full max-w-4xl overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#09090b] shadow-2xl"
+                        >
+                            <button
+                                type="button"
+                                onClick={() => setSelectedWorkshop(null)}
+                                className="absolute left-4 top-4 z-20 flex h-10 items-center gap-2 rounded-full border border-white/10 bg-black/50 px-4 text-sm font-bold text-white/75 backdrop-blur-md transition-all hover:bg-white hover:text-black"
+                                aria-label="Back to workshop cards"
+                            >
+                                <ArrowLeft size={16} />
+                                Back
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setSelectedWorkshop(null)}
+                                className="absolute right-4 top-4 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/50 text-white/70 backdrop-blur-md transition-all hover:bg-white hover:text-black"
+                                aria-label="Close workshop details"
+                            >
+                                <X size={18} />
+                            </button>
+
+                            <div className="grid max-h-[calc(100vh-7rem)] overflow-y-auto lg:grid-cols-[0.9fr_1.1fr]">
+                                <div className="relative min-h-[280px] bg-[#111] lg:min-h-full">
+                                    <ImageWithFallback src={selectedWorkshop.image} alt="" className="absolute inset-0 h-full w-full scale-110 object-cover opacity-30 blur-xl" />
+                                    <ImageWithFallback src={selectedWorkshop.image} alt={selectedWorkshop.title} className="relative z-10 h-full max-h-[440px] w-full object-contain p-4 lg:max-h-none" />
+                                    <div className="absolute inset-x-0 bottom-0 z-10 h-28 bg-gradient-to-t from-[#09090b] to-transparent" />
+                                </div>
+
+                                <div className="p-5 sm:p-7">
+                                    <div className="mb-4 flex flex-wrap gap-2">
+                                        <span className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] ${selectedWorkshop.accessType === 'paid' ? 'border-amber-400/25 bg-amber-500/10 text-amber-100' : 'border-emerald-400/25 bg-emerald-500/10 text-emerald-100'}`}>
+                                            {selectedWorkshop.accessType === 'paid' ? `Paid • ₹${selectedWorkshop.price}` : 'Free Class'}
+                                        </span>
+                                        {selectedWorkshop.tags.map((tag) => (
+                                            <span key={tag} className="rounded-full border border-pink-400/20 bg-pink-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-pink-100">
+                                                {tag}
+                                            </span>
+                                        ))}
+                                    </div>
+                                    <h3 className="text-2xl font-black leading-tight text-white sm:text-3xl">{selectedWorkshop.title}</h3>
+                                    <p className="mt-2 text-white/60">{selectedWorkshop.tutor}</p>
+                                    <p className="mt-5 leading-relaxed text-white/55">{selectedWorkshop.summary}</p>
+
+                                    <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                                        <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-4">
+                                            <Calendar size={18} className="mb-3 text-pink-300" />
+                                            <p className="text-xs uppercase tracking-[0.18em] text-white/35">Schedule</p>
+                                            <p className="mt-1 font-semibold text-white">{selectedWorkshop.date}</p>
+                                        </div>
+                                        <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-4">
+                                            <Clock3 size={18} className="mb-3 text-indigo-300" />
+                                            <p className="text-xs uppercase tracking-[0.18em] text-white/35">Duration</p>
+                                            <p className="mt-1 font-semibold text-white">{selectedWorkshop.durationMinutes} minutes</p>
+                                        </div>
+                                        <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-4">
+                                            <Users size={18} className="mb-3 text-emerald-300" />
+                                            <p className="text-xs uppercase tracking-[0.18em] text-white/35">Registered</p>
+                                            <p className="mt-1 font-semibold text-white">{selectedWorkshop.attendees} learners</p>
+                                        </div>
+                                        <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-4">
+                                            {selectedWorkshop.accessType === 'paid' ? <LockKeyhole size={18} className="mb-3 text-amber-300" /> : <BadgeCheck size={18} className="mb-3 text-emerald-300" />}
+                                            <p className="text-xs uppercase tracking-[0.18em] text-white/35">Access</p>
+                                            <p className="mt-1 font-semibold text-white">{selectedWorkshop.accessType === 'paid' ? `₹${selectedWorkshop.price}` : 'Free'}</p>
+                                        </div>
+                                        <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-4">
+                                            <Video size={18} className="mb-3 text-fuchsia-300" />
+                                            <p className="text-xs uppercase tracking-[0.18em] text-white/35">Mode</p>
+                                            <p className="mt-1 font-semibold text-white">{selectedWorkshop.mode}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                                        <button
+                                            onClick={() => handleJoinWorkshop(selectedWorkshop)}
+                                            disabled={processingId === selectedWorkshop.id}
+                                            className="flex flex-1 items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-bold text-black transition-all hover:bg-gray-200"
+                                        >
+                                            {selectedWorkshop.accessType === 'paid' ? <IndianRupee size={16} /> : <Video size={16} />}
+                                            {processingId === selectedWorkshop.id ? 'Processing...' : selectedWorkshop.accessType === 'paid' ? `Pay ₹${selectedWorkshop.price} & Join` : 'Join Free Room'}
+                                        </button>
+                                        <button
+                                            onClick={() => selectedWorkshop.mentorId && navigate(`/profile/${selectedWorkshop.mentorId}`)}
+                                            className="flex flex-1 items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-5 py-3 text-sm font-bold text-white transition-all hover:bg-white/[0.08]"
+                                        >
+                                            <UserRound size={16} />
+                                            View Mentor
+                                        </button>
+                                    </div>
+
+                                    <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                                        <button
+                                            onClick={() => copyRoomLink(selectedWorkshop)}
+                                            className="flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.035] px-5 py-2.5 text-sm font-bold text-white/70 transition-all hover:bg-white/[0.08] hover:text-white"
+                                        >
+                                            <Copy size={15} />
+                                            Copy Room Link
+                                        </button>
+                                        <button
+                                            onClick={() => downloadCalendarInvite(selectedWorkshop)}
+                                            className="flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.035] px-5 py-2.5 text-sm font-bold text-white/70 transition-all hover:bg-white/[0.08] hover:text-white"
+                                        >
+                                            <CalendarPlus size={15} />
+                                            Add to Calendar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

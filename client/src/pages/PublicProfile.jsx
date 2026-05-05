@@ -95,83 +95,98 @@ export const PublicProfile = () => {
         );
     }
 
+    const coverImage = getCoverImage(profile.role, profile.artStyle, profile.name);
+    const joinedLabel = new Date(profile.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
     return (
-        <div className="bg-[#030303] min-h-screen text-white font-sans overflow-x-hidden">
-            <div className="relative h-[340px] w-full md:h-[430px]">
-                <button
-                    onClick={() => navigate(-1)}
-                    className="absolute left-4 top-20 z-20 flex items-center gap-2 rounded-full border border-white/20 bg-black/40 px-4 py-2 font-medium text-white backdrop-blur-md transition-all hover:bg-black/80 md:left-8 md:top-24"
-                >
-                    <ArrowLeft size={18} /> Back
-                </button>
+        <div className="min-h-screen overflow-x-hidden bg-[#030303] font-sans text-white">
+            <div className="relative overflow-hidden border-b border-white/10 bg-[#050506]">
+                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.025)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.025)_1px,transparent_1px)] bg-[size:54px_54px]" />
+                <div className="absolute left-1/2 top-0 h-72 w-[min(900px,90vw)] -translate-x-1/2 rounded-full bg-amber-500/10 blur-[110px]" />
 
-                <img src={getCoverImage(profile.role, profile.artStyle, profile.name)} alt="Cover" className="h-full w-full object-cover opacity-50" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#030303] via-[#030303]/45 to-black/10"></div>
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(245,158,11,0.12),transparent_30%),radial-gradient(circle_at_right,rgba(99,102,241,0.12),transparent_28%)]"></div>
-            </div>
+                <div className="relative z-10 mx-auto max-w-[1180px] px-4 pb-10 pt-5 sm:px-6 lg:pt-7">
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="mb-5 flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/80 backdrop-blur-md transition-all hover:bg-white/10 hover:text-white"
+                    >
+                        <ArrowLeft size={17} /> Back
+                    </button>
 
-            <div className="relative z-10 mx-auto -mt-40 max-w-[1120px] px-6 pb-24">
-
-                <div className="mb-10 rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(17,17,19,0.9),rgba(8,8,10,0.96))] p-6 shadow-[0_30px_80px_rgba(0,0,0,0.35)] backdrop-blur-xl md:p-8">
-                    <div className="flex flex-col gap-6 text-center md:flex-row md:items-end md:text-left">
-                        <div className="mx-auto h-40 w-40 overflow-hidden rounded-[2rem] border border-white/15 bg-[#111] p-1 shadow-2xl shadow-amber-500/15 md:mx-0">
-                            <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-[1.65rem] bg-[#0d0d0f]">
-                                {profile.profilePic ? (
-                                    <img src={profile.profilePic} alt={profile.name} className="h-full w-full object-cover" />
-                                ) : (
-                                    <div className="flex h-full w-full items-center justify-center bg-amber-500/10 text-5xl font-black text-amber-500">
-                                        {profile.name?.charAt(0).toUpperCase()}
+                    <div className="grid overflow-hidden rounded-[1.6rem] border border-white/10 bg-[linear-gradient(135deg,rgba(18,18,20,0.96),rgba(7,7,9,0.98))] shadow-[0_24px_80px_rgba(0,0,0,0.42)] lg:grid-cols-[0.72fr_1fr]">
+                        <div className="relative min-h-[260px] border-b border-white/10 bg-[#111] lg:min-h-[420px] lg:border-b-0 lg:border-r">
+                            <img src={coverImage} alt="" className="absolute inset-0 h-full w-full object-cover opacity-55" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-[#08080a] via-[#08080a]/30 to-transparent" />
+                            <div className="absolute bottom-5 left-5 right-5 flex items-end gap-4">
+                                <div className="h-28 w-28 shrink-0 overflow-hidden rounded-[1.4rem] border border-white/20 bg-[#111] p-1 shadow-2xl shadow-black/50">
+                                    <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-[1.05rem] bg-[#0d0d0f]">
+                                        {profile.profilePic ? (
+                                            <img src={profile.profilePic} alt={profile.name} className="h-full w-full object-cover" />
+                                        ) : (
+                                            <div className="flex h-full w-full items-center justify-center bg-amber-500/10 text-4xl font-black text-amber-500">
+                                                {profile.name?.charAt(0).toUpperCase()}
+                                            </div>
+                                        )}
                                     </div>
-                                )}
+                                </div>
+                                <div className="min-w-0">
+                                    <p className="mb-2 inline-flex rounded-full border border-amber-400/25 bg-black/35 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-amber-200 backdrop-blur-md">
+                                        Artist Identity
+                                    </p>
+                                    <p className="truncate text-sm text-white/65">{profile.originLocation || 'Creative Network'}</p>
+                                </div>
                             </div>
                         </div>
 
-                        <div className="flex-1">
-                            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.22em] text-white/60">
+                        <div className="p-5 sm:p-7 lg:p-8">
+                            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white/60">
                                 <Sparkles size={12} className="text-amber-400" />
                                 Creative Profile
                             </div>
-                            <h1 className="mb-3 text-4xl font-black tracking-tight text-white md:text-6xl">
+                            <h1 className="mb-3 text-3xl font-black tracking-tight text-white sm:text-4xl lg:text-5xl">
                                 {profile.name}
                             </h1>
-                            <div className="mb-5 flex flex-wrap items-center justify-center gap-3 md:justify-start">
+                            <div className="mb-5 flex flex-wrap items-center gap-2">
                                 {profile.role && (
-                                    <span className="rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-sm font-semibold text-white/90 shadow-sm">
+                                    <span className="rounded-full border border-white/15 bg-white/10 px-3.5 py-1 text-sm font-semibold text-white/90 shadow-sm">
                                         {profile.role}
                                     </span>
                                 )}
                                 {profile.artStyle && (
-                                    <span className="flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-1.5 text-sm font-bold text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.15)]">
+                                    <span className="flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3.5 py-1 text-sm font-bold text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.15)]">
                                         <Star size={14} className="fill-amber-400" /> {profile.artStyle}
                                     </span>
                                 )}
                             </div>
-                            <div className="grid gap-3 sm:grid-cols-3">
-                                <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
-                                    <div className="mb-1 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-white/35">
+
+                            <p className="mb-6 max-w-2xl text-base leading-relaxed text-white/58">
+                                {profile.bio || 'This artist is shaping their creative story on Artify.'}
+                            </p>
+
+                            <div className="mb-6 grid gap-3 sm:grid-cols-3">
+                                <div className="rounded-xl border border-white/10 bg-white/[0.035] px-4 py-3">
+                                    <div className="mb-1 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white/35">
                                         <MapPin size={13} />
                                         Origin
                                     </div>
                                     <div className="font-semibold text-white">{profile.originLocation || 'World Citizen'}</div>
                                 </div>
-                                <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
-                                    <div className="mb-1 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-white/35">
+                                <div className="rounded-xl border border-white/10 bg-white/[0.035] px-4 py-3">
+                                    <div className="mb-1 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white/35">
                                         <Award size={13} />
                                         Experience
                                     </div>
                                     <div className="font-semibold text-white">{profile.experience || 'Rising Talent'}</div>
                                 </div>
-                                <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
-                                    <div className="mb-1 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-white/35">
+                                <div className="rounded-xl border border-white/10 bg-white/[0.035] px-4 py-3">
+                                    <div className="mb-1 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white/35">
                                         <Calendar size={13} />
                                         Joined
                                     </div>
-                                    <div className="font-semibold text-white">{new Date(profile.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</div>
+                                    <div className="font-semibold text-white">{joinedLabel}</div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div className="mt-4 flex w-full flex-wrap gap-2 md:mt-0 md:w-auto">
+                            <div className="flex w-full flex-wrap gap-2">
                         {!isMyProfile ? (
                             <>
                                 <button
@@ -200,24 +215,27 @@ export const PublicProfile = () => {
                         <button onClick={handleShare} className="rounded-xl border border-white/10 bg-white/5 p-2.5 text-white transition-all active:scale-95 hover:bg-white/10">
                             <Share2 size={20} />
                         </button>
-                    </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-12">
+            <div className="mx-auto max-w-[1180px] px-4 pb-16 pt-8 sm:px-6">
+                <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
 
-                    <div className="lg:col-span-2 space-y-8">
-                        <div className="rounded-3xl border border-white/[0.06] bg-[#0a0a0a] p-8 shadow-xl">
-                            <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                    <div className="space-y-5 lg:col-span-2">
+                        <div className="rounded-2xl border border-white/[0.06] bg-[#0a0a0a] p-5 shadow-xl md:p-6">
+                            <h3 className="mb-4 flex items-center gap-2 text-lg font-bold">
                                 <Brush className="text-amber-500" /> The Artist's Story
                             </h3>
-                            <p className="text-white/70 leading-relaxed text-lg whitespace-pre-wrap">
+                            <p className="whitespace-pre-wrap text-base leading-relaxed text-white/70">
                                 {profile.bio || "This artist is busy creating their next masterpiece. Check back later for their story!"}
                             </p>
                         </div>
 
-                        <div className="rounded-3xl border border-white/[0.06] bg-[#0a0a0a] p-8 shadow-xl">
-                            <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
+                        <div className="rounded-2xl border border-white/[0.06] bg-[#0a0a0a] p-5 shadow-xl md:p-6">
+                            <h3 className="mb-5 flex items-center gap-2 text-lg font-bold">
                                 <Award className="text-amber-500" /> Recent Artworks
                             </h3>
 
@@ -255,9 +273,9 @@ export const PublicProfile = () => {
                         </div>
                     </div>
 
-                    <div className="space-y-6">
+                    <div className="space-y-5">
 
-                        <div className="relative overflow-hidden rounded-3xl border border-white/[0.06] bg-gradient-to-br from-[#111] to-[#050505] p-6 shadow-xl">
+                        <div className="relative overflow-hidden rounded-2xl border border-white/[0.06] bg-gradient-to-br from-[#111] to-[#050505] p-5 shadow-xl">
                             <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-[50px]"></div>
                             <h4 className="text-sm text-white/40 font-bold tracking-wider uppercase mb-5">Heritage & Stats</h4>
 
@@ -280,13 +298,13 @@ export const PublicProfile = () => {
                                     <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/60"><Calendar size={18} /></div>
                                     <div>
                                         <p className="text-xs text-white/40">Joined Artify</p>
-                                        <p className="font-medium text-white/90">{new Date(profile.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</p>
+                                        <p className="font-medium text-white/90">{joinedLabel}</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="rounded-3xl border border-white/[0.06] bg-[#0a0a0a] p-6 shadow-xl">
+                        <div className="rounded-2xl border border-white/[0.06] bg-[#0a0a0a] p-5 shadow-xl">
                             <h4 className="text-sm text-white/40 font-bold tracking-wider uppercase mb-5">Connect</h4>
                             <div className="space-y-3">
                                 <a href={`mailto:${profile.email}`} className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors group cursor-pointer">
@@ -302,7 +320,7 @@ export const PublicProfile = () => {
                             </div>
                         </div>
 
-                        <div className="rounded-3xl border border-white/[0.06] bg-[#0a0a0a] p-6 shadow-xl">
+                        <div className="rounded-2xl border border-white/[0.06] bg-[#0a0a0a] p-5 shadow-xl">
                             <h4 className="mb-5 text-sm font-bold uppercase tracking-wider text-white/40">Creative Pulse</h4>
                             <div className="space-y-4">
                                 <div className="flex items-center gap-3">

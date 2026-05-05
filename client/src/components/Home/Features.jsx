@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import {
     Music,
     Palette,
@@ -7,7 +8,8 @@ import {
     Zap,
     ArrowUpRight,
     Star,
-    Sparkles
+    Sparkles,
+    Wand2
 } from 'lucide-react';
 
 import user1 from '../../assets/Images/features/user1.jpeg';
@@ -24,34 +26,52 @@ const features = [
         title: 'Showcase Your Art',
         description: 'Create a stunning profile to showcase paintings, digital art, sketches, and designs.',
         color: 'from-fuchsia-500 via-pink-500 to-rose-500',
-        borderColor: 'group-hover:border-fuchsia-500/50'
+        borderColor: 'group-hover:border-fuchsia-500/50',
+        path: '/my-profile',
+        metricLabel: 'Profile studio',
     },
     {
         icon: Music,
         title: 'Music & Collaboration',
         description: 'Jam with musicians, collaborate on projects, and build bands or creative teams.',
         color: 'from-violet-500 via-indigo-500 to-blue-500',
-        borderColor: 'group-hover:border-indigo-500/50'
+        borderColor: 'group-hover:border-indigo-500/50',
+        path: '/community',
+        metricLabel: 'Creative circles',
     },
     {
         icon: Globe,
         title: 'Artist Community',
         description: 'Connect with artists worldwide, share ideas, learn skills, and grow together.',
         color: 'from-cyan-400 via-teal-400 to-emerald-400',
-        borderColor: 'group-hover:border-cyan-500/50'
+        borderColor: 'group-hover:border-cyan-500/50',
+        path: '/learn',
+        metricLabel: 'Live mentors',
     },
     {
         icon: Zap,
         title: 'Gigs & Opportunities',
         description: 'Discover events, gigs, and paid opportunities matched to your creative skills.',
         color: 'from-amber-400 via-orange-400 to-red-400',
-        borderColor: 'group-hover:border-amber-500/50'
+        borderColor: 'group-hover:border-amber-500/50',
+        path: '/events',
+        metricLabel: 'Open doors',
     },
 ];
 
+const creativePrompts = [
+    'Turn one unfinished idea into a 20-minute sketch today.',
+    'Post a behind-the-scenes clip of your current practice.',
+    'Collaborate with one creator outside your main art style.',
+    'Rebuild an old artwork using only three colors.',
+];
+
 export default function Features() {
+    const navigate = useNavigate();
     const [overview, setOverview] = useState({ mentors: 0, workshops: 0 });
     const [marketCount, setMarketCount] = useState(0);
+    const [promptIndex, setPromptIndex] = useState(0);
+    const [activeFeature, setActiveFeature] = useState(0);
 
     useEffect(() => {
         let mounted = true;
@@ -83,11 +103,36 @@ export default function Features() {
         };
     }, []);
 
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setActiveFeature((prev) => (prev + 1) % features.length);
+        }, 4200);
+        return () => clearInterval(interval);
+    }, []);
+
     const dynamicStats = useMemo(() => ([
         { label: 'Live mentors', value: `${overview.mentors || 2}+` },
         { label: 'Workshops', value: `${overview.workshops || 0}+` },
         { label: 'Marketplace finds', value: `${marketCount || 7}+` },
     ]), [overview, marketCount]);
+
+    const dynamicFeatures = useMemo(() => features.map((feature, index) => {
+        const metrics = [
+            `${Math.max(marketCount, 1)} pieces listed`,
+            `${Math.max(overview.workshops, 1)} live sessions`,
+            `${Math.max(overview.mentors, 2)} mentors ready`,
+            `${Math.max(marketCount + overview.workshops, 3)} fresh leads`,
+        ];
+
+        return {
+            ...feature,
+            liveMetric: metrics[index],
+            pulse: Math.min(88, 38 + ((index + 1) * 9) + (overview.mentors || 0) + (marketCount % 12)),
+        };
+    }), [marketCount, overview]);
+
+    const active = dynamicFeatures[activeFeature] || dynamicFeatures[0];
+    const ActiveIcon = active.icon;
 
     return (
         <section id="features" className="relative w-full flex flex-col justify-center py-20 pb-0 bg-black overflow-hidden">
@@ -147,6 +192,47 @@ export default function Features() {
                             Artify empowers artists to showcase their talent, collaborate with creatives,
                             discover events, and turn passion into real opportunities.
                         </p>
+
+                        <div className="mt-7 flex items-start gap-5">
+                            <div className="hidden -space-x-8 transition-all duration-500 hover:space-x-2 md:flex">
+                                {userImages.map((img, i) => (
+                                    <motion.div
+                                        key={i}
+                                        initial={{ opacity: 0, rotate: i % 2 === 0 ? -12 : 12, y: 18 }}
+                                        whileInView={{ opacity: 1, rotate: i % 2 === 0 ? -6 : 6, y: i % 2 === 0 ? 8 : -4 }}
+                                        viewport={{ once: true, amount: 0.4 }}
+                                        transition={{ duration: 0.45, delay: i * 0.06 }}
+                                        whileHover={{ scale: 1.12, rotate: 0, y: 0 }}
+                                        className={`relative group h-16 w-14 bg-white p-1 shadow-lg transition-transform duration-300 hover:z-20 hover:scale-125 hover:rotate-0
+                                        ${i % 2 === 0 ? '-rotate-6 translate-y-2' : 'rotate-6 -translate-y-1'}`}
+                                    >
+                                        <img
+                                            src={img}
+                                            alt="Artist"
+                                            className="h-full w-full object-cover grayscale transition-all duration-300 group-hover:grayscale-0"
+                                        />
+                                    </motion.div>
+                                ))}
+
+                                <div className="z-10 flex h-16 w-14 rotate-12 flex-col items-center justify-center border border-white/20 bg-black text-white shadow-xl">
+                                    <span className="text-[10px] font-bold uppercase text-gray-400">Join</span>
+                                    <span className="bg-gradient-to-tr from-yellow-400 to-orange-500 bg-clip-text text-sm font-black text-transparent">{overview.mentors || 50}+</span>
+                                </div>
+                            </div>
+
+                            <motion.button
+                                type="button"
+                                whileHover={{ y: -3 }}
+                                onClick={() => setPromptIndex((prev) => (prev + 1) % creativePrompts.length)}
+                                className="group hidden max-w-[260px] rounded-2xl border border-amber-400/20 bg-amber-400/10 p-4 text-left shadow-[0_0_30px_rgba(245,158,11,0.08)] transition-all hover:bg-amber-400/15 lg:block"
+                            >
+                                <div className="mb-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-amber-200">
+                                    <Wand2 size={14} />
+                                    Creative Spark
+                                </div>
+                                <p className="text-sm leading-relaxed text-white/70 group-hover:text-white">{creativePrompts[promptIndex]}</p>
+                            </motion.button>
+                        </div>
                     </div>
 
                     <div className="hidden md:block py-4">
@@ -158,36 +244,44 @@ export default function Features() {
                                 </div>
                             ))}
                         </div>
-                        <div className="flex -space-x-8 hover:space-x-2 transition-all duration-500">
-                            {userImages.map((img, i) => (
-                                <motion.div
-                                    key={i}
-                                    initial={{ opacity: 0, rotate: i % 2 === 0 ? -12 : 12, y: 18 }}
-                                    whileInView={{ opacity: 1, rotate: i % 2 === 0 ? -6 : 6, y: i % 2 === 0 ? 8 : -4 }}
-                                    viewport={{ once: true, amount: 0.4 }}
-                                    transition={{ duration: 0.45, delay: i * 0.06 }}
-                                    whileHover={{ scale: 1.12, rotate: 0, y: 0 }}
-                                    className={`relative group w-14 h-16 bg-white p-1 shadow-lg transform transition-transform duration-300 hover:scale-125 hover:z-20 hover:rotate-0
-                                    ${i % 2 === 0 ? '-rotate-6 translate-y-2' : 'rotate-6 -translate-y-1'}`}
+                        <motion.div
+                            key={active.title}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="rounded-[1.35rem] border border-white/10 bg-white/[0.035] p-4 text-left backdrop-blur-md"
+                        >
+                            <div className="mb-3 flex items-center justify-between gap-4">
+                                <div className="flex items-center gap-3">
+                                    <div className={`flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${active.color} text-white`}>
+                                        <ActiveIcon size={18} />
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/35">Now Highlighting</p>
+                                        <p className="font-bold text-white">{active.title}</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => navigate(active.path)}
+                                    className="rounded-full border border-white/10 bg-white px-4 py-2 text-xs font-bold text-black transition-all hover:bg-gray-200"
                                 >
-                                    <img
-                                        src={img}
-                                        alt="Artist"
-                                        className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-300"
-                                    />
-                                </motion.div>
-                            ))}
-
-                            <div className="w-14 h-16 bg-black flex flex-col items-center justify-center text-white shadow-xl rotate-12 z-10 border border-white/20">
-                                <span className="text-[10px] uppercase font-bold text-gray-400">Join</span>
-                                <span className="text-sm font-black text-transparent bg-clip-text bg-gradient-to-tr from-yellow-400 to-orange-500">{overview.mentors || 50}+</span>
+                                    Open
+                                </button>
                             </div>
-                        </div>
+                            <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+                                <motion.div
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${active.pulse}%` }}
+                                    transition={{ duration: 0.6 }}
+                                    className={`h-full rounded-full bg-gradient-to-r ${active.color}`}
+                                />
+                            </div>
+                            <p className="mt-3 text-sm text-white/50">{active.liveMetric} • {active.metricLabel}</p>
+                        </motion.div>
                     </div>
                 </motion.div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                    {features.map((feature, index) => (
+                    {dynamicFeatures.map((feature, index) => (
                         <motion.div
                             key={index}
                             initial={{ opacity: 0, y: 24 }}
@@ -195,9 +289,11 @@ export default function Features() {
                             viewport={{ once: true, amount: 0.25 }}
                             transition={{ duration: 0.45, delay: index * 0.08 }}
                             whileHover={{ y: -8 }}
-                            className={`group relative h-full p-1 rounded-[2rem] bg-white/5 transition-all duration-500 hover:-translate-y-2`}
+                            onMouseEnter={() => setActiveFeature(index)}
+                            onClick={() => setActiveFeature(index)}
+                            className={`group relative h-full cursor-pointer rounded-[2rem] bg-white/5 p-1 transition-all duration-500 hover:-translate-y-2 ${activeFeature === index ? 'ring-1 ring-white/20' : ''}`}
                         >
-                            <div className={`absolute inset-0 rounded-[2rem] bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-500`}></div>
+                            <div className={`absolute inset-0 rounded-[2rem] bg-gradient-to-br ${feature.color} blur-sm transition-opacity duration-500 ${activeFeature === index ? 'opacity-80' : 'opacity-0 group-hover:opacity-100'}`}></div>
 
                             <div className={`relative h-full bg-black rounded-[1.9rem] p-6 border border-white/10 ${feature.borderColor} transition-colors duration-300 overflow-hidden`}>
 
@@ -207,7 +303,16 @@ export default function Features() {
                                     <div className="p-3 rounded-2xl bg-white/5 border border-white/10 group-hover:bg-white/10 transition-colors">
                                         <feature.icon size={26} className="text-white group-hover:scale-110 transition-transform duration-300" />
                                     </div>
-                                    <ArrowUpRight className="text-white/30 group-hover:text-white transition-colors" />
+                                    <button
+                                        onClick={(event) => {
+                                            event.stopPropagation();
+                                            navigate(feature.path);
+                                        }}
+                                        className="rounded-full p-1 text-white/30 transition-colors hover:bg-white/10 hover:text-white"
+                                        aria-label={`Open ${feature.title}`}
+                                    >
+                                        <ArrowUpRight />
+                                    </button>
                                 </div>
 
                                 <div className="relative z-10">
@@ -217,6 +322,16 @@ export default function Features() {
                                     <p className="text-white/50 text-sm leading-relaxed font-poppins group-hover:text-white/70 transition-colors">
                                         {feature.description}
                                     </p>
+                                    <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.035] p-3">
+                                        <div className="mb-2 flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.18em] text-white/35">
+                                            <span>{feature.metricLabel}</span>
+                                            <span>{feature.pulse}%</span>
+                                        </div>
+                                        <div className="h-1 overflow-hidden rounded-full bg-white/10">
+                                            <div className={`h-full rounded-full bg-gradient-to-r ${feature.color}`} style={{ width: `${feature.pulse}%` }} />
+                                        </div>
+                                        <p className="mt-2 text-xs text-white/45">{feature.liveMetric}</p>
+                                    </div>
                                 </div>
                             </div>
                         </motion.div>

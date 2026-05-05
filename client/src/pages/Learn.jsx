@@ -7,6 +7,7 @@ import { LiveWorkshops } from '../components/Learn/LiveWorkshops';
 import CreateWorkshopModal from '../components/Learn/CreateWorkshopModal';
 import { Footer } from '../components/Footer';
 import api from '../utils/api';
+import toast from 'react-hot-toast';
 
 export default function Learn() {
   const navigate = useNavigate();
@@ -17,6 +18,7 @@ export default function Learn() {
   const [loading, setLoading] = useState(true);
   const [isWorkshopModalOpen, setIsWorkshopModalOpen] = useState(false);
   const currentUser = JSON.parse(localStorage.getItem('user')) || {};
+  const currentUserId = currentUser?._id || currentUser?.id;
   const canCreateWorkshop = Boolean(currentUser?.mentorProfile?.isMentor);
 
   const filters = useMemo(() => ({
@@ -67,14 +69,28 @@ export default function Learn() {
             }}
           />
 
-          <MentorGrid mentors={mentors} filter={filters.mentor} loading={loading} />
+          <MentorGrid mentors={mentors} filter={filters.mentor} loading={loading} onSelectFilter={setSearchQuery} />
 
           <LiveWorkshops
             workshops={workshops}
             filter={filters.workshop}
             loading={loading}
             canCreateWorkshop={canCreateWorkshop}
+            currentUserId={currentUserId}
             onCreateWorkshop={() => setIsWorkshopModalOpen(true)}
+            onDeleteWorkshop={async (workshop) => {
+              const ok = window.confirm(`Delete "${workshop.title}" workshop?`);
+              if (!ok) return;
+
+              try {
+                await api.delete(`/learn/workshops/${workshop.id}`);
+                setWorkshops((prev) => prev.filter((item) => item.id !== workshop.id));
+                setStats((prev) => ({ ...prev, workshops: Math.max((prev.workshops || 1) - 1, 0) }));
+                toast.success('Workshop delete ho gaya.');
+              } catch (error) {
+                toast.error(error.response?.data?.message || 'Workshop delete nahi ho paya.');
+              }
+            }}
           />
 
           <motion.div

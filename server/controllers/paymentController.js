@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const Order = require('../models/orderModel');
 const userModel = require('../models/userModel');
 const Event = require('../models/eventModel');
+const Workshop = require('../models/workshopModel');
 
 const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID,
@@ -12,7 +13,7 @@ const razorpay = new Razorpay({
 
 exports.createOrder = async (req, res) => {
     try {
-        const { amount, eventId } = req.body;
+        const { amount, eventId, workshopId } = req.body;
 
 
         if (!amount) {
@@ -26,8 +27,9 @@ exports.createOrder = async (req, res) => {
             receipt: `rcpt_${Date.now()}_${req.user._id.toString().slice(-5)}`,
             notes: {
                 eventId: eventId || null,
+                workshopId: workshopId || null,
                 userId: req.user._id.toString(),
-                type: eventId ? 'ticket_booking' : 'marketplace_purchase'
+                type: workshopId ? 'workshop_booking' : eventId ? 'ticket_booking' : 'marketplace_purchase'
             }
         };
 
@@ -57,7 +59,8 @@ exports.verifyPayment = async (req, res) => {
             products,
             productSnapshots,
             totalAmount,
-            eventId
+            eventId,
+            workshopId
         } = req.body;
 
         const sign = razorpay_order_id + "|" + razorpay_payment_id;
@@ -87,13 +90,45 @@ exports.verifyPayment = async (req, res) => {
                 console.error(" Event not found during payment verification");
             }
         }
+
+        if (workshopId) {
+            const updatedWorkshop = await Workshop.findByIdAndUpdate(workshopId, {
+                $addToSet: { enrolledLearners: req.user._id },
+                $inc: { attendeesCount: 1 },
+                $push: {
+                    payments: {
+                        user: req.user._id,
+                        paymentId: razorpay_payment_id,
+                        orderId: razorpay_order_id,
+                        amount: totalAmount,
+                        status: 'paid'
+                    }
+                }
+            }, { new: true }).populate('mentor', 'name');
+
+            if (updatedWorkshop?.mentor?._id) {
+                await userModel.findByIdAndUpdate(updatedWorkshop.mentor._id, {
+                    $inc: { walletBalance: totalAmount },
+                    $push: {
+                        transactions: {
+                            title: `Workshop booking: ${updatedWorkshop.title}`,
+                            amount: totalAmount,
+                            type: 'credit',
+                            date: new Date()
+                        }
+                    }
+                });
+            }
+        }
+
         const newOrder = await Order.create({
             user: req.user._id,
             products: products || [],
             totalAmount: totalAmount,
             razorpay_payment_id,
             razorpay_order_id,
-            eventId: eventId || null
+            eventId: eventId || null,
+            workshopId: workshopId || null
         });
 
         if (productSnapshots && productSnapshots.length > 0) {
@@ -117,7 +152,7 @@ exports.verifyPayment = async (req, res) => {
 
         return res.status(200).json({
             success: true,
-            message: eventId ? "Ticket Booked Successfully!" : "Payment verified & Wallet updated!",
+            message: workshopId ? "Workshop seat booked successfully!" : eventId ? "Ticket Booked Successfully!" : "Payment verified & Wallet updated!",
             order: newOrder
         });
 

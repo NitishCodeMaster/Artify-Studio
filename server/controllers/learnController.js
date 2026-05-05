@@ -123,12 +123,31 @@ const serializeWorkshop = (workshop, index = 0) => {
             hour12: true,
         }),
         attendees: safeNumber(workshop.attendeesCount),
+        enrolledCount: workshop.enrolledLearners?.length || 0,
         tags: workshop.tags?.length ? workshop.tags : [workshop.mode || 'Live'],
         color: workshop.accentColor || theme.workshopGradient,
         image: workshop.coverImage || profile.coverImage || mentor.profilePic || fallbackWorkshopCovers[index % fallbackWorkshopCovers.length],
         durationMinutes: safeNumber(workshop.durationMinutes, 60),
         mode: workshop.mode || 'Live',
+        startAt: workshop.startAt,
+        accessType: workshop.accessType || 'free',
+        price: safeNumber(workshop.price),
     };
+};
+
+const deleteExpiredWorkshops = async () => {
+    const now = new Date();
+    const candidates = await Workshop.find({ isPublished: true, startAt: { $lte: now } }).select('startAt durationMinutes');
+    const expiredIds = candidates
+        .filter((workshop) => {
+            const durationMs = safeNumber(workshop.durationMinutes, 60) * 60 * 1000;
+            return new Date(workshop.startAt).getTime() + durationMs < now.getTime();
+        })
+        .map((workshop) => workshop._id);
+
+    if (expiredIds.length) {
+        await Workshop.deleteMany({ _id: { $in: expiredIds } });
+    }
 };
 
 module.exports.getMentors = async (req, res) => {
@@ -170,6 +189,8 @@ module.exports.getMentors = async (req, res) => {
 
 module.exports.getWorkshops = async (req, res) => {
     try {
+        await deleteExpiredWorkshops();
+
         const limit = Math.min(safeNumber(req.query.limit, 6), 12);
         const query = req.query.q?.trim();
 
@@ -193,6 +214,25 @@ module.exports.getWorkshops = async (req, res) => {
         });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Failed to fetch workshops', error: error.message });
+    }
+};
+
+module.exports.deleteWorkshop = async (req, res) => {
+    try {
+        const workshop = await Workshop.findById(req.params.id);
+
+        if (!workshop) {
+            return res.status(404).json({ success: false, message: 'Workshop not found' });
+        }
+
+        if (String(workshop.mentor) !== String(req.user._id)) {
+            return res.status(403).json({ success: false, message: 'Only the mentor can delete this workshop' });
+        }
+
+        await Workshop.findByIdAndDelete(req.params.id);
+        res.status(200).json({ success: true, message: 'Workshop deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Failed to delete workshop', error: error.message });
     }
 };
 
@@ -230,6 +270,8 @@ module.exports.createWorkshop = async (req, res) => {
             attendeesCount: safeNumber(req.body.attendeesCount, 0),
             tags: Array.isArray(req.body.tags) ? req.body.tags.filter(Boolean) : [],
             mode: req.body.mode || 'Live',
+            accessType: req.body.accessType === 'paid' ? 'paid' : 'free',
+            price: req.body.accessType === 'paid' ? Math.max(safeNumber(req.body.price, 0), 1) : 0,
             coverImage: req.body.coverImage || '',
             accentColor: req.body.accentColor || getTheme(req.user.mentorProfile?.accentColor).workshopGradient,
             isPublished: req.body.isPublished !== false,

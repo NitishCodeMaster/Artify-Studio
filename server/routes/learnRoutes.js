@@ -7,6 +7,7 @@ router.get('/overview', learnController.getLearnOverview);
 router.get('/mentors', learnController.getMentors);
 router.get('/workshops', learnController.getWorkshops);
 router.post('/workshops', authUser, learnController.createWorkshop);
+router.delete('/workshops/:id', authUser, learnController.deleteWorkshop);
 router.post('/seed', authUser, learnController.seedLearnData);
 
 module.exports = router;

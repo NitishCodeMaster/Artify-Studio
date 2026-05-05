@@ -23,6 +23,16 @@ const orderSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    eventId: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'Event',
+        default: null
+    },
+    workshopId: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'Workshop',
+        default: null
+    },
     status: {
         type: String,
         default: 'Processing' 

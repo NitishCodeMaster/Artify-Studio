@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useEffect } from 'react';
+import React, { Suspense, lazy, useLayoutEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
@@ -6,6 +6,7 @@ import { Loader2 } from 'lucide-react';
 import Navbar from './components/Navbar';
 import { Toaster } from 'react-hot-toast';
 import PrivateRoute from './components/PrivateRoute';
+import CreativePulse from './components/CreativePulse';
 
 const CartDrawer = lazy(() => import('./components/MarketPlace/CartDrawer'));
 const Home = lazy(() => import('./pages/Home'));
@@ -31,10 +32,16 @@ const Wallet = lazy(() => import('./pages/Wallet'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 const ScrollToTop = () => {
-  const { pathname } = useLocation();
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
+  const { pathname, search } = useLocation();
+  useLayoutEffect(() => {
+    window.history.scrollRestoration = 'manual';
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    const frame = requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, [pathname, search]);
   return null;
 };
 
@@ -89,6 +96,7 @@ const App = () => {
               </Routes>
             </Suspense>
           </div>
+          <CreativePulse />
         </Router>
       </CartProvider>
     </AuthProvider>
