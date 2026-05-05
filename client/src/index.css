@@ -17,6 +17,18 @@ html, body {
   scroll-behavior: smooth; 
 }
 
+@media (min-width: 1024px) {
+  html {
+    font-size: 93.75%;
+  }
+}
+
+@media (min-width: 1536px) {
+  html {
+    font-size: 91.25%;
+  }
+}
+
 img, video, canvas, svg {
   max-width: 100%;
 }

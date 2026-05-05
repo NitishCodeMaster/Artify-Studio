@@ -192,7 +192,7 @@ const Navbar = () => {
         navigate('/login');
     };
 
-    const iconButtonClass = "relative flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-white/70 transition-all duration-300 hover:border-white/20 hover:bg-white/[0.08] hover:text-white";
+    const iconButtonClass = "relative flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-white/70 transition-all duration-300 hover:border-white/20 hover:bg-white/[0.08] hover:text-white";
 
     return (
         <nav className={`sticky top-0 z-50 px-0 transition-transform duration-500 ease-out ${isVisible ? "translate-y-0" : "-translate-y-[120%]"}`}>
@@ -203,24 +203,24 @@ const Navbar = () => {
                     }`}>
                     <div className={`pointer-events-none absolute inset-x-12 top-0 h-px bg-gradient-to-r from-transparent ${theme.accentGlow} via-white/35 to-transparent`} />
 
-                    <div className="flex h-[78px] items-center justify-between px-5 sm:px-7 lg:px-10">
+                    <div className="flex h-[68px] items-center justify-between px-4 sm:px-6 lg:px-8">
                         <Link to="/" className="group flex items-center gap-3">
-                            <div className="relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-black/40 shadow-inner shadow-black/30">
+                            <div className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-black/40 shadow-inner shadow-black/30">
                                 <div className={`absolute inset-[1px] rounded-[14px] bg-gradient-to-br ${theme.accentGlow}`} />
                                 <div className="absolute -right-2 -top-2 h-6 w-6 rounded-full bg-white/10 blur-md" />
-                                <span className="relative z-10 text-lg font-black tracking-wide text-white">A</span>
+                                <span className="relative z-10 text-base font-black tracking-wide text-white">A</span>
                             </div>
 
                             <div className="leading-none">
                                 <div className="flex items-center gap-2">
-                                    <span className="text-lg font-black tracking-[0.24em] text-white transition-all duration-300 group-hover:tracking-[0.3em]">
+                                    <span className="text-base font-black tracking-[0.24em] text-white transition-all duration-300 group-hover:tracking-[0.3em]">
                                         ARTIFY
                                     </span>
                                     <span className={`hidden rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.24em] sm:inline-flex ${theme.accentBorder} ${theme.accentText} ${theme.accentSoftBg}`}>
                                         Studio
                                     </span>
                                 </div>
-                                <p className="mt-1 text-[10px] uppercase tracking-[0.35em] text-white/35">
+                                <p className="mt-1 text-[9px] uppercase tracking-[0.32em] text-white/35">
                                     Creative Network
                                 </p>
                             </div>
@@ -234,7 +234,7 @@ const Navbar = () => {
                                     <Link
                                         key={link.path}
                                         to={link.path}
-                                        className={`relative rounded-2xl px-4 py-2.5 text-sm font-medium tracking-wide transition-all duration-300 ${isActive ? theme.activeChip : "text-white/55 hover:bg-white/[0.05] hover:text-white"}`}
+                                        className={`relative rounded-xl px-3.5 py-2 text-sm font-medium tracking-wide transition-all duration-300 ${isActive ? theme.activeChip : "text-white/55 hover:bg-white/[0.05] hover:text-white"}`}
                                     >
                                         <span className="relative z-10">{link.name}</span>
                                         {isActive && (
@@ -368,7 +368,7 @@ const Navbar = () => {
                                             <p className="truncate text-sm font-semibold text-white">
                                                 {userProfile.name?.split(' ')[0] || "Artist"}
                                             </p>
-                                            <p className="text-xs text-white/40">Manage account</p>
+                                                    <p className="text-[11px] text-white/40">Manage account</p>
                                         </div>
 
                                         <ChevronDown size={16} className={`text-white/40 transition-transform duration-300 ${isDropdownOpen ? "rotate-180" : ""}`} />
@@ -418,7 +418,7 @@ const Navbar = () => {
                         </div>
 
                         <button
-                            className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-white transition-colors md:hidden"
+                            className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-white transition-colors md:hidden"
                             onClick={() => setIsOpen((prev) => !prev)}
                         >
                             {isOpen ? <X size={20} /> : <Menu size={20} />}

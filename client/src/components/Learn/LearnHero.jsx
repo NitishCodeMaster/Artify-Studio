@@ -4,14 +4,14 @@ import { motion } from 'framer-motion';
 
 export function LearnHero({ searchQuery, setSearchQuery, stats, onFindMentor }) {
     return (
-        <div className="mb-12 grid items-center gap-8 sm:mb-14 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10">
+        <div className="mb-10 grid items-center gap-7 sm:mb-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-8">
             <div>
             <motion.div
                 initial={{ opacity: 0, y: 14 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.5 }}
                 transition={{ duration: 0.45 }}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-6 backdrop-blur-md"
+                className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 backdrop-blur-md"
             >
                 <motion.div
                     animate={{ rotate: [0, 10, -8, 0], scale: [1, 1.08, 1] }}
@@ -27,7 +27,7 @@ export function LearnHero({ searchQuery, setSearchQuery, stats, onFindMentor }) 
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.45 }}
                 transition={{ duration: 0.5, delay: 0.05 }}
-                className="mb-5 text-4xl font-black leading-tight text-white sm:text-5xl md:text-6xl lg:text-7xl"
+                className="mb-4 text-4xl font-black leading-tight text-white sm:text-5xl md:text-[3.4rem] lg:text-[4.2rem]"
             >
                 Learn from the <br className="hidden sm:block" />
                 <motion.span
@@ -44,7 +44,7 @@ export function LearnHero({ searchQuery, setSearchQuery, stats, onFindMentor }) 
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.45 }}
                 transition={{ duration: 0.5, delay: 0.12 }}
-                className="mb-7 max-w-2xl text-base leading-relaxed text-white/40 sm:mb-8 sm:text-lg"
+                className="mb-6 max-w-2xl text-base leading-relaxed text-white/40 sm:text-[1.05rem]"
             >
                 Book 1-on-1 mentorship sessions, join live masterclasses, and level up your skills with verified pros.
             </motion.p>
@@ -54,7 +54,7 @@ export function LearnHero({ searchQuery, setSearchQuery, stats, onFindMentor }) 
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.45 }}
                 transition={{ duration: 0.5, delay: 0.15 }}
-                className="mb-7 flex flex-wrap items-center gap-3"
+                className="mb-6 flex flex-wrap items-center gap-2.5"
             >
                 <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/65 sm:tracking-[0.22em]">
                     {stats?.mentors || 0}+ live mentors
@@ -83,7 +83,7 @@ export function LearnHero({ searchQuery, setSearchQuery, stats, onFindMentor }) 
                     />
                     <button
                         onClick={onFindMentor}
-                        className="flex min-h-11 items-center justify-center gap-2 rounded-full bg-white px-5 py-3 font-bold text-black transition-colors hover:bg-gray-200 sm:px-6"
+                        className="flex min-h-10 items-center justify-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm font-bold text-black transition-colors hover:bg-gray-200 sm:px-5"
                     >
                         Find Mentor
                         <ArrowRight size={16} />

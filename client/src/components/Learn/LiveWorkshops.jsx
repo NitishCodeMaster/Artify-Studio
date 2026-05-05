@@ -5,9 +5,9 @@ import { useNavigate } from 'react-router-dom';
 import { ImageWithFallback } from '../placeholder/ImageWithFallback';
 
 const WorkshopSkeleton = () => (
-    <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.02]">
-        <div className="h-52 animate-pulse bg-white/[0.04]" />
-        <div className="space-y-4 p-8">
+    <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
+        <div className="h-48 animate-pulse bg-white/[0.04]" />
+        <div className="space-y-4 p-5">
             <div className="h-6 w-2/3 rounded bg-white/10" />
             <div className="h-4 w-40 rounded bg-white/10" />
             <div className="flex items-center justify-between pt-8">
@@ -51,10 +51,10 @@ export function LiveWorkshops({ workshops = [], filter = '', loading = false, on
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.35 }}
                 transition={{ duration: 0.45 }}
-                className="mb-8 flex flex-col items-start justify-between gap-5 px-1 sm:mb-10 sm:px-4 md:flex-row md:items-end"
+                className="mb-7 flex flex-col items-start justify-between gap-4 px-1 sm:mb-8 sm:px-3 md:flex-row md:items-end"
             >
                 <div className="min-w-0">
-                    <h3 className="text-2xl font-bold text-white sm:text-3xl">Upcoming Live Masterclasses</h3>
+                    <h3 className="text-2xl font-bold text-white sm:text-[1.8rem]">Upcoming Live Masterclasses</h3>
                     <p className="mt-2 text-sm text-white/40">Mentor-led workshops now come from live backend data, so this section stays fresh automatically.</p>
                 </div>
                 <div className="flex w-full flex-wrap items-center gap-3 md:w-auto md:justify-end">
@@ -74,7 +74,7 @@ export function LiveWorkshops({ workshops = [], filter = '', loading = false, on
                 </div>
             </motion.div>
 
-            <div className="grid gap-5 sm:gap-6 lg:grid-cols-2">
+            <div className="grid gap-4 sm:gap-5 lg:grid-cols-2">
                 {loading && [1, 2].map((item) => <WorkshopSkeleton key={item} />)}
 
                 {!loading && (
@@ -87,10 +87,10 @@ export function LiveWorkshops({ workshops = [], filter = '', loading = false, on
                                 viewport={{ once: true, amount: 0.2 }}
                                 transition={{ duration: 0.45, delay: index * 0.08 }}
                                 whileHover={{ y: -6 }}
-                                className={`group relative cursor-pointer overflow-hidden rounded-2xl border transition-all duration-300 sm:rounded-3xl ${activeIndex === index ? 'border-white/20' : 'border-white/10'}`}
+                                className={`group relative cursor-pointer overflow-hidden rounded-2xl border transition-all duration-300 ${activeIndex === index ? 'border-white/20' : 'border-white/10'}`}
                                 onClick={() => ws.mentorId && navigate(`/profile/${ws.mentorId}`)}
                             >
-                                <div className="relative h-52 overflow-hidden">
+                                <div className="relative h-48 overflow-hidden">
                                     <ImageWithFallback src={ws.image} alt={ws.title} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
                                     <div className="absolute inset-0 bg-gradient-to-t from-[#060606] via-black/35 to-transparent" />
                                     <div className="absolute left-4 top-4 flex gap-2">
@@ -107,12 +107,12 @@ export function LiveWorkshops({ workshops = [], filter = '', loading = false, on
                                     />
                                 </div>
 
-                                <div className="relative flex h-full flex-col p-5 sm:p-8">
-                                    <h4 className="max-w-md text-xl font-bold text-white sm:text-2xl">{ws.title}</h4>
+                                <div className="relative flex h-full flex-col p-5 sm:p-6">
+                                    <h4 className="max-w-md text-xl font-bold text-white sm:text-[1.35rem]">{ws.title}</h4>
                                     <p className="mt-2 text-white/65">{ws.tutor}</p>
                                     <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-white/45">{ws.summary}</p>
 
-                                    <div className="mt-7 flex flex-col gap-5 sm:mt-8 sm:flex-row sm:items-center sm:justify-between">
+                                    <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                                         <div className="flex flex-col gap-2">
                                             <div className="flex items-center gap-2 text-sm text-white/80">
                                                 <Calendar size={16} className="text-pink-400" /> {ws.date}
@@ -127,8 +127,8 @@ export function LiveWorkshops({ workshops = [], filter = '', loading = false, on
                                             </div>
                                         </div>
 
-                                        <button className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white text-black transition-transform group-hover:scale-110">
-                                            <ArrowRight size={20} />
+                                        <button className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-black transition-transform group-hover:scale-110">
+                                            <ArrowRight size={18} />
                                         </button>
                                     </div>
                                 </div>

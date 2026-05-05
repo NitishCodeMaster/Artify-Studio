@@ -5,9 +5,9 @@ import { useNavigate } from 'react-router-dom';
 import { ImageWithFallback } from '../placeholder/ImageWithFallback';
 
 const MentorSkeleton = () => (
-    <div className="rounded-3xl border border-white/5 bg-[#0f0f0f] p-4">
-        <div className="h-64 animate-pulse rounded-2xl bg-white/[0.04]" />
-        <div className="space-y-3 px-2 pt-5">
+    <div className="rounded-2xl border border-white/5 bg-[#0f0f0f] p-3">
+        <div className="h-56 animate-pulse rounded-xl bg-white/[0.04]" />
+        <div className="space-y-3 px-2 pt-4">
             <div className="h-6 w-40 rounded bg-white/10" />
             <div className="h-4 w-32 rounded bg-white/10" />
             <div className="flex items-center justify-between border-t border-white/10 pt-4">
@@ -29,7 +29,7 @@ export function MentorGrid({ mentors = [], filter = '', loading = false }) {
     });
 
     return (
-        <div id="mentor-grid" className="mb-16 scroll-mt-28">
+        <div id="mentor-grid" className="mb-12 scroll-mt-24">
             <motion.div
                 initial={{ opacity: 0, y: 18 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -38,7 +38,7 @@ export function MentorGrid({ mentors = [], filter = '', loading = false }) {
                 className="mb-8 flex flex-col items-start justify-between gap-4 px-1 sm:flex-row sm:items-end"
             >
                 <div className="min-w-0">
-                    <h3 className="text-2xl font-bold text-white sm:text-3xl">Top Rated Mentors</h3>
+                    <h3 className="text-2xl font-bold text-white sm:text-[1.8rem]">Top Rated Mentors</h3>
                     <p className="mt-2 text-sm text-white/40">Real mentor profiles powered from artist accounts, each with a unique mentor identity.</p>
                 </div>
                 <button onClick={() => navigate('/settings')} className="text-sm font-bold uppercase tracking-wider text-pink-400 hover:text-pink-300">
@@ -46,7 +46,7 @@ export function MentorGrid({ mentors = [], filter = '', loading = false }) {
                 </button>
             </motion.div>
 
-            <div className="grid gap-5 sm:gap-6 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+            <div className="grid gap-4 sm:gap-5 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
                 {loading && [1, 2, 3].map((item) => <MentorSkeleton key={item} />)}
 
                 {!loading && visibleMentors.map((mentor, index) => (
@@ -57,9 +57,9 @@ export function MentorGrid({ mentors = [], filter = '', loading = false }) {
                         viewport={{ once: true, amount: 0.2 }}
                         transition={{ duration: 0.4, delay: index * 0.08 }}
                         whileHover={{ y: -8 }}
-                        className={`group relative rounded-2xl border border-white/5 bg-[#0f0f0f] p-3 transition-all duration-300 hover:-translate-y-2 sm:rounded-3xl sm:p-4 ${mentor.shadow} ${mentor.border}`}
+                        className={`group relative rounded-2xl border border-white/5 bg-[#0f0f0f] p-3 transition-all duration-300 hover:-translate-y-1.5 sm:p-3.5 ${mentor.shadow} ${mentor.border}`}
                     >
-                        <div className="relative mb-5 h-64 overflow-hidden rounded-2xl">
+                        <div className="relative mb-4 h-56 overflow-hidden rounded-xl">
                             <ImageWithFallback src={mentor.image} alt={mentor.name} className="h-full w-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
                             <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full border border-white/10 bg-black/60 px-3 py-1 backdrop-blur-md">
@@ -81,21 +81,21 @@ export function MentorGrid({ mentors = [], filter = '', loading = false }) {
 
                         <div className="px-2">
                             <div className="mb-1 flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
-                                <h4 className="text-xl font-bold text-white">{mentor.name}</h4>
+                                <h4 className="text-lg font-bold text-white">{mentor.name}</h4>
                                 <span className="break-all text-[11px] uppercase tracking-[0.18em] text-white/30 sm:text-xs sm:tracking-[0.22em]">{mentor.mentorSlug}</span>
                             </div>
                             <p className="mb-1 text-sm text-white/70">{mentor.skill}</p>
                             <p className="mb-4 line-clamp-2 text-sm leading-relaxed text-white/45">{mentor.headline}</p>
 
-                            <div className="mb-5 grid grid-cols-1 gap-3 text-xs text-white/55 sm:grid-cols-2">
-                                <div className="rounded-2xl border border-white/10 bg-white/[0.02] px-3 py-3">
+                            <div className="mb-4 grid grid-cols-1 gap-2.5 text-xs text-white/55 sm:grid-cols-2">
+                                <div className="rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2.5">
                                     <div className="mb-1 flex items-center gap-1.5 uppercase tracking-[0.2em] text-white/30">
                                         <Users size={12} />
                                         Learners
                                     </div>
                                     <div className="text-sm font-semibold text-white">{mentor.students}</div>
                                 </div>
-                                <div className="rounded-2xl border border-white/10 bg-white/[0.02] px-3 py-3">
+                                <div className="rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2.5">
                                     <div className="mb-1 flex items-center gap-1.5 uppercase tracking-[0.2em] text-white/30">
                                         <Languages size={12} />
                                         Modes
@@ -111,7 +111,7 @@ export function MentorGrid({ mentors = [], filter = '', loading = false }) {
                                 </div>
                                 <button
                                     onClick={() => navigate(`/profile/${mentor.id}`)}
-                                    className="flex min-h-10 items-center justify-center gap-2 rounded-full bg-white px-5 py-2 text-sm font-bold text-black transition-colors hover:bg-gray-200"
+                                    className="flex min-h-9 items-center justify-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-bold text-black transition-colors hover:bg-gray-200"
                                 >
                                     <Video size={16} />
                                     View Mentor
