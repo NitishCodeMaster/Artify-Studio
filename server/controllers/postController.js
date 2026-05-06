@@ -2,22 +2,28 @@ const Post = require('../models/postModel');
 
 exports.createPost = async (req, res) => {
     try {
-        const { content, text, image, category } = req.body;
+        const { content, text, image, category, voiceIntro } = req.body;
         const finalContent = content || text;
+        const hasVoiceIntro = Boolean(voiceIntro?.url);
 
-        if (!finalContent && !image) {
+        if (!finalContent && !image && !hasVoiceIntro) {
             return res.status(400).json({ success: false, message: "Post cannot be empty!" });
         }
 
         const newPost = await Post.create({
-            content: finalContent,
+            content: finalContent || '',
             image: image || '',
+            voiceIntro: hasVoiceIntro ? {
+                url: voiceIntro.url,
+                duration: Number(voiceIntro.duration || 0),
+                mimeType: voiceIntro.mimeType || ''
+            } : undefined,
             user: req.user._id,
             category: category || 'General'
         });
 
         const populatedPost = await Post.findById(newPost._id)
-            .populate('user', 'name email')
+            .populate('user', 'name email profilePic')
             .populate('comments.user', 'name');
 
         req.app.get('io').emit('new_post', populatedPost);
@@ -38,7 +44,7 @@ exports.getAllPosts = async (req, res) => {
         }
 
         const posts = await Post.find(query)
-            .populate('user', 'name email')
+            .populate('user', 'name email profilePic')
             .populate('comments.user', 'name')
             .sort({ createdAt: -1 });
 

@@ -1,14 +1,16 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { CommunityHero } from '../components/Community/CommunityHero';
 import { DiscussionList } from '../components/Community/DiscussionList';
 import { CreatorSidebar } from '../components/Community/CreatorSidebar';
 import { StatsStrip } from '../components/Community/StatsStrip';
 import { Footer } from '../components/Footer';
+import { CreativeMissions } from '../components/Community/CreativeMissions';
 
 
 export default function Community() {
     const discussionRef = useRef(null);
     const groupsRef = useRef(null);
+    const [missionDraft, setMissionDraft] = useState(null);
 
     return (
         <>
@@ -21,9 +23,11 @@ export default function Community() {
                 <div className="relative z-10 max-w-[1680px] mx-auto px-6 lg:px-8">
                     <CommunityHero discussionRef={discussionRef} groupsRef={groupsRef} />
 
+                    <CreativeMissions onUseMission={setMissionDraft} discussionRef={discussionRef} />
+
                     <div ref={discussionRef} className="grid xl:grid-cols-[1fr_360px] 2xl:grid-cols-[1fr_400px] gap-8 scroll-mt-24">
-                        <DiscussionList />
-                        <CreatorSidebar />
+                        <DiscussionList missionDraft={missionDraft} />
+                        <CreatorSidebar onUseTemplate={setMissionDraft} discussionRef={discussionRef} />
                     </div>
 
                     <div ref={groupsRef} className="mt-20 scroll-mt-24">

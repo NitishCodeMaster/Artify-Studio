@@ -296,7 +296,7 @@ export function LiveWorkshops({ workshops = [], filter = '', loading = false, on
 
             <AnimatePresence>
                 {selectedWorkshop && (
-                    <div className="fixed inset-0 z-[9999] flex items-start justify-center px-3 pb-4 pt-24">
+                    <div className="fixed inset-0 z-[9999] flex items-start justify-center px-3 pb-8 pt-28 sm:pt-28">
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
@@ -308,7 +308,7 @@ export function LiveWorkshops({ workshops = [], filter = '', loading = false, on
                             initial={{ opacity: 0, y: 22, scale: 0.97 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: 16, scale: 0.98 }}
-                            className="relative max-h-[calc(100vh-7rem)] w-full max-w-4xl overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#09090b] shadow-2xl"
+                            className="relative h-[min(720px,calc(100dvh-9rem))] w-full max-w-5xl overflow-hidden rounded-[1.5rem] border border-white/10 bg-[#09090b] shadow-2xl"
                         >
                             <button
                                 type="button"
@@ -328,15 +328,15 @@ export function LiveWorkshops({ workshops = [], filter = '', loading = false, on
                                 <X size={18} />
                             </button>
 
-                            <div className="grid max-h-[calc(100vh-7rem)] overflow-y-auto lg:grid-cols-[0.9fr_1.1fr]">
-                                <div className="relative min-h-[280px] bg-[#111] lg:min-h-full">
+                            <div className="grid h-full overflow-y-auto lg:grid-cols-[0.86fr_1.14fr] lg:overflow-hidden">
+                                <div className="relative min-h-[220px] bg-[#111] lg:min-h-0">
                                     <ImageWithFallback src={selectedWorkshop.image} alt="" className="absolute inset-0 h-full w-full scale-110 object-cover opacity-30 blur-xl" />
-                                    <ImageWithFallback src={selectedWorkshop.image} alt={selectedWorkshop.title} className="relative z-10 h-full max-h-[440px] w-full object-contain p-4 lg:max-h-none" />
+                                    <ImageWithFallback src={selectedWorkshop.image} alt={selectedWorkshop.title} className="relative z-10 h-full max-h-[320px] w-full object-contain p-3 lg:max-h-none lg:p-4" />
                                     <div className="absolute inset-x-0 bottom-0 z-10 h-28 bg-gradient-to-t from-[#09090b] to-transparent" />
                                 </div>
 
-                                <div className="p-5 sm:p-7">
-                                    <div className="mb-4 flex flex-wrap gap-2">
+                                <div className="flex min-h-0 flex-col p-4 sm:p-5 lg:p-6">
+                                    <div className="mb-3 flex flex-wrap gap-2 pr-12">
                                         <span className={`rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] ${selectedWorkshop.accessType === 'paid' ? 'border-amber-400/25 bg-amber-500/10 text-amber-100' : 'border-emerald-400/25 bg-emerald-500/10 text-emerald-100'}`}>
                                             {selectedWorkshop.accessType === 'paid' ? `Paid • ₹${selectedWorkshop.price}` : 'Free Class'}
                                         </span>
@@ -346,50 +346,63 @@ export function LiveWorkshops({ workshops = [], filter = '', loading = false, on
                                             </span>
                                         ))}
                                     </div>
-                                    <h3 className="text-2xl font-black leading-tight text-white sm:text-3xl">{selectedWorkshop.title}</h3>
-                                    <p className="mt-2 text-white/60">{selectedWorkshop.tutor}</p>
-                                    <p className="mt-5 leading-relaxed text-white/55">{selectedWorkshop.summary}</p>
+                                    <h3 className="text-xl font-black leading-tight text-white sm:text-2xl lg:text-[1.65rem]">{selectedWorkshop.title}</h3>
+                                    <p className="mt-1 text-sm text-white/60">{selectedWorkshop.tutor}</p>
+                                    <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-white/55">{selectedWorkshop.summary}</p>
 
-                                    <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                                        <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-4">
-                                            <Calendar size={18} className="mb-3 text-pink-300" />
+                                    <div className="mt-4 grid gap-2 sm:grid-cols-3">
+                                        <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-3">
+                                            <Calendar size={16} className="mb-2 text-pink-300" />
                                             <p className="text-xs uppercase tracking-[0.18em] text-white/35">Schedule</p>
-                                            <p className="mt-1 font-semibold text-white">{selectedWorkshop.date}</p>
+                                            <p className="mt-1 text-sm font-semibold text-white">{selectedWorkshop.date}</p>
                                         </div>
-                                        <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-4">
-                                            <Clock3 size={18} className="mb-3 text-indigo-300" />
+                                        <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-3">
+                                            <Clock3 size={16} className="mb-2 text-indigo-300" />
                                             <p className="text-xs uppercase tracking-[0.18em] text-white/35">Duration</p>
-                                            <p className="mt-1 font-semibold text-white">{selectedWorkshop.durationMinutes} minutes</p>
+                                            <p className="mt-1 text-sm font-semibold text-white">{selectedWorkshop.durationMinutes} minutes</p>
                                         </div>
-                                        <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-4">
-                                            <Users size={18} className="mb-3 text-emerald-300" />
+                                        <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-3">
+                                            <Users size={16} className="mb-2 text-emerald-300" />
                                             <p className="text-xs uppercase tracking-[0.18em] text-white/35">Registered</p>
-                                            <p className="mt-1 font-semibold text-white">{selectedWorkshop.attendees} learners</p>
+                                            <p className="mt-1 text-sm font-semibold text-white">{selectedWorkshop.attendees} learners</p>
                                         </div>
-                                        <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-4">
-                                            {selectedWorkshop.accessType === 'paid' ? <LockKeyhole size={18} className="mb-3 text-amber-300" /> : <BadgeCheck size={18} className="mb-3 text-emerald-300" />}
+                                        <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-3">
+                                            {selectedWorkshop.accessType === 'paid' ? <LockKeyhole size={16} className="mb-2 text-amber-300" /> : <BadgeCheck size={16} className="mb-2 text-emerald-300" />}
                                             <p className="text-xs uppercase tracking-[0.18em] text-white/35">Access</p>
-                                            <p className="mt-1 font-semibold text-white">{selectedWorkshop.accessType === 'paid' ? `₹${selectedWorkshop.price}` : 'Free'}</p>
+                                            <p className="mt-1 text-sm font-semibold text-white">{selectedWorkshop.accessType === 'paid' ? `₹${selectedWorkshop.price}` : 'Free'}</p>
                                         </div>
-                                        <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-4">
-                                            <Video size={18} className="mb-3 text-fuchsia-300" />
+                                        <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-3">
+                                            <Video size={16} className="mb-2 text-fuchsia-300" />
                                             <p className="text-xs uppercase tracking-[0.18em] text-white/35">Mode</p>
-                                            <p className="mt-1 font-semibold text-white">{selectedWorkshop.mode}</p>
+                                            <p className="mt-1 text-sm font-semibold text-white">{selectedWorkshop.mode}</p>
+                                        </div>
+                                        <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-indigo-500/10 to-pink-500/10 p-3">
+                                            <Sparkles size={16} className="mb-2 text-pink-300" />
+                                            <p className="text-xs uppercase tracking-[0.18em] text-white/35">Room Kit</p>
+                                            <p className="mt-1 text-sm font-semibold text-white">Link + calendar ready</p>
                                         </div>
                                     </div>
 
-                                    <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                                    <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.025] p-3">
+                                        <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-white/60">
+                                            <span className="rounded-full bg-white/[0.06] px-3 py-1">Live room opens in Jitsi</span>
+                                            <span className="rounded-full bg-white/[0.06] px-3 py-1">Calendar invite included</span>
+                                            <span className="rounded-full bg-white/[0.06] px-3 py-1">Mentor profile one click away</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-auto grid gap-3 pt-4 sm:grid-cols-2">
                                         <button
                                             onClick={() => handleJoinWorkshop(selectedWorkshop)}
                                             disabled={processingId === selectedWorkshop.id}
-                                            className="flex flex-1 items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-bold text-black transition-all hover:bg-gray-200"
+                                            className="flex items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-bold text-black transition-all hover:bg-gray-200"
                                         >
                                             {selectedWorkshop.accessType === 'paid' ? <IndianRupee size={16} /> : <Video size={16} />}
                                             {processingId === selectedWorkshop.id ? 'Processing...' : selectedWorkshop.accessType === 'paid' ? `Pay ₹${selectedWorkshop.price} & Join` : 'Join Free Room'}
                                         </button>
                                         <button
                                             onClick={() => selectedWorkshop.mentorId && navigate(`/profile/${selectedWorkshop.mentorId}`)}
-                                            className="flex flex-1 items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-5 py-3 text-sm font-bold text-white transition-all hover:bg-white/[0.08]"
+                                            className="flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-5 py-3 text-sm font-bold text-white transition-all hover:bg-white/[0.08]"
                                         >
                                             <UserRound size={16} />
                                             View Mentor

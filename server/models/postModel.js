@@ -3,10 +3,24 @@ const mongoose = require('mongoose');
 const postSchema = new mongoose.Schema({
     content: {
         type: String,
-        required: true
+        default: ''
     },
     image: {
         type: String,
+    },
+    voiceIntro: {
+        url: {
+            type: String,
+            default: ''
+        },
+        duration: {
+            type: Number,
+            default: 0
+        },
+        mimeType: {
+            type: String,
+            default: ''
+        }
     },
     user: {
         type: mongoose.Schema.ObjectId,

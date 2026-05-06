@@ -7,6 +7,8 @@ import Navbar from './components/Navbar';
 import { Toaster } from 'react-hot-toast';
 import PrivateRoute from './components/PrivateRoute';
 import CreativePulse from './components/CreativePulse';
+import CreativeMode from './components/CreativeMode';
+import FloatingInspiration from './components/FloatingInspiration';
 
 const CartDrawer = lazy(() => import('./components/MarketPlace/CartDrawer'));
 const Home = lazy(() => import('./pages/Home'));
@@ -35,12 +37,22 @@ const ScrollToTop = () => {
   const { pathname, search } = useLocation();
   useLayoutEffect(() => {
     window.history.scrollRestoration = 'manual';
-    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-    const frame = requestAnimationFrame(() => {
+    const resetScroll = () => {
       window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-    });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    };
 
-    return () => cancelAnimationFrame(frame);
+    resetScroll();
+    const frame = requestAnimationFrame(() => {
+      resetScroll();
+    });
+    const delay = window.setTimeout(resetScroll, 80);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      window.clearTimeout(delay);
+    };
   }, [pathname, search]);
   return null;
 };
@@ -96,6 +108,8 @@ const App = () => {
               </Routes>
             </Suspense>
           </div>
+          <CreativeMode />
+          <FloatingInspiration />
           <CreativePulse />
         </Router>
       </CartProvider>

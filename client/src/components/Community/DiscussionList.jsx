@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import api from '../../utils/api';
-import { Zap, Send, Loader2, Trash2, Tag, Filter, Image as ImageIcon, X, MessageSquare } from 'lucide-react';
+import { Send, Loader2, Trash2, Tag, Filter, Image as ImageIcon, X, MessageSquare, Mic, Square, PlayCircle } from 'lucide-react';
 import PostCard from './postCard';
 import ConfirmDeleteModal from '../ConfirmDeleteModal';
 import { io } from 'socket.io-client';
@@ -8,7 +8,7 @@ import Masonry from 'react-masonry-css';
 
 const POST_CATEGORIES = ['General', 'Looking for Band', 'Art Feedback', 'Gigs'];
 
-export function DiscussionList() {
+export function DiscussionList({ missionDraft }) {
     const [posts, setPosts] = useState([]);
     const [newPostContent, setNewPostContent] = useState('');
     const [postCategory, setPostCategory] = useState('General');
@@ -19,6 +19,14 @@ export function DiscussionList() {
     const [imageUrl, setImageUrl] = useState('');
     const [uploadingImage, setUploadingImage] = useState(false);
     const fileInputRef = useRef(null);
+    const [voiceIntro, setVoiceIntro] = useState(null);
+    const [recording, setRecording] = useState(false);
+    const [recordingSeconds, setRecordingSeconds] = useState(0);
+    const recordingSecondsRef = useRef(0);
+    const recorderRef = useRef(null);
+    const chunksRef = useRef([]);
+    const streamRef = useRef(null);
+    const timerRef = useRef(null);
 
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [postToDelete, setPostToDelete] = useState(null);
@@ -52,6 +60,17 @@ export function DiscussionList() {
     useEffect(() => {
         fetchPosts();
     }, [activeFilter]);
+
+    useEffect(() => () => {
+        if (timerRef.current) clearInterval(timerRef.current);
+        streamRef.current?.getTracks().forEach((track) => track.stop());
+    }, []);
+
+    useEffect(() => {
+        if (!missionDraft) return;
+        setNewPostContent(missionDraft.text || '');
+        setPostCategory(missionDraft.category || 'General');
+    }, [missionDraft]);
 
     useEffect(() => {
         socket.on("new_post", (newPost) => {
@@ -109,10 +128,68 @@ export function DiscussionList() {
         }
     };
 
+    const stopRecording = () => {
+        if (recorderRef.current && recorderRef.current.state !== 'inactive') {
+            recorderRef.current.stop();
+        }
+    };
+
+    const startRecording = async () => {
+        if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
+            alert('Voice recording is not supported in this browser.');
+            return;
+        }
+
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            streamRef.current = stream;
+            chunksRef.current = [];
+            const recorder = new MediaRecorder(stream);
+            recorderRef.current = recorder;
+            setRecordingSeconds(0);
+            recordingSecondsRef.current = 0;
+
+            recorder.ondataavailable = (event) => {
+                if (event.data.size > 0) chunksRef.current.push(event.data);
+            };
+
+            recorder.onstop = () => {
+                const blob = new Blob(chunksRef.current, { type: recorder.mimeType || 'audio/webm' });
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    setVoiceIntro({
+                        url: reader.result,
+                        duration: Math.min(recordingSecondsRef.current || 20, 20),
+                        mimeType: blob.type,
+                    });
+                };
+                reader.readAsDataURL(blob);
+                stream.getTracks().forEach((track) => track.stop());
+                streamRef.current = null;
+                setRecording(false);
+                if (timerRef.current) clearInterval(timerRef.current);
+            };
+
+            recorder.start();
+            setRecording(true);
+            timerRef.current = setInterval(() => {
+                setRecordingSeconds((prev) => {
+                    const next = prev + 1;
+                    recordingSecondsRef.current = next;
+                    if (next >= 20) stopRecording();
+                    return Math.min(next, 20);
+                });
+            }, 1000);
+        } catch (error) {
+            console.error('Voice recording failed:', error);
+            alert('Mic permission nahi mila ya recording start nahi ho payi.');
+        }
+    };
+
     const handlePostSubmit = async (e) => {
         e.preventDefault();
         if (!currentUser) return alert("Please login to post!");
-        if (!newPostContent.trim() && !imageUrl) return alert("Write something or upload a photo!");
+        if (!newPostContent.trim() && !imageUrl && !voiceIntro?.url) return alert("Write something, upload a photo, or record a voice intro!");
 
         setSubmitting(true);
         try {
@@ -120,12 +197,14 @@ export function DiscussionList() {
                 user: currentUser._id || currentUser.id,
                 content: newPostContent,
                 category: postCategory,
-                image: imageUrl
+                image: imageUrl,
+                voiceIntro
             });
 
             setNewPostContent('');
             setPostCategory('General');
             setImageUrl('');
+            setVoiceIntro(null);
 
             if (activeFilter !== 'All' && activeFilter !== postCategory) {
                 setActiveFilter('All');
@@ -182,6 +261,21 @@ export function DiscussionList() {
                             </div>
                         )}
 
+                        {voiceIntro && (
+                            <div className="rounded-2xl border border-emerald-400/20 bg-emerald-500/10 p-3">
+                                <div className="mb-2 flex items-center justify-between gap-3">
+                                    <span className="flex items-center gap-2 text-sm font-bold text-emerald-100">
+                                        <PlayCircle size={16} />
+                                        Voice intro attached ({voiceIntro.duration}s)
+                                    </span>
+                                    <button type="button" onClick={() => setVoiceIntro(null)} className="rounded-full bg-black/30 p-1 text-white/60 hover:text-white">
+                                        <X size={14} />
+                                    </button>
+                                </div>
+                                <audio controls src={voiceIntro.url} className="h-9 w-full" />
+                            </div>
+                        )}
+
                         <div className="flex flex-wrap items-center justify-between gap-4 border-t border-white/5 pt-4">
                             <div className="flex items-center gap-3">
                                 <div className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/10">
@@ -194,8 +288,16 @@ export function DiscussionList() {
                                 <button type="button" onClick={() => fileInputRef.current.click()} disabled={uploadingImage} className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-indigo-400 border border-white/10 transition-all">
                                     {uploadingImage ? <Loader2 className="animate-spin" size={20} /> : <ImageIcon size={20} />}
                                 </button>
+                                <button
+                                    type="button"
+                                    onClick={recording ? stopRecording : startRecording}
+                                    className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-bold transition-all ${recording ? 'border-red-400/30 bg-red-500/15 text-red-200' : 'border-white/10 bg-white/5 text-emerald-300 hover:bg-white/10'}`}
+                                >
+                                    {recording ? <Square size={16} /> : <Mic size={16} />}
+                                    {recording ? `${recordingSeconds}s / 20s` : 'Voice Intro'}
+                                </button>
                             </div>
-                            <button type="submit" disabled={submitting || uploadingImage || (!newPostContent.trim() && !imageUrl)} className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white px-8 py-2.5 rounded-xl font-bold transition-all shadow-lg shadow-indigo-600/20">
+                            <button type="submit" disabled={submitting || uploadingImage || recording || (!newPostContent.trim() && !imageUrl && !voiceIntro?.url)} className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white px-8 py-2.5 rounded-xl font-bold transition-all shadow-lg shadow-indigo-600/20">
                                 {submitting ? <Loader2 className="animate-spin" size={18} /> : <Send size={18} />} Post
                             </button>
                         </div>

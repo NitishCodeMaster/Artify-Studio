@@ -10,13 +10,17 @@ The project helps creators showcase their talent, discover events, join workshop
 
 ## Live Demo
 
-Deployment link will be added here:
+🌐 Frontend: https://artify-studio-client.vercel.app/
 
-```text
-Coming Soon
-```
+⚙️ Backend API: https://artify-studio-server.onrender.com
 
 ---
+
+## 📌 Status
+
+- Project Completed  
+- Fully Responsive  
+- Frontend & Backend Deployed  
 
 ## Features
 
@@ -163,8 +167,8 @@ Artify/
 │   ├── utils/              # Cron jobs and helpers
 │   ├── .env.example
 │   └── package.json
-│ 
-├── screenshots/            
+│
+├── screenshots/
 │   ├── Banner.png
 │   ├── Events.png
 │   ├── Home.png
@@ -285,7 +289,7 @@ VITE_RAZORPAY_KEY_ID=your_razorpay_key_id
 
 ---
 
-## Screenshots 
+## Screenshots
 
 ![Home](./screenshots/Home.png)
 ![Learn](./screenshots/Learn.png)

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Heart, MessageCircle, Send, UserCircle2 } from 'lucide-react';
+import { Heart, MessageCircle, Send, UserCircle2, Mic2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../utils/api';
 import { timeAgo } from '../../utils/timeAgo';
@@ -97,6 +97,21 @@ const PostCard = ({ post }) => {
             {post.image && (
                 <div className="rounded-xl overflow-hidden mb-4 border border-white/[0.05]">
                     <img src={post.image} alt="Post Attachment" className="w-full h-auto object-cover max-h-[400px]" />
+                </div>
+            )}
+
+            {post.voiceIntro?.url && (
+                <div className="mb-4 rounded-2xl border border-emerald-400/20 bg-gradient-to-r from-emerald-500/10 to-indigo-500/10 p-3">
+                    <div className="mb-2 flex items-center justify-between gap-3">
+                        <span className="flex items-center gap-2 text-sm font-bold text-emerald-100">
+                            <Mic2 size={16} />
+                            Voice Intro
+                        </span>
+                        <span className="text-xs font-semibold text-white/40">
+                            {post.voiceIntro.duration || 20}s
+                        </span>
+                    </div>
+                    <audio controls src={post.voiceIntro.url} className="h-9 w-full" />
                 </div>
             )}
 

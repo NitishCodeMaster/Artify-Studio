@@ -1,10 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { Award, Music, PenTool, Mic, ArrowRight, UserCircle2 } from 'lucide-react';
+import { Award, Music, PenTool, Mic, MessageSquarePlus, Search, Sparkles, UserCircle2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../utils/api';
 import toast from 'react-hot-toast';
 
-export function CreatorSidebar() {
+const POST_TEMPLATES = [
+    {
+        title: 'Find a collaborator',
+        category: 'Looking for Band',
+        text: 'I am looking for a collaborator for: \n\nSkill needed: \nTimeline: \nReference/inspiration: ',
+        icon: Search,
+    },
+    {
+        title: 'Ask for feedback',
+        category: 'Art Feedback',
+        text: 'I need feedback on this work.\n\nWhat I want feedback on:\n1. \n2. \n3. ',
+        icon: MessageSquarePlus,
+    },
+    {
+        title: 'Share an opportunity',
+        category: 'Gigs',
+        text: 'Opportunity/Gig available:\n\nRole needed: \nDate/location: \nHow to apply: ',
+        icon: Sparkles,
+    },
+];
+
+export function CreatorSidebar({ onUseTemplate, discussionRef }) {
     const [creators, setCreators] = useState([]);
     const [followingArtists, setFollowingArtists] = useState({});
     const navigate = useNavigate();
@@ -33,9 +54,9 @@ export function CreatorSidebar() {
         const isCurrentlyFollowing = followingArtists[creatorId];
 
         if (isCurrentlyFollowing) {
-            toast(`Unfollowed ${creatorName}`, { icon: '👋', style: { borderRadius: '10px', background: '#333', color: '#fff' } });
+            toast(`Unfollowed ${creatorName}`, { style: { borderRadius: '10px', background: '#333', color: '#fff' } });
         } else {
-            toast.success(`You are now following ${creatorName}! 🌟`);
+            toast.success(`You are now following ${creatorName}.`);
         }
 
         setFollowingArtists(prev => ({
@@ -45,14 +66,7 @@ export function CreatorSidebar() {
     };
 
     const handleLeaderboard = () => {
-        toast("Top Artists Leaderboard is updating live! 🏆", { icon: '🔥', style: { borderRadius: '10px', background: '#333', color: '#fff' } });
-    };
-
-    const handleCallout = () => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        toast.success("Ready to Collab? Type your Callout and post it! 📣", {
-            style: { borderRadius: '10px', background: '#4f46e5', color: '#fff', border: '1px solid #6366f1' }
-        });
+        toast("Top Artists Leaderboard is updating live.", { style: { borderRadius: '10px', background: '#333', color: '#fff' } });
     };
 
     return (
@@ -116,18 +130,43 @@ export function CreatorSidebar() {
                 </button>
             </div>
 
-            <div className="p-8 rounded-3xl bg-[#0a0a0a] border border-white/5 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl group-hover:bg-amber-500/20 transition-all"></div>
-                <h3 className="text-2xl font-black text-white mb-2 relative z-10 tracking-tight">Collab?</h3>
-                <p className="text-sm text-white/50 mb-6 relative z-10 leading-relaxed">
-                    Find perfect collaborators for your next big masterpiece.
-                </p>
-                <button
-                    onClick={handleCallout}
-                    className="w-full py-3.5 rounded-full bg-amber-500 hover:bg-amber-400 text-black font-bold flex items-center justify-center gap-2 group-hover:scale-105 transition-all shadow-[0_0_20px_rgba(245,158,11,0.2)] relative z-10"
-                >
-                    Create a Callout <ArrowRight size={16} />
-                </button>
+            <div className="rounded-3xl border border-white/10 bg-[#0a0a0a] p-5">
+                <div className="mb-4">
+                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-amber-300">Quick Post Helper</p>
+                    <h3 className="mt-2 text-xl font-black text-white">Not sure what to post?</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-white/45">
+                        Pick a ready format. It will fill the discussion box with the right category and structure.
+                    </p>
+                </div>
+
+                <div className="space-y-2">
+                    {POST_TEMPLATES.map((template) => {
+                        const Icon = template.icon;
+                        return (
+                            <button
+                                key={template.title}
+                                onClick={() => {
+                                    onUseTemplate?.({
+                                        id: `${template.category}-${Date.now()}`,
+                                        category: template.category,
+                                        text: template.text,
+                                    });
+                                    discussionRef?.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                    toast.success('Post format ready in composer.');
+                                }}
+                                className="flex w-full items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.035] p-3 text-left transition-all hover:border-amber-300/30 hover:bg-amber-400/10"
+                            >
+                                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-400/10 text-amber-300">
+                                    <Icon size={18} />
+                                </span>
+                                <span className="min-w-0">
+                                    <span className="block text-sm font-bold text-white">{template.title}</span>
+                                    <span className="block text-xs text-white/40">{template.category}</span>
+                                </span>
+                            </button>
+                        );
+                    })}
+                </div>
             </div>
         </div>
     );
