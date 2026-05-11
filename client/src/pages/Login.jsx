@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import { Mail, Lock, ArrowRight, Loader2, LogIn, UserRound, GraduationCap, Sparkles, BadgeCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
@@ -35,11 +35,9 @@ export default function Login() {
           _id: res.data.user._id || res.data.user.id
         };
         login(fixedUser);
-        toast.success(loginMode === 'mentor' ? 'Mentor mode unlocked!' : 'Welcome back to Artify!');
-
-        setTimeout(() => {
-          navigate(loginMode === 'mentor' ? '/learn' : '/');
-        }, 1500);
+        toast.dismiss();
+        toast.success(loginMode === 'mentor' ? 'Mentor mode unlocked!' : 'Welcome back to Artify!', { duration: 1200 });
+        navigate(loginMode === 'mentor' ? '/learn' : '/', { replace: true });
       }
     } catch (error) {
       console.error(error);
@@ -51,18 +49,6 @@ export default function Login() {
 
   return (
     <section className="min-h-[calc(100vh-72px)] bg-[#050505] flex items-start justify-center relative overflow-hidden px-6 pt-10 pb-12">
-
-      <Toaster
-        position="bottom-right"
-        toastOptions={{
-          style: {
-            background: '#1a1a1a',
-            color: '#fff',
-            border: '1px solid #333'
-          }
-        }}
-      />
-
       <div className="hidden lg:block absolute top-0 left-0 w-1/3 h-full overflow-hidden opacity-40">
         <img src={leftSideImage} alt="Art background left" className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000 scale-110" />
         <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-[#050505]/90 to-[#050505]"></div>

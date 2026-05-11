@@ -40,6 +40,7 @@ app.get("/api/test", (req, res) => {
 });
 
 app.use('/api/users', userRoutes);
+app.use('/users', userRoutes);
 app.use('/api/sellers', sellerRoutes);
 app.use("/api/home", homeRoutes);
 app.use('/api/products', productRoutes);
