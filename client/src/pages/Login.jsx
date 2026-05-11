@@ -36,7 +36,6 @@ export default function Login() {
         };
         login(fixedUser);
         toast.dismiss();
-        toast.success(loginMode === 'mentor' ? 'Mentor mode unlocked!' : 'Welcome back to Artify!', { duration: 1200 });
         navigate(loginMode === 'mentor' ? '/learn' : '/', { replace: true });
       }
     } catch (error) {
