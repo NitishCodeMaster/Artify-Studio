@@ -20,7 +20,10 @@ const CartDrawer = () => {
                 return;
             }
 
-            const orderRes = await api.post('/payments/create-order', { amount: cartTotal });
+            const orderRes = await api.post('/payments/create-order', {
+                products: cart.map(item => item._id),
+                amount: cartTotal
+            });
             const order = orderRes.data.order;
 
             const options = {

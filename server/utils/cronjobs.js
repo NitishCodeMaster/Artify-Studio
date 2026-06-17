@@ -7,13 +7,19 @@ const initCronJobs = () => {
             const startOfToday = new Date();
             startOfToday.setHours(0, 0, 0, 0);
 
-            console.log("[Cron Job] Cleaning past events...");
+            console.log("[Cron Job] Marking past events as completed...");
 
-            const result = await Event.deleteMany({
-                date: { $lt: startOfToday }
+            const result = await Event.updateMany({
+                date: { $lt: startOfToday },
+                status: 'upcoming'
+            }, {
+                $set: {
+                    status: 'completed',
+                    archivedAt: new Date()
+                }
             });
-            if (result.deletedCount > 0) {
-                console.log(`[Cron Job] Deleted ${result.deletedCount} events.`);
+            if (result.modifiedCount > 0) {
+                console.log(`[Cron Job] Marked ${result.modifiedCount} events as completed.`);
             }
         } catch (error) {
             console.error("[Cron Job] Error:", error);

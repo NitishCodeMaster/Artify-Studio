@@ -135,9 +135,13 @@ const serializeWorkshop = (workshop, index = 0) => {
     };
 };
 
-const deleteExpiredWorkshops = async () => {
+const markExpiredWorkshopsCompleted = async () => {
     const now = new Date();
-    const candidates = await Workshop.find({ isPublished: true, startAt: { $lte: now } }).select('startAt durationMinutes');
+    const candidates = await Workshop.find({
+        isPublished: true,
+        status: 'upcoming',
+        startAt: { $lte: now }
+    }).select('startAt durationMinutes');
     const expiredIds = candidates
         .filter((workshop) => {
             const durationMs = safeNumber(workshop.durationMinutes, 60) * 60 * 1000;
@@ -146,7 +150,10 @@ const deleteExpiredWorkshops = async () => {
         .map((workshop) => workshop._id);
 
     if (expiredIds.length) {
-        await Workshop.deleteMany({ _id: { $in: expiredIds } });
+        await Workshop.updateMany(
+            { _id: { $in: expiredIds } },
+            { $set: { status: 'completed', archivedAt: now } }
+        );
     }
 };
 
@@ -189,13 +196,14 @@ module.exports.getMentors = async (req, res) => {
 
 module.exports.getWorkshops = async (req, res) => {
     try {
-        await deleteExpiredWorkshops();
+        await markExpiredWorkshopsCompleted();
 
         const limit = Math.min(safeNumber(req.query.limit, 6), 12);
         const query = req.query.q?.trim();
 
         const workshops = await Workshop.find({
             isPublished: true,
+            status: 'upcoming',
             ...(query ? {
                 $or: [
                     { title: { $regex: query, $options: 'i' } },
@@ -240,7 +248,7 @@ module.exports.getLearnOverview = async (req, res) => {
     try {
         const [mentorCount, workshopCount] = await Promise.all([
             userModel.countDocuments({ 'mentorProfile.isMentor': true, 'mentorProfile.availableForBooking': true }),
-            Workshop.countDocuments({ isPublished: true }),
+            Workshop.countDocuments({ isPublished: true, status: 'upcoming' }),
         ]);
 
         res.status(200).json({
@@ -275,6 +283,7 @@ module.exports.createWorkshop = async (req, res) => {
             coverImage: req.body.coverImage || '',
             accentColor: req.body.accentColor || getTheme(req.user.mentorProfile?.accentColor).workshopGradient,
             isPublished: req.body.isPublished !== false,
+            status: 'upcoming',
         });
 
         const populated = await Workshop.findById(workshop._id).populate('mentor', 'name profilePic mentorProfile role');
@@ -316,6 +325,7 @@ module.exports.seedLearnData = async (req, res) => {
             mode: 'Live',
             coverImage: mentor.mentorProfile?.coverImage || mentor.profilePic || fallbackWorkshopCovers[index % fallbackWorkshopCovers.length],
             accentColor: getTheme(mentor.mentorProfile?.accentColor).workshopGradient,
+            status: 'upcoming',
         }));
 
         await Workshop.insertMany(seeds);

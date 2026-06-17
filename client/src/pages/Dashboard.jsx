@@ -13,7 +13,7 @@ const Dashboard = () => {
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-                const res = await api.get('/payment/my-orders');
+                const res = await api.get('/payments/my-orders');
                 setOrders(res.data.orders);
             } catch (error) {
                 console.error("Error fetching orders:", error);
@@ -103,7 +103,7 @@ const Dashboard = () => {
                                 </div>
 
                                  <div className="p-6">
-                                    {order.products.map((product) => (
+                                    {order.products?.length > 0 ? order.products.map((product) => (
                                         <div key={product._id} className="flex items-center gap-6 py-4 first:pt-0 last:pb-0 border-b border-white/5 last:border-0 group">
                                             <div className="w-24 h-24 rounded-2xl bg-black border border-white/10 overflow-hidden shrink-0 relative">
                                                 <img
@@ -125,7 +125,22 @@ const Dashboard = () => {
                                                 <ChevronRight size={20} />
                                             </button>
                                         </div>
-                                    ))}
+                                    )) : (
+                                        <div className="flex items-center gap-6 py-4">
+                                            <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-black text-white/30">
+                                                <Package size={28} />
+                                            </div>
+                                            <div className="flex-1">
+                                                <h4 className="text-lg font-bold text-white/90 mb-1">
+                                                    {order.workshopId ? 'Workshop booking' : order.eventId ? 'Event ticket' : 'Artify order'}
+                                                </h4>
+                                                <p className="text-sm text-white/50 mb-2">Payment verified and saved in your order history.</p>
+                                                <span className="inline-block px-3 py-1 bg-amber-500/10 text-amber-500 text-xs font-bold uppercase tracking-wider rounded-lg border border-amber-500/20">
+                                                    {order.status}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </motion.div>
                         ))}

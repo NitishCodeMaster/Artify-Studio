@@ -28,6 +28,7 @@ const Settings = lazy(() => import('./pages/Settings').then((module) => ({ defau
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword').then((module) => ({ default: module.ForgotPassword })));
 const ResetPassword = lazy(() => import('./pages/ResetPassword').then((module) => ({ default: module.ResetPassword })));
 const PublicProfile = lazy(() => import('./pages/PublicProfile').then((module) => ({ default: module.PublicProfile })));
+const Portfolio = lazy(() => import('./pages/Portfolio'));
 const Messages = lazy(() => import('./pages/Messages'));
 const SavedCollections = lazy(() => import('./pages/SavedCollections'));
 const Wallet = lazy(() => import('./pages/Wallet'));
@@ -97,10 +98,11 @@ const App = () => {
                 <Route path="/product/:id" element={<ProductDetails />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/my-profile" element={<Profile />} />
-                <Route path="/settings" element={<Settings />} />
+                <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password/:token" element={<ResetPassword />} />
                 <Route path="/profile/:id" element={<PublicProfile />} />
+                <Route path="/portfolio/:id" element={<Portfolio />} />
                 <Route path="/messages" element={<Messages />} />
                 <Route path="/saved" element={<SavedCollections />} />
                 <Route path="/wallet" element={<Wallet />} />

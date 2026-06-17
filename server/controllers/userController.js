@@ -24,6 +24,39 @@ const normalizePhone = (value) => {
     return digits.length > 10 ? digits.slice(-10) : digits;
 };
 
+const toList = (value) => {
+    if (Array.isArray(value)) return value.map((item) => String(item).trim()).filter(Boolean);
+    return String(value || '').split(',').map((item) => item.trim()).filter(Boolean);
+};
+
+const normalizeFeaturedWorks = (works) => {
+    if (!Array.isArray(works)) return [];
+    return works
+        .slice(0, 6)
+        .map((work) => ({
+            title: String(work?.title || '').trim(),
+            image: String(work?.image || '').trim(),
+            description: String(work?.description || '').trim(),
+            link: String(work?.link || '').trim()
+        }))
+        .filter((work) => work.title || work.image || work.description || work.link);
+};
+
+const serializePortfolio = (user) => ({
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    phone: user.phone,
+    profilePic: user.profilePic,
+    role: user.role,
+    bio: user.bio,
+    artStyle: user.artStyle,
+    originLocation: user.originLocation,
+    experience: user.experience,
+    socialLinks: user.socialLinks,
+    portfolio: user.portfolio || {}
+});
+
 module.exports.registerUser = async (req, res) => {
     try {
         const errors = validationResult(req);
@@ -454,6 +487,77 @@ module.exports.getWallet = async (req, res) => {
         });
     } catch (error) {
         res.status(500).json({ success: false, message: "Error fetching wallet data" });
+    }
+};
+
+module.exports.getPortfolio = async (req, res) => {
+    try {
+        const user = await userModel.findById(req.params.id).select('-password -resetPasswordToken -resetPasswordExpire');
+        if (!user) {
+            return res.status(404).json({ success: false, message: "Portfolio not found" });
+        }
+
+        const isOwner = req.user && String(req.user._id || req.user.id) === String(user._id);
+        if (!user.portfolio?.isPublished && !isOwner) {
+            return res.status(404).json({ success: false, message: "Portfolio is not published yet" });
+        }
+
+        const posts = await Post.find({ user: user._id })
+            .populate('user', 'name profilePic')
+            .sort({ createdAt: -1 })
+            .limit(6);
+
+        res.status(200).json({ success: true, artist: serializePortfolio(user), posts });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Error fetching portfolio", error: error.message });
+    }
+};
+
+module.exports.getFeaturedPortfolios = async (req, res) => {
+    try {
+        const artists = await userModel.find({ 'portfolio.isPublished': true })
+            .select('name role profilePic artStyle originLocation experience portfolio')
+            .sort({ updatedAt: -1 })
+            .limit(6);
+
+        res.status(200).json({
+            success: true,
+            artists: artists.map(serializePortfolio)
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Error fetching featured portfolios" });
+    }
+};
+
+module.exports.updatePortfolio = async (req, res) => {
+    try {
+        const user = await userModel.findById(req.user._id || req.user.id);
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+
+        user.portfolio = {
+            ...(user.portfolio || {}),
+            isPublished: req.body.isPublished === true || req.body.isPublished === 'true',
+            headline: req.body.headline || '',
+            coverImage: req.body.coverImage || '',
+            about: req.body.about || '',
+            skills: toList(req.body.skills),
+            services: toList(req.body.services),
+            featuredWorks: normalizeFeaturedWorks(req.body.featuredWorks),
+            contactEmail: req.body.contactEmail || user.email,
+            isAvailableForWork: req.body.isAvailableForWork !== false
+        };
+
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Portfolio saved successfully",
+            user
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Failed to save portfolio", error: error.message });
     }
 };
 

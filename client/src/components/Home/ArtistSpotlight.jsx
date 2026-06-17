@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Star, Palette, Music, Mic2, Zap, ArrowRight, Users, Sparkles, Mic, Wind, MapPin, BadgeCheck, Crown } from 'lucide-react';
 import { ImageWithFallback } from '../placeholder/ImageWithFallback';
+import api from '../../utils/api';
 
 import avatar1 from "../../assets/Images/ArtistSpotlight/acoustic.jpeg";
 import avatar2 from "../../assets/Images/PerformerPanel/avatar2.jpeg";
@@ -101,6 +102,37 @@ const artists = [
 
 export default function ArtistSpotlight() {
     const navigate = useNavigate();
+    const [portfolioArtists, setPortfolioArtists] = useState([]);
+
+    useEffect(() => {
+        const fetchPortfolios = async () => {
+            try {
+                const res = await api.get('/users/portfolio/featured');
+                const incoming = res.data.artists || [];
+                setPortfolioArtists(incoming.map((artist, index) => {
+                    const fallback = artists[index % artists.length];
+                    return {
+                        ...fallback,
+                        id: artist._id,
+                        portfolioId: artist._id,
+                        name: artist.name,
+                        role: artist.portfolio?.headline || artist.role || artist.artStyle || fallback.role,
+                        location: artist.originLocation || fallback.location,
+                        followers: artist.experience || fallback.followers,
+                        rating: artist.portfolio?.isAvailableForWork ? 'Open' : fallback.rating,
+                        image: artist.portfolio?.coverImage || artist.profilePic || fallback.image,
+                        featured: index === 0,
+                    };
+                }));
+            } catch (error) {
+                console.error('Failed to load portfolio spotlight:', error);
+            }
+        };
+
+        fetchPortfolios();
+    }, []);
+
+    const visibleArtists = portfolioArtists.length > 0 ? portfolioArtists : artists;
 
     return (
         <section id="artist-spotlight" className="relative pt-16 bg-black overflow-hidden">
@@ -151,7 +183,7 @@ export default function ArtistSpotlight() {
                 </motion.div>
 
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-y-16 gap-x-6 md:gap-x-12">
-                    {artists.map((artist) => (
+                    {visibleArtists.map((artist) => (
                         <motion.div
                             key={artist.id}
                             initial={{ opacity: 0, y: 22 }}
@@ -159,6 +191,7 @@ export default function ArtistSpotlight() {
                             viewport={{ once: true, amount: 0.2 }}
                             transition={{ duration: 0.45, delay: artist.id * 0.04 }}
                             whileHover={{ y: -6 }}
+                            onClick={() => artist.portfolioId ? navigate(`/portfolio/${artist.portfolioId}`) : navigate('/settings')}
                             className="group relative flex flex-col items-center text-center cursor-pointer"
                         >
 
@@ -225,7 +258,7 @@ export default function ArtistSpotlight() {
 
                                 <div className="mt-4 h-0 opacity-0 group-hover:h-6 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
                                     <span className="text-xs font-bold text-white flex items-center justify-center gap-1">
-                                        View Portfolio <ArrowRight size={12} />
+                                        {artist.portfolioId ? 'View Portfolio' : 'Create Portfolio'} <ArrowRight size={12} />
                                     </span>
                                 </div>
                             </div>

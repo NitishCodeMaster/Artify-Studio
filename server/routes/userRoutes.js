@@ -3,6 +3,21 @@ const router = express.Router();
 const { body } = require("express-validator");
 const userController = require('../controllers/userController');
 const { authUser } = require('../middleware/authMiddleware');
+const jwt = require('jsonwebtoken');
+const userModel = require('../models/userModel');
+
+const optionalAuthUser = async (req, res, next) => {
+    try {
+        const token = req.cookies?.token || req.header('Authorization')?.replace('Bearer ', '');
+        if (token) {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            req.user = await userModel.findById(decoded.id).select('-password');
+        }
+    } catch {
+        req.user = null;
+    }
+    next();
+};
 
 router.post('/register', [
     body('name').not().isEmpty().withMessage('Name is required'),
@@ -23,6 +38,10 @@ router.post('/logout', authUser, userController.logoutUser);
 router.get('/profile', authUser, userController.getUserProfile);
 
 router.get('/top-creators', authUser, userController.getTopCreators);
+
+router.get('/portfolio/featured', userController.getFeaturedPortfolios);
+router.get('/portfolio/:id', optionalAuthUser, userController.getPortfolio);
+router.put('/portfolio', authUser, userController.updatePortfolio);
 
 router.get('/profile/:id', userController.getUserProfileById);
 

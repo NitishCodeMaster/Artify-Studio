@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import api from '../utils/api';
 import { Footer } from '../components/Footer';
-import { Loader2, Camera, Mail, Phone, UserCircle2, Sparkles, Tag, MapPin, Brush, Award, GraduationCap, Globe2, Wallet, BookOpenCheck, ArrowLeft } from 'lucide-react';
+import { Loader2, Camera, Mail, Phone, UserCircle2, Sparkles, Tag, MapPin, Brush, Award, GraduationCap, Globe2, Wallet, BookOpenCheck, ArrowLeft, BriefcaseBusiness, Image, Eye } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import AvatarEditor from 'react-avatar-editor';
 import { useNavigate } from 'react-router-dom';
@@ -30,6 +30,18 @@ export function Settings() {
     const [mentorTags, setMentorTags] = useState((user?.mentorProfile?.tags || []).join(', '));
     const [accentColor, setAccentColor] = useState(user?.mentorProfile?.accentColor || 'indigo');
     const [profileMode, setProfileMode] = useState(Boolean(user?.mentorProfile?.isMentor) ? 'mentor' : 'artist');
+    const [portfolioPublished, setPortfolioPublished] = useState(!!user?.portfolio?.isPublished);
+    const [portfolioHeadline, setPortfolioHeadline] = useState(user?.portfolio?.headline || '');
+    const [portfolioCoverImage, setPortfolioCoverImage] = useState(user?.portfolio?.coverImage || '');
+    const [portfolioAbout, setPortfolioAbout] = useState(user?.portfolio?.about || '');
+    const [portfolioSkills, setPortfolioSkills] = useState((user?.portfolio?.skills || []).join(', '));
+    const [portfolioServices, setPortfolioServices] = useState((user?.portfolio?.services || []).join(', '));
+    const [portfolioContactEmail, setPortfolioContactEmail] = useState(user?.portfolio?.contactEmail || user?.email || '');
+    const [portfolioAvailable, setPortfolioAvailable] = useState(user?.portfolio?.isAvailableForWork !== false);
+    const [featuredWorks, setFeaturedWorks] = useState(() => {
+        const existing = user?.portfolio?.featuredWorks || [];
+        return [0, 1, 2].map((index) => existing[index] || { title: '', image: '', description: '', link: '' });
+    });
 
     const [submitting, setSubmitting] = useState(false);
     const fileInputRef = useRef(null);
@@ -107,11 +119,25 @@ export function Settings() {
                 mergedUser = mentorRes.data.user;
             }
 
+            const portfolioRes = await api.put('/users/portfolio', {
+                isPublished: portfolioPublished,
+                headline: portfolioHeadline,
+                coverImage: portfolioCoverImage,
+                about: portfolioAbout,
+                skills: portfolioSkills,
+                services: portfolioServices,
+                contactEmail: portfolioContactEmail,
+                isAvailableForWork: portfolioAvailable,
+                featuredWorks
+            });
+
+            mergedUser = portfolioRes.data.user;
+
             if (profileRes.data.success) {
                 localStorage.setItem('user', JSON.stringify(mergedUser));
                 localStorage.setItem('artify_user', JSON.stringify(mergedUser));
                 window.dispatchEvent(new Event('userChanged'));
-                toast.success("Profile details updated! 🪄");
+                toast.success(profileMode === 'portfolio' ? "Portfolio saved!" : "Profile details updated! 🪄");
             }
         } catch (error) {
             toast.error(error.response?.data?.message || "Failed to update profile");
@@ -203,15 +229,24 @@ export function Settings() {
                         >
                             Mentor Profile
                         </button>
+                        <button
+                            type="button"
+                            onClick={() => setProfileMode('portfolio')}
+                            className={`rounded-full px-4 py-2 text-sm font-semibold transition-all ${profileMode === 'portfolio' ? 'bg-white text-black' : 'text-white/60 hover:text-white'}`}
+                        >
+                            Portfolio
+                        </button>
                     </div>
                 </div>
 
                 <h1 className="text-3xl md:text-4xl font-black mb-2 text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">
-                    {profileMode === 'mentor' ? 'Mentor Dashboard' : 'Artist Dashboard'}
+                    {profileMode === 'mentor' ? 'Mentor Dashboard' : profileMode === 'portfolio' ? 'Portfolio Builder' : 'Artist Dashboard'}
                 </h1>
                 <p className="text-white/50 mb-7">
                     {profileMode === 'mentor'
                         ? 'Build your dedicated mentor identity, booking style, and learning presence.'
+                        : profileMode === 'portfolio'
+                        ? 'Publish a dedicated portfolio page that visitors can open from artist spotlight cards.'
                         : 'Showcase your true identity, heritage, and art to the world.'}
                 </p>
 
@@ -353,6 +388,92 @@ export function Settings() {
                             </div>
                         )}
                     </div>
+                    )}
+
+                    {profileMode === 'portfolio' && (
+                        <div className="space-y-6">
+                            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+                                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                                    <div>
+                                        <h2 className="flex items-center gap-2 text-xl font-bold">
+                                            <BriefcaseBusiness className="text-amber-300" />
+                                            Public Portfolio
+                                        </h2>
+                                        <p className="mt-2 text-sm text-white/50">Publish this to appear on Home artist spotlight and share your portfolio page.</p>
+                                    </div>
+                                    <label className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-black/30 px-4 py-2 text-sm text-white/80">
+                                        <input type="checkbox" checked={portfolioPublished} onChange={(e) => setPortfolioPublished(e.target.checked)} className="accent-amber-400" />
+                                        Published
+                                    </label>
+                                </div>
+
+                                {(user?._id || user?.id) && (
+                                    <button
+                                        type="button"
+                                        onClick={() => navigate(`/portfolio/${user._id || user.id}`)}
+                                        className="mt-4 inline-flex items-center gap-2 rounded-full border border-white/10 px-4 py-2 text-sm font-bold text-white/70 transition hover:bg-white/10 hover:text-white"
+                                    >
+                                        <Eye size={15} />
+                                        Preview Portfolio
+                                    </button>
+                                )}
+                            </div>
+
+                            <div className="space-y-5 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-5">
+                                <h2 className="flex items-center gap-2 text-xl font-bold text-amber-300">
+                                    <Sparkles />
+                                    Portfolio Story
+                                </h2>
+                                <div>
+                                    <label className="mb-2 block text-sm text-white/60">Headline</label>
+                                    <input value={portfolioHeadline} onChange={(e) => setPortfolioHeadline(e.target.value)} placeholder="e.g., Acoustic storyteller crafting intimate live experiences" className="w-full rounded-xl border border-white/10 bg-black/40 p-3 outline-none focus:border-amber-500" />
+                                </div>
+                                <div>
+                                    <label className="mb-2 flex items-center gap-1.5 text-sm text-white/60"><Image size={16} /> Cover Image URL</label>
+                                    <input value={portfolioCoverImage} onChange={(e) => setPortfolioCoverImage(e.target.value)} placeholder="Paste Cloudinary/Unsplash image URL" className="w-full rounded-xl border border-white/10 bg-black/40 p-3 outline-none focus:border-amber-500" />
+                                </div>
+                                <div>
+                                    <label className="mb-2 block text-sm text-white/60">About Your Work</label>
+                                    <textarea value={portfolioAbout} onChange={(e) => setPortfolioAbout(e.target.value)} rows={5} placeholder="Tell clients, fans, and collaborators what you create and why it matters." className="w-full resize-none rounded-xl border border-white/10 bg-black/40 p-3 outline-none focus:border-amber-500" />
+                                </div>
+                                <div className="grid gap-4 md:grid-cols-2">
+                                    <div>
+                                        <label className="mb-2 block text-sm text-white/60">Skills</label>
+                                        <input value={portfolioSkills} onChange={(e) => setPortfolioSkills(e.target.value)} placeholder="Guitar, Live vocals, Songwriting" className="w-full rounded-xl border border-white/10 bg-black/40 p-3 outline-none focus:border-amber-500" />
+                                    </div>
+                                    <div>
+                                        <label className="mb-2 block text-sm text-white/60">Services</label>
+                                        <input value={portfolioServices} onChange={(e) => setPortfolioServices(e.target.value)} placeholder="Live gigs, Studio sessions, Custom commissions" className="w-full rounded-xl border border-white/10 bg-black/40 p-3 outline-none focus:border-amber-500" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="space-y-4 rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+                                <h2 className="flex items-center gap-2 text-xl font-bold">
+                                    <Brush className="text-pink-300" />
+                                    Featured Work
+                                </h2>
+                                {featuredWorks.map((work, index) => (
+                                    <div key={index} className="grid gap-3 rounded-2xl border border-white/10 bg-black/25 p-4 md:grid-cols-2">
+                                        <input value={work.title} onChange={(e) => setFeaturedWorks((prev) => prev.map((item, i) => i === index ? { ...item, title: e.target.value } : item))} placeholder={`Work ${index + 1} title`} className="rounded-xl border border-white/10 bg-black/40 p-3 outline-none focus:border-amber-500" />
+                                        <input value={work.image} onChange={(e) => setFeaturedWorks((prev) => prev.map((item, i) => i === index ? { ...item, image: e.target.value } : item))} placeholder="Image URL" className="rounded-xl border border-white/10 bg-black/40 p-3 outline-none focus:border-amber-500" />
+                                        <input value={work.link} onChange={(e) => setFeaturedWorks((prev) => prev.map((item, i) => i === index ? { ...item, link: e.target.value } : item))} placeholder="Optional project/video link" className="rounded-xl border border-white/10 bg-black/40 p-3 outline-none focus:border-amber-500 md:col-span-2" />
+                                        <textarea value={work.description} onChange={(e) => setFeaturedWorks((prev) => prev.map((item, i) => i === index ? { ...item, description: e.target.value } : item))} rows={2} placeholder="Short description" className="resize-none rounded-xl border border-white/10 bg-black/40 p-3 outline-none focus:border-amber-500 md:col-span-2" />
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="grid gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-5 md:grid-cols-2">
+                                <div>
+                                    <label className="mb-2 block text-sm text-white/60">Contact Email</label>
+                                    <input value={portfolioContactEmail} onChange={(e) => setPortfolioContactEmail(e.target.value)} className="w-full rounded-xl border border-white/10 bg-black/40 p-3 outline-none focus:border-amber-500" />
+                                </div>
+                                <label className="flex items-center gap-3 rounded-xl border border-white/10 bg-black/25 p-4 text-sm text-white/75">
+                                    <input type="checkbox" checked={portfolioAvailable} onChange={(e) => setPortfolioAvailable(e.target.checked)} className="accent-emerald-400" />
+                                    Available for work
+                                </label>
+                            </div>
+                        </div>
                     )}
 
                 </form>

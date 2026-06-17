@@ -77,6 +77,15 @@ const WorkshopSchema = new mongoose.Schema({
     isPublished: {
         type: Boolean,
         default: true
+    },
+    status: {
+        type: String,
+        enum: ['upcoming', 'completed', 'cancelled'],
+        default: 'upcoming'
+    },
+    archivedAt: {
+        type: Date,
+        default: null
     }
 }, { timestamps: true });
 

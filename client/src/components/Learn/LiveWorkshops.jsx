@@ -43,7 +43,15 @@ export function LiveWorkshops({ workshops = [], filter = '', loading = false, on
 
     const handleJoinWorkshop = async (workshop) => {
         if (workshop.accessType !== 'paid' || Number(workshop.price) <= 0) {
-            openRoom(workshop);
+            try {
+                setProcessingId(workshop.id);
+                await api.post('/payments/book-free', { workshopId: workshop.id });
+                openRoom(workshop);
+            } catch (error) {
+                toast.error(error.response?.data?.message || 'Free workshop join nahi ho paya.');
+            } finally {
+                setProcessingId('');
+            }
             return;
         }
 

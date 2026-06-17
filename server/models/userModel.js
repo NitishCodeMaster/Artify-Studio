@@ -53,6 +53,49 @@ const UserSchema = new mongoose.Schema({
         youtube: { type: String, default: '' },
         portfolioUrl: { type: String, default: '' }
     },
+    portfolio: {
+        isPublished: {
+            type: Boolean,
+            default: false
+        },
+        headline: {
+            type: String,
+            default: '',
+            trim: true
+        },
+        coverImage: {
+            type: String,
+            default: ''
+        },
+        about: {
+            type: String,
+            default: '',
+            trim: true
+        },
+        skills: [{
+            type: String,
+            trim: true
+        }],
+        services: [{
+            type: String,
+            trim: true
+        }],
+        featuredWorks: [{
+            title: { type: String, default: '', trim: true },
+            image: { type: String, default: '' },
+            description: { type: String, default: '', trim: true },
+            link: { type: String, default: '', trim: true }
+        }],
+        contactEmail: {
+            type: String,
+            default: '',
+            trim: true
+        },
+        isAvailableForWork: {
+            type: Boolean,
+            default: true
+        }
+    },
     mentorProfile: {
         isMentor: {
             type: Boolean,

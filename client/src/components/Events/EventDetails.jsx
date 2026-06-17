@@ -41,7 +41,7 @@ const EventDetails = ({ event: propEvent, onBack, refresh, viewMode }) => {
 
     const handleDelete = async () => {
         try {
-            await api.delete(`/events/${event._id}`);
+            await api.delete(`/events/delete/${event._id}`);
             toast.success("Event Deleted");
             if (refresh) refresh();
             onBack ? onBack() : navigate("/events");
@@ -51,6 +51,22 @@ const EventDetails = ({ event: propEvent, onBack, refresh, viewMode }) => {
     };
 
     const handlePayment = async () => {
+        if (Number(event.price) <= 0) {
+            try {
+                setIsProcessing(true);
+                await api.post('/payments/book-free', { eventId: event._id });
+                toast.success("Free ticket booked!");
+                if (refresh) refresh();
+                if (onBack) onBack();
+                else navigate("/events");
+            } catch (error) {
+                toast.error(error.response?.data?.message || "Free booking failed");
+            } finally {
+                setIsProcessing(false);
+            }
+            return;
+        }
+
         const isLoaded = await loadRazorpay();
         if (!isLoaded) {
             toast.error("Razorpay failed to load.");

@@ -62,6 +62,15 @@ const eventSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    status: {
+        type: String,
+        enum: ['upcoming', 'completed', 'cancelled'],
+        default: 'upcoming'
+    },
+    archivedAt: {
+        type: Date,
+        default: null
+    },
     attendees: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
