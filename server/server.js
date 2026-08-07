@@ -38,33 +38,44 @@ const startServer = async () => {
                 if (!userId) return;
 
                 const uid = userId.toString();
-
                 onlineUsers.set(uid, socket.id);
                 socket.join(`user:${uid}`);
 
+                // Broadcast updated online users list
+                io.emit("online_users_list", Array.from(onlineUsers.keys()));
                 console.log(`🟢 User ${uid} registered with socket ${socket.id}`);
-                console.log("Online Users:", onlineUsers);
+            });
+
+            socket.on("get_online_users", () => {
+                socket.emit("online_users_list", Array.from(onlineUsers.keys()));
             });
 
             socket.on("join_chat", (chatId) => {
                 if (!chatId) return;
-
                 socket.join(chatId);
-                console.log(`📩 User joined chat room: ${chatId}`);
             });
 
             socket.on("leave_chat", (chatId) => {
                 if (!chatId) return;
-
                 socket.leave(chatId);
-                console.log(`📤 User left chat room: ${chatId}`);
+            });
+
+            socket.on("typing", ({ chatId, userId, userName }) => {
+                if (!chatId) return;
+                socket.to(chatId).emit("display_typing", { chatId, userId, userName });
+            });
+
+            socket.on("stop_typing", ({ chatId, userId }) => {
+                if (!chatId) return;
+                socket.to(chatId).emit("hide_typing", { chatId, userId });
             });
 
             socket.on("disconnect", () => {
                 for (let [userId, socketId] of onlineUsers.entries()) {
                     if (socketId === socket.id) {
                         onlineUsers.delete(userId);
-                        console.log(` User ${userId} disconnected`);
+                        io.emit("online_users_list", Array.from(onlineUsers.keys()));
+                        console.log(`🔴 User ${userId} disconnected`);
                         break;
                     }
                 }

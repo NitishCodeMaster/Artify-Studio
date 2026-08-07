@@ -327,3 +327,63 @@ exports.bookFreeCheckout = async (req, res) => {
         res.status(400).json({ success: false, message: error.message });
     }
 };
+
+exports.getTradeHistory = async (req, res) => {
+    try {
+        const userId = req.user._id;
+
+        const purchases = await Order.find({ user: userId })
+            .populate({
+                path: 'products',
+                populate: { path: 'seller', select: 'name email profilePic sellerProfile' }
+            })
+            .populate('eventId', 'title date location price')
+            .populate('workshopId', 'title accessType price')
+            .sort({ createdAt: -1 });
+
+        const userProducts = await Product.find({ seller: userId }).select('_id');
+        const userProductIds = userProducts.map(p => p._id);
+
+        let sales = [];
+        if (userProductIds.length > 0) {
+            sales = await Order.find({ products: { $in: userProductIds } })
+                .populate('user', 'name email profilePic phone')
+                .populate('products')
+                .sort({ createdAt: -1 });
+        }
+
+        const userDoc = await userModel.findById(userId).select('walletBalance transactions');
+
+        res.status(200).json({
+            success: true,
+            walletBalance: userDoc?.walletBalance || 0,
+            purchases,
+            sales,
+            transactions: userDoc?.transactions || []
+        });
+    } catch (error) {
+        console.error("Trade History Error:", error);
+        res.status(500).json({ success: false, message: "Error fetching trade history", error: error.message });
+    }
+};
+
+exports.getMySales = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const userProducts = await Product.find({ seller: userId }).select('_id');
+        const userProductIds = userProducts.map(p => p._id);
+
+        let sales = [];
+        if (userProductIds.length > 0) {
+            sales = await Order.find({ products: { $in: userProductIds } })
+                .populate('user', 'name email profilePic phone')
+                .populate('products')
+                .sort({ createdAt: -1 });
+        }
+
+        res.status(200).json({ success: true, sales });
+    } catch (error) {
+        console.error("Sales History Error:", error);
+        res.status(500).json({ success: false, message: "Error fetching sales history" });
+    }
+};

@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Footer } from '../components/Footer';
-import { MapPin, Brush, Award, Calendar, Mail, Phone, Loader2, ArrowLeft, Share2, Star, Sparkles, Users, Layers3 } from 'lucide-react';
+import { MapPin, Brush, Award, Calendar, Mail, Phone, Loader2, ArrowLeft, Share2, Star, Sparkles, Users, Layers3, Store, ShoppingBag, Briefcase, CheckCircle2 } from 'lucide-react';
+import SellerMap from '../components/MarketPlace/SellerMap';
+import ProductCard from '../components/MarketPlace/ProductCard';
+import CommissionModal from '../components/CommissionModal';
 import api from '../utils/api';
 import toast from 'react-hot-toast';
 
@@ -37,8 +40,10 @@ export const PublicProfile = () => {
     const [profile, setProfile] = useState(null);
     const [isFollowing, setIsFollowing] = useState(false);
     const [posts, setPosts] = useState([]);
+    const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [isCommissionModalOpen, setIsCommissionModalOpen] = useState(false);
 
     const currentUser = JSON.parse(localStorage.getItem('user')) || {};
     const isMyProfile = currentUser.id === id || currentUser._id === id;
@@ -49,6 +54,7 @@ export const PublicProfile = () => {
                 const res = await api.get(`/users/profile/${id}`);
                 setProfile(res.data.user);
                 setPosts(res.data.posts || []);
+                setProducts(res.data.products || []);
             } catch (err) {
                 setError("Artist not found or wandering in the woods.");
             } finally {
@@ -98,6 +104,12 @@ export const PublicProfile = () => {
     const coverImage = getCoverImage(profile.role, profile.artStyle, profile.name);
     const joinedLabel = new Date(profile.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
+    const storeName = profile.sellerProfile?.storeName || `${profile.name}'s Music & Crafts`;
+    const sellerLoc = profile.sellerProfile?.location || profile.originLocation || 'Chandigarh';
+    const sellerLat = profile.sellerProfile?.latitude;
+    const sellerLng = profile.sellerProfile?.longitude;
+    const sellerCategory = profile.sellerProfile?.sellerCategory || 'Artisan Seller';
+
     return (
         <div className="min-h-screen overflow-x-hidden bg-[#030303] font-sans text-white">
             <div className="relative overflow-hidden border-b border-white/10 bg-[#050506]">
@@ -130,17 +142,20 @@ export const PublicProfile = () => {
                                 </div>
                                 <div className="min-w-0">
                                     <p className="mb-2 inline-flex rounded-full border border-amber-400/25 bg-black/35 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-amber-200 backdrop-blur-md">
-                                        Artist Identity
+                                        Verified Seller & Artist
                                     </p>
-                                    <p className="truncate text-sm text-white/65">{profile.originLocation || 'Creative Network'}</p>
+                                    <p className="truncate text-sm text-white/65 flex items-center gap-1">
+                                        <MapPin size={13} className="text-amber-400" />
+                                        📍 {sellerLoc}
+                                    </p>
                                 </div>
                             </div>
                         </div>
 
                         <div className="p-5 sm:p-7 lg:p-8">
                             <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white/60">
-                                <Sparkles size={12} className="text-amber-400" />
-                                Creative Profile
+                                <Store size={12} className="text-amber-400" />
+                                Store: {storeName}
                             </div>
                             <h1 className="mb-3 text-3xl font-black tracking-tight text-white sm:text-4xl lg:text-5xl">
                                 {profile.name}
@@ -159,78 +174,129 @@ export const PublicProfile = () => {
                             </div>
 
                             <p className="mb-6 max-w-2xl text-base leading-relaxed text-white/58">
-                                {profile.bio || 'This artist is shaping their creative story on Artify.'}
+                                {profile.bio || 'This artist and seller is shaping their creative story on Artify.'}
                             </p>
 
                             <div className="mb-6 grid gap-3 sm:grid-cols-3">
                                 <div className="rounded-xl border border-white/10 bg-white/[0.035] px-4 py-3">
                                     <div className="mb-1 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white/35">
                                         <MapPin size={13} />
-                                        Origin
+                                        Location
                                     </div>
-                                    <div className="font-semibold text-white">{profile.originLocation || 'World Citizen'}</div>
+                                    <div className="font-semibold text-white truncate">📍 {sellerLoc}</div>
                                 </div>
                                 <div className="rounded-xl border border-white/10 bg-white/[0.035] px-4 py-3">
                                     <div className="mb-1 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white/35">
                                         <Award size={13} />
-                                        Experience
+                                        Category
                                     </div>
-                                    <div className="font-semibold text-white">{profile.experience || 'Rising Talent'}</div>
+                                    <div className="font-semibold text-white">{sellerCategory}</div>
                                 </div>
                                 <div className="rounded-xl border border-white/10 bg-white/[0.035] px-4 py-3">
                                     <div className="mb-1 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white/35">
-                                        <Calendar size={13} />
-                                        Joined
+                                        <ShoppingBag size={13} />
+                                        Products Listed
                                     </div>
-                                    <div className="font-semibold text-white">{joinedLabel}</div>
+                                    <div className="font-semibold text-amber-400">{products.length} Items</div>
                                 </div>
                             </div>
 
                             <div className="flex w-full flex-wrap gap-2">
-                        {!isMyProfile ? (
-                            <>
-                                <button
-                                    onClick={handleFollow}
-                                    className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg active:scale-95 border ${isFollowing
-                                        ? 'bg-white/10 text-white border-white/20 hover:bg-white/20'
-                                        : 'bg-amber-500 text-black border-amber-500 hover:bg-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.2)]'
-                                        }`}
+                                {!isMyProfile ? (
+                                    <>
+                                        <button
+                                            onClick={() => setIsCommissionModalOpen(true)}
+                                            className="flex-1 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 px-5 py-2.5 text-sm font-black text-black shadow-lg shadow-amber-500/25 transition-all active:scale-95 hover:from-amber-400 hover:to-orange-500 flex items-center justify-center gap-1.5 md:flex-none"
+                                        >
+                                            <Briefcase size={16} /> Hire / Commission
+                                        </button>
+
+                                        <button
+                                            onClick={handleFollow}
+                                            className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg active:scale-95 border ${isFollowing
+                                                ? 'bg-white/10 text-white border-white/20 hover:bg-white/20'
+                                                : 'bg-white/10 text-white border-white/20 hover:bg-white/20'
+                                                }`}
+                                        >
+                                            {isFollowing ? 'Following' : 'Follow'}
+                                        </button>
+
+                                        <button
+                                            onClick={handleCallout}
+                                            className="flex-1 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 transition-all active:scale-95 hover:bg-indigo-500 md:flex-none"
+                                        >
+                                            Send Callout
+                                        </button>
+                                    </>
+                                ) : (
+                                    <Link to="/settings" className="flex flex-1 items-center justify-center rounded-xl border border-white/10 bg-white/10 px-6 py-2.5 text-sm font-bold text-white transition-all hover:bg-white/20 md:flex-none">
+                                        Edit Profile
+                                    </Link>
+                                )}
+
+                                <Link
+                                    to={isMyProfile ? '/settings' : `/portfolio/${profile._id}`}
+                                    className="flex flex-1 items-center justify-center rounded-xl border border-amber-400/25 bg-amber-500/10 px-6 py-2.5 text-sm font-bold text-amber-100 transition-all hover:bg-amber-500 hover:text-black md:flex-none"
                                 >
-                                    {isFollowing ? 'Following' : 'Follow'}
+                                    {isMyProfile ? 'Create Portfolio' : 'View Portfolio'}
+                                </Link>
+
+                                <button onClick={handleShare} className="rounded-xl border border-white/10 bg-white/5 p-2.5 text-white transition-all active:scale-95 hover:bg-white/10">
+                                    <Share2 size={20} />
                                 </button>
-
-                                <button
-                                    onClick={handleCallout}
-                                    className="flex-1 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 transition-all active:scale-95 hover:bg-indigo-500 md:flex-none"
-                                >
-                                    Send Callout
-                                </button>
-                            </>
-                        ) : (
-                            <Link to="/settings" className="flex flex-1 items-center justify-center rounded-xl border border-white/10 bg-white/10 px-6 py-2.5 text-sm font-bold text-white transition-all hover:bg-white/20 md:flex-none">
-                                Edit Profile
-                            </Link>
-                        )}
-
-                        <Link
-                            to={isMyProfile ? '/settings' : `/portfolio/${profile._id}`}
-                            className="flex flex-1 items-center justify-center rounded-xl border border-amber-400/25 bg-amber-500/10 px-6 py-2.5 text-sm font-bold text-amber-100 transition-all hover:bg-amber-500 hover:text-black md:flex-none"
-                        >
-                            {isMyProfile ? 'Create Portfolio' : 'View Portfolio'}
-                        </Link>
-
-                        <button onClick={handleShare} className="rounded-xl border border-white/10 bg-white/5 p-2.5 text-white transition-all active:scale-95 hover:bg-white/10">
-                            <Share2 size={20} />
-                        </button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="mx-auto max-w-[1180px] px-4 pb-16 pt-8 sm:px-6">
-                <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+            <div className="mx-auto max-w-[1180px] px-4 pb-16 pt-2 sm:px-6 space-y-8">
+                {/* Storefront Location Map Card */}
+                <div className="rounded-2xl border border-white/[0.08] bg-[#0a0a0a] p-6 shadow-2xl space-y-4">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+                                <Store size={20} />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-white">{storeName} Location</h3>
+                                <p className="text-xs text-white/50">📍 {sellerLoc}</p>
+                            </div>
+                        </div>
+                    </div>
 
+                    <SellerMap
+                        locationName={sellerLoc}
+                        latitude={sellerLat}
+                        longitude={sellerLng}
+                        storeName={storeName}
+                        sellerCategory={sellerCategory}
+                        height="320px"
+                    />
+                </div>
+
+                {/* Seller Marketplace Items Gallery */}
+                <div className="rounded-2xl border border-white/[0.08] bg-[#0a0a0a] p-6 shadow-2xl">
+                    <h3 className="mb-6 flex items-center gap-2 text-xl font-bold">
+                        <ShoppingBag className="text-amber-400" /> Seller's Marketplace Items ({products.length})
+                    </h3>
+
+                    {products && products.length > 0 ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {products.map((product) => (
+                                <ProductCard key={product._id} product={product} onDelete={() => { }} />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="h-40 border-2 border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center text-white/30 bg-white/[0.02]">
+                            <ShoppingBag size={32} className="mb-2 opacity-50" />
+                            <p>No marketplace products listed yet.</p>
+                        </div>
+                    )}
+                </div>
+
+                {/* Story and Artworks Grid */}
+                <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
                     <div className="space-y-5 lg:col-span-2">
                         <div className="rounded-2xl border border-white/[0.06] bg-[#0a0a0a] p-5 shadow-xl md:p-6">
                             <h3 className="mb-4 flex items-center gap-2 text-lg font-bold">
@@ -281,7 +347,6 @@ export const PublicProfile = () => {
                     </div>
 
                     <div className="space-y-5">
-
                         <div className="relative overflow-hidden rounded-2xl border border-white/[0.06] bg-gradient-to-br from-[#111] to-[#050505] p-5 shadow-xl">
                             <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-[50px]"></div>
                             <h4 className="text-sm text-white/40 font-bold tracking-wider uppercase mb-5">Heritage & Stats</h4>
@@ -290,8 +355,8 @@ export const PublicProfile = () => {
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/60"><MapPin size={18} /></div>
                                     <div>
-                                        <p className="text-xs text-white/40">Origin</p>
-                                        <p className="font-medium text-white/90">{profile.originLocation || 'World Citizen'}</p>
+                                        <p className="text-xs text-white/40">Location</p>
+                                        <p className="font-medium text-white/90">📍 {sellerLoc}</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-3">
@@ -326,34 +391,15 @@ export const PublicProfile = () => {
                                 )}
                             </div>
                         </div>
-
-                        <div className="rounded-2xl border border-white/[0.06] bg-[#0a0a0a] p-5 shadow-xl">
-                            <h4 className="mb-5 text-sm font-bold uppercase tracking-wider text-white/40">Creative Pulse</h4>
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/5 text-amber-400">
-                                        <Layers3 size={18} />
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-white/40">Posts Shared</p>
-                                        <p className="font-semibold text-white">{posts.length}</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/5 text-indigo-400">
-                                        <Users size={18} />
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-white/40">Community Presence</p>
-                                        <p className="font-semibold text-white">{profile.role || 'Creative Member'}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
                     </div>
                 </div>
             </div>
+            <CommissionModal
+                isOpen={isCommissionModalOpen}
+                onClose={() => setIsCommissionModalOpen(false)}
+                artist={profile}
+            />
+
             <Footer />
         </div>
     );

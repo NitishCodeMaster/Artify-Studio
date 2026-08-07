@@ -37,7 +37,7 @@ export default function CreateWorkshopModal({ isOpen, onClose, onCreated }) {
         }
 
         if (file.size > 4 * 1024 * 1024) {
-            toast.error('Image 4MB se chhoti honi chahiye.');
+            toast.error('Image size must be less than 4MB.');
             return;
         }
 
@@ -46,7 +46,7 @@ export default function CreateWorkshopModal({ isOpen, onClose, onCreated }) {
             handleChange('coverImage', reader.result);
             setImageName(file.name);
         };
-        reader.onerror = () => toast.error('Image read nahi ho payi.');
+        reader.onerror = () => toast.error('Failed to read image file.');
         reader.readAsDataURL(file);
     };
 
@@ -62,13 +62,13 @@ export default function CreateWorkshopModal({ isOpen, onClose, onCreated }) {
             };
 
             const res = await api.post('/learn/workshops', payload);
-            toast.success('Workshop live ho gaya!');
+            toast.success('Workshop created successfully!');
             setFormData(initialState);
             setImageName('');
             onCreated?.(res.data.workshop);
             onClose?.();
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Workshop create nahi ho paya.');
+            toast.error(error.response?.data?.message || 'Failed to create workshop.');
         } finally {
             setLoading(false);
         }

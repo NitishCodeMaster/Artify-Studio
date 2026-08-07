@@ -48,7 +48,7 @@ export function LiveWorkshops({ workshops = [], filter = '', loading = false, on
                 await api.post('/payments/book-free', { workshopId: workshop.id });
                 openRoom(workshop);
             } catch (error) {
-                toast.error(error.response?.data?.message || 'Free workshop join nahi ho paya.');
+                toast.error(error.response?.data?.message || 'Failed to join free workshop.');
             } finally {
                 setProcessingId('');
             }
@@ -57,7 +57,7 @@ export function LiveWorkshops({ workshops = [], filter = '', loading = false, on
 
         const isLoaded = await loadRazorpay();
         if (!isLoaded) {
-            toast.error('Razorpay load nahi ho paya.');
+            toast.error('Failed to load Razorpay SDK.');
             return;
         }
 
@@ -97,7 +97,7 @@ export function LiveWorkshops({ workshops = [], filter = '', loading = false, on
                             openRoom(workshop);
                         }
                     } catch {
-                        toast.error('Payment verify nahi ho paya.');
+                        toast.error('Payment verification failed.');
                     } finally {
                         setProcessingId('');
                     }
@@ -110,7 +110,7 @@ export function LiveWorkshops({ workshops = [], filter = '', loading = false, on
             new window.Razorpay(options).open();
         } catch (error) {
             console.error('Workshop payment error:', error);
-            toast.error(error.response?.data?.message || 'Payment start nahi ho paya.');
+            toast.error(error.response?.data?.message || 'Failed to initiate payment.');
             setProcessingId('');
         }
     };
@@ -120,7 +120,7 @@ export function LiveWorkshops({ workshops = [], filter = '', loading = false, on
             await navigator.clipboard.writeText(getRoomUrl(workshop));
             toast.success('Live room link copied.');
         } catch {
-            toast.error('Room link copy nahi ho paya.');
+            toast.error('Failed to copy room link.');
         }
     };
 

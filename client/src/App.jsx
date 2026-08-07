@@ -32,6 +32,7 @@ const Portfolio = lazy(() => import('./pages/Portfolio'));
 const Messages = lazy(() => import('./pages/Messages'));
 const SavedCollections = lazy(() => import('./pages/SavedCollections'));
 const Wallet = lazy(() => import('./pages/Wallet'));
+const TradeHistory = lazy(() => import('./pages/TradeHistory'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 const ScrollToTop = () => {
@@ -106,6 +107,7 @@ const App = () => {
                 <Route path="/messages" element={<Messages />} />
                 <Route path="/saved" element={<SavedCollections />} />
                 <Route path="/wallet" element={<Wallet />} />
+                <Route path="/trade-history" element={<PrivateRoute><TradeHistory /></PrivateRoute>} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>

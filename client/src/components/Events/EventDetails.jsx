@@ -2,11 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from '../../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Calendar, MapPin, Clock, Trash2, ShieldCheck, Zap, Ticket } from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, Clock, Trash2, ShieldCheck, Zap, Ticket, Pencil, QrCode, Camera, User, MessageSquare, ExternalLink, Phone, Mail, Sparkles, CheckCircle2 } from 'lucide-react';
 import api from '../../utils/api';
 import { toast } from 'react-hot-toast';
 import DeleteConfirmModal from './DeleteConfirmModal';
+import CreateEventModal from './CreateEventModal';
+import EventTicketModal from './EventTicketModal';
+import TicketScannerModal from './TicketScannerModal';
 import { ReviewSection } from './ReviewSection';
+import EventMap from './EventMap';
 import { buildRazorpayPrefill, loadRazorpay } from '../../utils/razorpay';
 
 const EventDetails = ({ event: propEvent, onBack, refresh, viewMode }) => {
@@ -17,6 +21,10 @@ const EventDetails = ({ event: propEvent, onBack, refresh, viewMode }) => {
     const { user } = useAuth();
 
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [showTicketModal, setShowTicketModal] = useState(false);
+    const [showScannerModal, setShowScannerModal] = useState(false);
+    const [viewingApplicant, setViewingApplicant] = useState(null);
     const [isProcessing, setIsProcessing] = useState(false);
 
     useEffect(() => {
@@ -38,6 +46,52 @@ const EventDetails = ({ event: propEvent, onBack, refresh, viewMode }) => {
     if (!event) {
         return <p className="text-white p-10">Loading event...</p>;
     }
+
+    const currentUser = user || JSON.parse(localStorage.getItem("user")) || JSON.parse(localStorage.getItem("artify_user"));
+    const currentUserId = currentUser?._id || currentUser?.id;
+    const organizerId = event.organizer?._id || event.organizer;
+    const isOwner = Boolean(
+        currentUserId &&
+        organizerId &&
+        currentUserId.toString() === organizerId.toString()
+    );
+
+    const [applyMessage, setApplyMessage] = useState('');
+    const [showApplyModal, setShowApplyModal] = useState(false);
+    const [isApplying, setIsApplying] = useState(false);
+
+    const hasApplied = event.applicants?.some(
+        a => (a.artist?._id || a.artist || a).toString() === currentUserId?.toString()
+    );
+
+    const handleApplyGig = async (e) => {
+        e?.preventDefault();
+        setIsApplying(true);
+        try {
+            const res = await api.post(`/events/${event._id}/apply`, { message: applyMessage });
+            if (res.data.success) {
+                toast.success(res.data.message || "Applied for Gig! 🚀");
+                if (res.data.event) setEvent(res.data.event);
+                setShowApplyModal(false);
+            }
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Error applying for gig");
+        } finally {
+            setIsApplying(false);
+        }
+    };
+
+    const handleSelectApplicant = async (applicantId) => {
+        try {
+            const res = await api.post(`/events/${event._id}/select-applicant`, { applicantId });
+            if (res.data.success) {
+                toast.success("Artist selected for Gig! ✨");
+                if (res.data.event) setEvent(res.data.event);
+            }
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Error selecting applicant");
+        }
+    };
 
     const handleDelete = async () => {
         try {
@@ -144,11 +198,40 @@ const EventDetails = ({ event: propEvent, onBack, refresh, viewMode }) => {
                     <span className="text-xs font-black uppercase tracking-[0.3em]">Back to Hub</span>
                 </button>
 
-                <div className="flex items-center gap-4">
-                    {viewMode === 'artist' && (
-                        <button onClick={() => setShowDeleteModal(true)} className="p-3 text-red-500 bg-red-500/5 hover:bg-red-500/10 border border-red-500/10 rounded-xl transition-all">
-                            <Trash2 size={18} />
-                        </button>
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={() => setShowTicketModal(true)}
+                        className="px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-black rounded-xl transition-all flex items-center gap-2 text-xs font-black shadow-lg shadow-amber-500/20 active:scale-95"
+                    >
+                        <QrCode size={16} />
+                        <span>My Ticket Pass</span>
+                    </button>
+
+                    {isOwner && (
+                        <>
+                            <button
+                                onClick={() => setShowScannerModal(true)}
+                                className="px-4 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-black rounded-xl transition-all flex items-center gap-2 text-xs font-black shadow-lg shadow-cyan-500/20 active:scale-95"
+                            >
+                                <Camera size={16} />
+                                <span className="hidden sm:inline">Scan Gate Tickets</span>
+                            </button>
+                            <button
+                                onClick={() => setShowEditModal(true)}
+                                className="px-4 py-2.5 text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 rounded-xl transition-all flex items-center gap-2 text-xs font-bold active:scale-95"
+                                title="Edit Gig"
+                            >
+                                <Pencil size={16} />
+                                <span className="hidden sm:inline">Edit Gig</span>
+                            </button>
+                            <button
+                                onClick={() => setShowDeleteModal(true)}
+                                className="p-3 text-red-500 bg-red-500/5 hover:bg-red-500/10 border border-red-500/10 rounded-xl transition-all active:scale-95"
+                                title="Delete Gig"
+                            >
+                                <Trash2 size={18} />
+                            </button>
+                        </>
                     )}
                 </div>
             </nav>
@@ -177,25 +260,25 @@ const EventDetails = ({ event: propEvent, onBack, refresh, viewMode }) => {
                             <span className="text-[10px] font-black uppercase tracking-widest">Premium Event</span>
                         </motion.div>
 
-                        <h1 className="text-4xl xl:text-7xl font-black tracking-tighter leading-[0.85] uppercase">
+                        <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight leading-tight uppercase">
                             {event.title}
                         </h1>
 
-                        <div className="flex items-center gap-6">
-                            <div className="flex -space-x-3">
-                                {[1, 2, 3, 4].map(i => (
-                                    <div key={i} className="w-9 h-9 rounded-full border-2 border-[#050505] bg-zinc-800 flex items-center justify-center text-[10px] font-bold text-white/20">A</div>
+                        <div className="flex items-center gap-4">
+                            <div className="flex -space-x-2">
+                                {[1, 2, 3].map(i => (
+                                    <div key={i} className="w-7 h-7 rounded-full border-2 border-[#050505] bg-zinc-800 flex items-center justify-center text-[9px] font-bold text-white/40">A</div>
                                 ))}
                             </div>
-                            <span className="text-xs font-bold text-white/40 uppercase tracking-widest">
-                                Joined by {event.attendees?.length || 0} People
+                            <span className="text-xs font-semibold text-white/50 uppercase tracking-wider">
+                                {event.attendees?.length || 0} Attending
                             </span>
                         </div>
                     </div>
                 </div>
 
                 <div className="flex-1 overflow-y-auto custom-scrollbar bg-[#080808]/40">
-                    <div className="max-w-3xl mx-auto px-8 md:px-16 py-16 space-y-10">
+                    <div className="max-w-3xl mx-auto px-6 md:px-10 py-8 space-y-6">
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.6 }} className="space-y-3">
@@ -215,39 +298,162 @@ const EventDetails = ({ event: propEvent, onBack, refresh, viewMode }) => {
                             </motion.div>
                         </div>
 
+                        {/* Commercial Gig Model Pass Card */}
                         <motion.div
-                            initial={{ scale: 0.95, opacity: 0 }}
+                            initial={{ scale: 0.98, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             transition={{ delay: 0.8 }}
-                            className="relative group p-[1px] rounded-[2.5rem] bg-gradient-to-br from-indigo-500/40 via-transparent to-white/5"
+                            className="relative group p-[1px] rounded-2xl bg-gradient-to-br from-indigo-500/30 via-transparent to-white/5"
                         >
-                            <div className="bg-[#0c0c0c] border border-white/5 rounded-[2.4rem] p-5 md:p-6 flex flex-col md:flex-row items-center justify-between gap-4 relative overflow-hidden">
+                            <div className="bg-[#0c0c0c] border border-white/10 rounded-2xl p-5 flex flex-col md:flex-row items-center justify-between gap-4 relative overflow-hidden">
                                 <div className="relative z-10 text-center md:text-left">
-                                    <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.5em] mb-4 text-center md:text-left">Access Pass</p>
+                                    <p className="text-[10px] font-bold text-white/50 uppercase tracking-widest mb-1 text-center md:text-left">
+                                        {event.gigType === 'paid_gig' || (Number(event.artistPayout) > 0 && event.gigType !== 'free' && event.gigType !== 'ticketed')
+                                            ? "⭐ Paid Artist Gig"
+                                            : (event.gigType === 'ticketed' || (Number(event.price) > 0 && event.gigType !== 'free')
+                                                ? "🎟️ Ticketed Event Pass"
+                                                : "🎁 Free Gig Registration")}
+                                    </p>
                                     <div className="flex items-baseline gap-2 justify-center md:justify-start">
-                                        <span className="text-4xl font-black tracking-tighter italic">₹{event.price}</span>
-                                        <span className="text-xs font-bold text-white/20 uppercase tracking-widest">/ Individual</span>
+                                        {event.gigType === 'paid_gig' || (Number(event.artistPayout) > 0 && event.gigType !== 'free' && event.gigType !== 'ticketed') ? (
+                                            <>
+                                                <span className="text-3xl font-extrabold tracking-tight text-emerald-400">₹{event.artistPayout || 5000}</span>
+                                                <span className="text-xs font-semibold text-emerald-300/70 uppercase tracking-wider">/ Performer Pay</span>
+                                            </>
+                                        ) : event.gigType === 'ticketed' || (Number(event.price) > 0 && event.gigType !== 'free') ? (
+                                            <>
+                                                <span className="text-3xl font-extrabold tracking-tight text-white">₹{event.price || 500}</span>
+                                                <span className="text-xs font-semibold text-white/40 uppercase tracking-wider">/ Ticket</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <span className="text-2xl font-extrabold tracking-tight text-purple-400">FREE</span>
+                                                <span className="text-xs font-semibold text-purple-300/70 uppercase tracking-wider">₹0 Entry & Pay</span>
+                                            </>
+                                        )}
                                     </div>
                                 </div>
 
-                                <button
-                                    onClick={handlePayment}
-                                    disabled={isProcessing}
-                                    className="w-full md:w-auto px-6 py-3 bg-white text-black rounded-[1.5rem] font-black text-base hover:bg-indigo-500 hover:text-white transition-all shadow-2xl flex items-center justify-center gap-4 relative z-10 active:scale-95 disabled:opacity-50"
-                                >
-                                    {isProcessing ? "SECURE..." : "GET TICKETS"}
-                                    <Ticket size={22} />
-                                </button>
-
-                                <ShieldCheck size={180} className="absolute -right-10 -bottom-10 text-white/[0.02] -rotate-12 pointer-events-none" />
+                                <div className="relative z-10 w-full md:w-auto">
+                                    {event.gigType === 'ticketed' || Number(event.price) > 0 ? (
+                                        <button
+                                            onClick={handlePayment}
+                                            disabled={isProcessing}
+                                            className="w-full md:w-auto px-5 py-2.5 bg-white text-black rounded-xl font-bold text-sm hover:bg-indigo-500 hover:text-white transition-all shadow-lg flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
+                                        >
+                                            {isProcessing ? "SECURE..." : "GET TICKETS"}
+                                            <Ticket size={18} />
+                                        </button>
+                                    ) : (
+                                        isOwner ? (
+                                             <span className="text-xs font-bold text-indigo-400 bg-indigo-500/10 px-4 py-2 rounded-xl border border-indigo-500/20 inline-block">
+                                                 Your Gig Post ({event.applicants?.length || 0} Applicants)
+                                             </span>
+                                         ) : event.applicants?.some(a => (a.artist?._id || a.artist)?.toString() === currentUserId?.toString() && a.status === 'selected') ? (
+                                             <div className="w-full md:w-auto px-5 py-2.5 bg-gradient-to-r from-emerald-500/20 via-teal-500/20 to-emerald-500/20 text-emerald-300 border border-emerald-500/50 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20">
+                                                 <Sparkles size={16} className="text-amber-400 animate-pulse" />
+                                                 <span>YOU ARE SELECTED FOR THIS GIG! 🎉</span>
+                                             </div>
+                                         ) : hasApplied ? (
+                                            <button disabled className="w-full md:w-auto px-5 py-2.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 rounded-xl font-bold text-xs flex items-center justify-center gap-2">
+                                                Application Submitted ✓
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={() => setShowApplyModal(true)}
+                                                className="w-full md:w-auto px-6 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black rounded-xl font-extrabold text-sm transition-all shadow-md shadow-emerald-500/20 flex items-center justify-center gap-2 active:scale-95"
+                                            >
+                                                Apply Now 🚀
+                                            </button>
+                                        )
+                                    )}
+                                </div>
                             </div>
                         </motion.div>
+
+                        {/* Applicants Section for Gig Organizer */}
+                        {isOwner && (
+                            <div className="bg-[#111] border border-white/10 p-6 rounded-3xl space-y-4">
+                                <div className="flex items-center justify-between border-b border-white/5 pb-3">
+                                    <h4 className="text-lg font-bold text-white flex items-center gap-2">
+                                        🎤 Applicants for this Gig <span className="text-xs bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full">{event.applicants?.length || 0}</span>
+                                    </h4>
+                                </div>
+
+                                {event.applicants && event.applicants.length > 0 ? (
+                                    <div className="space-y-3">
+                                        {event.applicants.map((app, index) => {
+                                            const artist = app.artist || {};
+                                            const isSelected = app.status === 'selected';
+
+                                            return (
+                                                <div key={index} className="bg-white/5 border border-white/10 p-4 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:border-indigo-500/30 transition-all">
+                                                    <div
+                                                        onClick={() => setViewingApplicant({ artist, message: app.message, status: app.status, date: app.createdAt })}
+                                                        className="flex items-center gap-3 cursor-pointer group"
+                                                    >
+                                                        <img
+                                                            src={artist.profilePic || "https://via.placeholder.com/150"}
+                                                            className="w-12 h-12 rounded-full object-cover border border-indigo-500/40 shrink-0 group-hover:scale-105 transition-transform"
+                                                            alt={artist.name || 'Artist'}
+                                                        />
+                                                        <div>
+                                                            <h5 className="font-bold text-white text-sm flex items-center gap-2 group-hover:text-indigo-300 transition-colors">
+                                                                {artist.name || 'Artist Applicant'}
+                                                                <span className="text-[10px] text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded uppercase font-bold">{artist.artStyle || artist.role || 'Artist'}</span>
+                                                            </h5>
+                                                            <p className="text-xs text-white/60 italic mt-0.5 line-clamp-1">"{app.message || 'Ready to perform for this gig!'}"</p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="shrink-0 flex items-center gap-2 w-full sm:w-auto justify-end">
+                                                        <button
+                                                            onClick={() => setViewingApplicant({ artist, message: app.message, status: app.status, date: app.createdAt })}
+                                                            className="px-3 py-2 bg-white/10 hover:bg-white/20 border border-white/10 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5"
+                                                        >
+                                                            <User size={14} className="text-indigo-400" />
+                                                            <span>View Profile</span>
+                                                        </button>
+
+                                                        {isSelected ? (
+                                                            <span className="px-3 py-2 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold rounded-xl flex items-center gap-1">
+                                                                <CheckCircle2 size={14} /> Selected
+                                                            </span>
+                                                        ) : (
+                                                            <button
+                                                                onClick={() => handleSelectApplicant(app._id || artist._id)}
+                                                                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-md active:scale-95 flex items-center gap-1.5"
+                                                            >
+                                                                <Sparkles size={14} /> Select Artist
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                ) : (
+                                    <p className="text-xs text-white/40 italic text-center py-4">No artists have applied for this gig yet. Applicant profiles will appear here.</p>
+                                )}
+                            </div>
+                        )}
 
                         <div className="space-y-3">
                             <h5 className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">The Vision</h5>
                             <p className="text-base font-light text-white/70 leading-relaxed italic">
                                 "{event.description || "An immersive journey into the world of art and music, crafted specifically for the Artify collective. Witness creativity in its purest form."}"
                             </p>
+                        </div>
+
+                        {/* Event Location Map */}
+                        <div className="pt-2 mt-4 border-t border-white/10">
+                            <EventMap
+                                latitude={event.latitude}
+                                longitude={event.longitude}
+                                title={event.title}
+                                venue={event.location}
+                                date={event.date}
+                            />
                         </div>
 
                         <div className="pt-2 mt-4 border-t border-white/10">
@@ -276,6 +482,172 @@ const EventDetails = ({ event: propEvent, onBack, refresh, viewMode }) => {
                         onConfirm={handleDelete}
                         title={event.title}
                     />
+                )}
+                {showEditModal && (
+                    <CreateEventModal
+                        isOpen={showEditModal}
+                        onClose={() => setShowEditModal(false)}
+                        eventToEdit={event}
+                        refresh={(updatedEv) => {
+                            if (updatedEv) setEvent(updatedEv);
+                            if (refresh) refresh();
+                        }}
+                    />
+                )}
+                {showApplyModal && (
+                    <div className="fixed inset-0 z-[120] flex items-center justify-center px-4">
+                        <motion.div
+                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                            onClick={() => setShowApplyModal(false)}
+                            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+                        />
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
+                            className="relative bg-[#111] border border-white/10 w-full max-w-md p-6 rounded-3xl z-10 space-y-4 shadow-2xl"
+                        >
+                            <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                                🎤 Apply for Gig: <span className="text-emerald-400 font-extrabold">{event.title}</span>
+                            </h3>
+                            <p className="text-xs text-white/50">
+                                Send a quick note or pitch to the organizer to apply for this performance opportunity.
+                            </p>
+                            <form onSubmit={handleApplyGig} className="space-y-4">
+                                <textarea
+                                    required
+                                    rows="3"
+                                    placeholder="e.g. Hi! I'm an acoustic guitarist & singer with live performance experience. Would love to perform at your venue!"
+                                    className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white text-xs outline-none focus:border-emerald-500 transition-all resize-none"
+                                    value={applyMessage}
+                                    onChange={(e) => setApplyMessage(e.target.value)}
+                                />
+                                <div className="flex justify-end gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowApplyModal(false)}
+                                        className="px-4 py-2 text-xs font-bold text-white/40 hover:text-white"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={isApplying}
+                                        className="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs rounded-xl shadow-lg shadow-emerald-500/20 active:scale-95 disabled:opacity-50"
+                                    >
+                                        {isApplying ? "Submitting..." : "Submit Application 🚀"}
+                                    </button>
+                                </div>
+                            </form>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            <EventTicketModal
+                isOpen={showTicketModal}
+                onClose={() => setShowTicketModal(false)}
+                eventId={event._id}
+                eventData={event}
+            />
+
+            <TicketScannerModal
+                isOpen={showScannerModal}
+                onClose={() => setShowScannerModal(false)}
+                eventId={event._id}
+                eventTitle={event.title}
+            />
+
+            {/* Artist Applicant Full Profile Dossier Modal */}
+            <AnimatePresence>
+                {viewingApplicant && (
+                    <div className="fixed inset-0 z-[130] flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                            onClick={() => setViewingApplicant(null)}
+                            className="absolute inset-0 bg-black/85 backdrop-blur-md"
+                        />
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
+                            className="relative bg-[#0d0d14] border border-white/15 w-full max-w-lg p-6 rounded-3xl z-10 shadow-2xl space-y-5 overflow-hidden text-left"
+                        >
+                            <button
+                                onClick={() => setViewingApplicant(null)}
+                                className="absolute top-4 right-4 p-2 text-white/50 hover:text-white bg-white/5 rounded-full"
+                            >
+                                ✕
+                            </button>
+
+                            {/* Header Profile */}
+                            <div className="flex items-center gap-4">
+                                <img
+                                    src={viewingApplicant.artist?.profilePic || "https://via.placeholder.com/150"}
+                                    alt={viewingApplicant.artist?.name}
+                                    className="w-16 h-16 rounded-2xl object-cover border-2 border-indigo-500/50 shadow-lg shrink-0"
+                                />
+                                <div>
+                                    <h3 className="text-lg font-black text-white flex items-center gap-2">
+                                        {viewingApplicant.artist?.name || "Artist Applicant"}
+                                    </h3>
+                                    <div className="flex items-center gap-2 mt-1">
+                                        <span className="text-xs bg-indigo-500/20 text-indigo-300 px-2.5 py-0.5 rounded-md font-bold uppercase border border-indigo-500/30">
+                                            🎨 {viewingApplicant.artist?.artStyle || viewingApplicant.artist?.role || "Artist"}
+                                        </span>
+                                        {viewingApplicant.artist?.originLocation && (
+                                            <span className="text-xs text-white/60 flex items-center gap-1">
+                                                <MapPin size={12} className="text-indigo-400" /> {viewingApplicant.artist.originLocation}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Pitch Message */}
+                            <div className="bg-white/5 border border-white/10 p-4 rounded-2xl space-y-1">
+                                <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Applicant Pitch Note</p>
+                                <p className="text-xs text-white/90 italic leading-relaxed">
+                                    "{viewingApplicant.message || "Ready to perform for this gig!"}"
+                                </p>
+                            </div>
+
+                            {/* Profile Details Grid */}
+                            <div className="grid grid-cols-2 gap-3 text-xs">
+                                <div className="bg-white/5 p-3 rounded-xl border border-white/5">
+                                    <p className="text-[10px] text-white/40 font-bold uppercase">Experience</p>
+                                    <p className="text-white font-bold mt-0.5">{viewingApplicant.artist?.experience || "Live Performer"}</p>
+                                </div>
+
+                                <div className="bg-white/5 p-3 rounded-xl border border-white/5">
+                                    <p className="text-[10px] text-white/40 font-bold uppercase">Store / Studio</p>
+                                    <p className="text-white font-bold mt-0.5">{viewingApplicant.artist?.sellerProfile?.storeName || "Artify Creator"}</p>
+                                </div>
+
+                                {viewingApplicant.artist?.phoneNumber && (
+                                    <div className="bg-white/5 p-3 rounded-xl border border-white/5 col-span-2 flex items-center justify-between">
+                                        <span className="text-[10px] text-white/40 font-bold uppercase flex items-center gap-1">
+                                            <Phone size={12} /> Contact Number
+                                        </span>
+                                        <span className="text-emerald-400 font-bold">{viewingApplicant.artist.phoneNumber}</span>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="flex items-center gap-2 pt-2 border-t border-white/10">
+                                <button
+                                    onClick={() => navigate('/messages')}
+                                    className="flex-1 py-3 bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs rounded-xl shadow-lg flex items-center justify-center gap-2"
+                                >
+                                    <MessageSquare size={16} /> Direct Chat
+                                </button>
+
+                                <button
+                                    onClick={() => navigate(`/profile/${viewingApplicant.artist?._id}`)}
+                                    className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-xs rounded-xl shadow-lg flex items-center justify-center gap-2"
+                                >
+                                    <ExternalLink size={16} /> Full Profile Page
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
                 )}
             </AnimatePresence>
         </motion.div>

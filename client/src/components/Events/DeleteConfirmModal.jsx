@@ -23,7 +23,7 @@ const DeleteConfirmModal = ({ isOpen, onClose, onConfirm, title }) => {
                 </div>
                 <h3 className="text-xl font-bold text-white mb-2">Delete Gig?</h3>
                 <p className="text-white/50 text-sm mb-8 leading-relaxed">
-                    Kya aap sach mein "<span className="text-white font-medium">{title}</span>" ko remove karna chahte hain? Ye action undo nahi hoga.
+                    Are you sure you want to remove "<span className="text-white font-medium">{title}</span>"? This action cannot be undone.
                 </p>
                 <div className="flex gap-3">
                     <button

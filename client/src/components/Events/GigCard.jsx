@@ -1,22 +1,22 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Briefcase, Clock, ArrowUpRight, MapPin, Trash2 } from 'lucide-react';
+import { Briefcase, Clock, ArrowUpRight, MapPin, Trash2, Pencil } from 'lucide-react';
 import api from '../../utils/api';
 import { toast } from 'react-hot-toast';
 import DeleteConfirmModal from './DeleteConfirmModal';
 
-const GigCard = ({ event, refresh, onOpenDetails }) => {
+const GigCard = ({ event, refresh, onOpenDetails, onEdit }) => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-    const currentUser = JSON.parse(localStorage.getItem("user"));
+    const currentUser = JSON.parse(localStorage.getItem("user")) || JSON.parse(localStorage.getItem("artify_user"));
     const currentUserId = currentUser?._id || currentUser?.id;
-    const organizerId =
-        event.organizer?._id || event.organizer;
+    const organizerId = event.organizer?._id || event.organizer;
 
-    const isOwner =
+    const isOwner = Boolean(
         currentUserId &&
         organizerId &&
-        currentUserId.toString() === organizerId.toString();
+        currentUserId.toString() === organizerId.toString()
+    );
 
     const eventDate = new Date(event.date).toLocaleDateString('en-IN', {
         day: 'numeric',
@@ -27,6 +27,14 @@ const GigCard = ({ event, refresh, onOpenDetails }) => {
         e.stopPropagation();
         e.preventDefault();
         setShowDeleteModal(true);
+    };
+
+    const handleEditClick = (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        if (onEdit) {
+            onEdit(event);
+        }
     };
 
     const confirmDelete = async () => {
@@ -45,65 +53,81 @@ const GigCard = ({ event, refresh, onOpenDetails }) => {
     return (
         <>
             <motion.div
-                whileHover={{ y: -5 }}
+                whileHover={{ y: -4 }}
                 onClick={() => onOpenDetails(event)}
-                className="relative bg-[#111] border border-white/10 rounded-2xl p-5 hover:border-indigo-500/50 transition-all duration-300 group overflow-hidden"
+                className="relative bg-[#111] border border-white/10 rounded-2xl overflow-hidden hover:border-indigo-500/50 transition-all duration-300 group cursor-pointer flex flex-col h-full shadow-xl"
             >
-                <div className="flex justify-between items-start mb-4 mt-2">
-                    <div className="flex gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500/10 to-purple-500/10 flex items-center justify-center text-indigo-400 border border-white/5">
-                            <Briefcase size={18} />
-                        </div>
-                        <div>
-                            <h3 className="font-bold text-white text-base line-clamp-1">{event.title}</h3>
-                            <div className="flex items-center gap-2 text-xs text-white/50">
-                                <span className="flex items-center gap-1 capitalize">
-                                    <MapPin size={10} /> {event.location}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                {/* Banner Thumbnail */}
+                <div className="relative h-40 w-full overflow-hidden bg-zinc-900 shrink-0">
+                    <img
+                        src={event.bannerImage || "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=800"}
+                        alt={event.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#111] via-transparent to-transparent opacity-90" />
 
-                <div className="flex flex-wrap gap-2 mb-4">
-                    <span className="text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2 py-1 rounded">
-                        {event.category}
-                    </span>
-                </div>
-
-                <div className="flex items-center justify-between pt-4 border-t border-white/5">
-                    <div className="flex flex-col">
-                        <span className="text-[10px] text-white/40 uppercase tracking-wide">Ticket Price</span>
-                        <span className="text-sm font-bold text-white">
-                            {event.price === 0 ? "FREE" : `₹${event.price}`}
+                    <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
+                        <span className="px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-bold text-white uppercase tracking-wider">
+                            {event.category}
                         </span>
+
+                        {event.gigType === 'paid_gig' || (Number(event.artistPayout) > 0 && event.gigType !== 'free' && event.gigType !== 'ticketed') ? (
+                            <span className="px-2.5 py-1 rounded-full bg-emerald-500 text-black font-extrabold text-[10px] shadow-lg">
+                                ⭐ ₹{event.artistPayout || 5000} Payout
+                            </span>
+                        ) : event.gigType === 'ticketed' || (Number(event.price) > 0 && event.gigType !== 'free') ? (
+                            <span className="px-2.5 py-1 rounded-full bg-indigo-600 text-white font-extrabold text-[10px] shadow-lg">
+                                🎟️ ₹{event.price || 500} Ticket
+                            </span>
+                        ) : (
+                            <span className="px-2.5 py-1 rounded-full bg-purple-600 text-white font-extrabold text-[10px] shadow-lg">
+                                🎁 Free Gig
+                            </span>
+                        )}
+                    </div>
+                </div>
+
+                {/* Card Body */}
+                <div className="p-4 flex flex-col justify-between flex-1 space-y-3">
+                    <div>
+                        <h3 className="font-bold text-white text-base line-clamp-1 group-hover:text-indigo-400 transition-colors">
+                            {event.title}
+                        </h3>
+                        <p className="text-xs text-white/50 flex items-center gap-1 mt-1 truncate">
+                            <MapPin size={12} className="text-indigo-400 shrink-0" />
+                            <span className="truncate">{event.location}</span>
+                        </p>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                        {isOwner && (
-                            <button
-                                onClick={handleDeleteClick}
-                                className="p-2 text-white/20 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
-                                title="Delete Gig"
-                            >
-                                <Trash2 size={16} />
-                            </button>
-                        )}
+                    <div className="flex items-center justify-between pt-3 border-t border-white/5">
+                        <div className="flex items-center gap-1.5 text-xs text-white/60 font-medium">
+                            <Clock size={12} className="text-indigo-400" />
+                            <span>{eventDate} • {event.time || "7:00 PM"}</span>
+                        </div>
 
-                        <div className="h-8 w-[1px] bg-white/5"></div>
+                        <div className="flex items-center gap-2">
+                            {isOwner && (
+                                <div className="flex items-center gap-1">
+                                    <button
+                                        onClick={handleEditClick}
+                                        className="p-1.5 text-white/50 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-lg transition-all"
+                                        title="Edit Gig"
+                                    >
+                                        <Pencil size={14} />
+                                    </button>
+                                    <button
+                                        onClick={handleDeleteClick}
+                                        className="p-1.5 text-white/50 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
+                                        title="Delete Gig"
+                                    >
+                                        <Trash2 size={14} />
+                                    </button>
+                                </div>
+                            )}
 
-                        <div className="flex flex-col items-end">
-                            <span className="text-[10px] text-white/40 flex items-center gap-1">
-                                <Clock size={10} /> {eventDate} • {event.time}
+                            <span className="flex items-center gap-0.5 text-xs font-bold text-indigo-400 group-hover:text-white transition-colors">
+                                Details <ArrowUpRight size={12} />
                             </span>
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    onOpenDetails(event);
-                                }} className="mt-1 flex items-center gap-1 text-xs font-bold text-indigo-400 hover:text-white transition-colors"
-                            >
-                                View Gig <ArrowUpRight size={12} />
-                            </button>
                         </div>
                     </div>
                 </div>

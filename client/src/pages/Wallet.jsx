@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Footer } from '../components/Footer';
-import { Wallet as WalletIcon, ArrowUpRight, ArrowDownLeft, History, Plus, Loader2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Wallet as WalletIcon, ArrowUpRight, ArrowDownLeft, History, Plus, Loader2, ShoppingBag } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
 import api from '../utils/api';
 
 const Wallet = () => {
@@ -13,7 +13,7 @@ const Wallet = () => {
     useEffect(() => {
         const fetchWallet = async () => {
             try {
-                 const res = await api.get('/users/wallet');
+                const res = await api.get('/users/wallet');
                 setBalance(res.data.balance || 0);
                 setTransactions(res.data.transactions || []);
             } catch (error) {
@@ -32,9 +32,18 @@ const Wallet = () => {
                     ← Back
                 </button>
 
-                <div className="flex items-center gap-3 mb-8">
-                    <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500"><WalletIcon size={24} /></div>
-                    <h1 className="text-3xl font-black tracking-tight">Your Wallet</h1>
+                <div className="flex items-center justify-between gap-3 mb-8">
+                    <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500"><WalletIcon size={24} /></div>
+                        <h1 className="text-3xl font-black tracking-tight">Your Wallet</h1>
+                    </div>
+
+                    <Link
+                        to="/trade-history"
+                        className="px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5"
+                    >
+                        <ShoppingBag size={14} /> Full Trade History
+                    </Link>
                 </div>
 
                 {loading ? (
@@ -46,9 +55,12 @@ const Wallet = () => {
                             <p className="text-black/70 font-bold uppercase tracking-widest text-sm mb-2 relative z-10">Available Balance</p>
                             <h2 className="text-5xl font-black text-black tracking-tight mb-8 relative z-10">₹{balance.toLocaleString()}</h2>
 
-                            <div className="flex gap-4 relative z-10">
+                            <div className="flex flex-wrap gap-4 relative z-10">
                                 <button className="bg-black text-white px-6 py-3 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-black/80 transition-all"><Plus size={16} /> Top Up</button>
                                 <button className="bg-white/20 text-black border border-black/10 px-6 py-3 rounded-xl font-bold text-sm hover:bg-white/30 transition-all">Withdraw</button>
+                                <button onClick={() => navigate('/trade-history')} className="bg-black/90 text-amber-300 border border-amber-500/40 px-6 py-3 rounded-xl font-bold text-sm hover:bg-black transition-all flex items-center gap-2">
+                                    <History size={16} /> Purchases & Sales History
+                                </button>
                             </div>
                         </div>
 

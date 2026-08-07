@@ -182,7 +182,7 @@ export function DiscussionList({ missionDraft }) {
             }, 1000);
         } catch (error) {
             console.error('Voice recording failed:', error);
-            alert('Mic permission nahi mila ya recording start nahi ho payi.');
+            alert('Microphone permission denied or recording failed.');
         }
     };
 

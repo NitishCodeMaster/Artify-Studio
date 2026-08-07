@@ -1,148 +1,181 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Calendar, Clock, Ticket, PlayCircle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { featuredEvents as dummyData } from '../../Data/EventData';
+import { MapPin, Calendar, Ticket, Sparkles, ChevronRight, ChevronLeft, Plus } from 'lucide-react';
 
-const EventHero = ({ events }) => {
+const EventHero = ({ events, onOpenModal, onSelectEvent }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
-    const navigate = useNavigate();
 
     const featuredList = (events && events.length > 0)
-        ? events.slice(0, 3)
-        : dummyData;
+        ? events.slice(0, 5)
+        : [];
 
     useEffect(() => {
         if (featuredList.length <= 1) return;
         const timer = setInterval(() => {
             setCurrentIndex((prev) => (prev + 1) % featuredList.length);
-        }, 8000);
+        }, 6000);
         return () => clearInterval(timer);
     }, [featuredList.length]);
 
-    const event = featuredList[currentIndex];
-
-    if (!event) return null;
-
-    const scrollToEvents = () => {
-        const element = document.getElementById('event-list');
-        if (element) {
-            element.scrollIntoView({ behavior: 'smooth' });
+    const handleNext = () => {
+        if (featuredList.length > 0) {
+            setCurrentIndex((prev) => (prev + 1) % featuredList.length);
         }
     };
 
-    const displayDate = event.date.includes('-') || !isNaN(Date.parse(event.date))
-        ? new Date(event.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'long' })
-        : event.date;
+    const handlePrev = () => {
+        if (featuredList.length > 0) {
+            setCurrentIndex((prev) => (prev - 1 + featuredList.length) % featuredList.length);
+        }
+    };
+
+    const currentEvent = featuredList[currentIndex];
 
     return (
-        <div className="relative w-full h-[600px] md:h-[680px] overflow-hidden bg-[#050505] font-sans">
-            <AnimatePresence mode="wait">
-                <motion.div
-                    key={event._id || event.id}
-                    initial={{ opacity: 0, scale: 1.1 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 1.2 }}
-                    className="absolute inset-0 z-0"
-                >
-                    <img
-                        src={event.bannerImage || event.image}
-                        alt={event.title}
-                        className="w-full h-full object-cover opacity-60"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/60 to-transparent" />
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-[#050505]/40 to-transparent" />
-                </motion.div>
-            </AnimatePresence>
+        <div className="relative w-full bg-[#08080c] py-6 px-4 md:px-8 border-b border-white/10">
+            <div className="max-w-[1400px] mx-auto">
 
-            <div className="relative z-10 h-full max-w-[1400px] mx-auto px-6 flex flex-col justify-center">
-                <AnimatePresence mode="wait">
-                    <motion.div
-                        key={event._id || event.id}
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -30 }}
-                        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                        className="w-full"
-                    >
-                        <div className="flex items-center gap-3 mb-8">
-                            <span className="flex h-3 w-3 relative">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-3 w-3 bg-indigo-500"></span>
+                {/* Top Welcome & Post Action Bar */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+                    <div>
+                        <div className="flex items-center gap-2 mb-1">
+                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 flex items-center gap-1">
+                                <Sparkles size={12} /> ARTIFY GIG HUB
                             </span>
-                            <p className="text-sm font-bold tracking-[0.3em] uppercase text-indigo-400/90">
-                                Now Trending in {event.location.split(',')[0]}
-                            </p>
+                            <span className="text-xs text-white/40 font-medium">Live Performances & Events</span>
                         </div>
-
-                         <h1 className="text-6xl md:text-[120px] font-black text-white leading-[0.85] mb-6 tracking-tighter drop-shadow-2xl">
-                            {event.title.split(' ').map((word, i) => (
-                                <span key={i} className={i === 1 ? "text-indigo-500 block md:inline" : ""}>
-                                    {word}{' '}
-                                </span>
-                            ))}
+                        <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight">
+                            Discover & Host Live Gigs
                         </h1>
+                    </div>
 
-                        <div className="flex items-center gap-6 mb-12">
-                            <div className="h-20 w-[2px] bg-gradient-to-b from-indigo-500 to-transparent"></div>
-                            <div>
-                                <p className="text-2xl text-white/70 font-medium tracking-tight">
-                                    Featuring <span className="text-white font-bold underline decoration-indigo-500 underline-offset-8">
-                                        {event.organizer?.name || event.artist}
+                    <button
+                        onClick={onOpenModal}
+                        className="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-extrabold text-xs rounded-xl shadow-lg shadow-indigo-500/25 transition-all flex items-center gap-2 active:scale-95 shrink-0"
+                    >
+                        <Plus size={16} /> Post New Gig
+                    </button>
+                </div>
+
+                {/* Hero Showcase Slide */}
+                {currentEvent ? (
+                    <div className="relative w-full h-[280px] sm:h-[340px] md:h-[380px] rounded-3xl overflow-hidden border border-white/10 shadow-2xl group">
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={currentEvent._id || currentIndex}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.5 }}
+                                className="absolute inset-0 z-0"
+                            >
+                                <img
+                                    src={currentEvent.bannerImage || "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=1200"}
+                                    alt={currentEvent.title}
+                                    className="w-full h-full object-cover"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-[#08080c] via-[#08080c]/60 to-transparent" />
+                                <div className="absolute inset-0 bg-gradient-to-r from-[#08080c]/90 via-[#08080c]/40 to-transparent" />
+                            </motion.div>
+                        </AnimatePresence>
+
+                        {/* Content overlay */}
+                        <div className="relative z-10 h-full p-6 md:p-10 flex flex-col justify-end max-w-2xl">
+                            <div className="flex flex-wrap items-center gap-2 mb-3">
+                                {currentEvent.gigType === 'paid_gig' || (Number(currentEvent.artistPayout) > 0 && currentEvent.gigType !== 'free' && currentEvent.gigType !== 'ticketed') ? (
+                                    <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-bold flex items-center gap-1">
+                                        ⭐ Paid Gig • ₹{currentEvent.artistPayout || 5000} Payout
                                     </span>
-                                </p>
-                                <div className="flex items-center gap-4 mt-4 text-white/50 text-sm">
-                                    <span className="flex items-center gap-1"><Calendar size={14} /> {event.date}</span>
-                                    <span className="flex items-center gap-1"><MapPin size={14} /> {event.location}</span>
-                                </div>
+                                ) : currentEvent.gigType === 'ticketed' || (Number(currentEvent.price) > 0 && currentEvent.gigType !== 'free') ? (
+                                    <span className="px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/40 text-xs font-bold">
+                                        🎟️ Ticketed • ₹{currentEvent.price || 500}
+                                    </span>
+                                ) : (
+                                    <span className="px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/40 text-xs font-bold">
+                                        🎁 Free Gig
+                                    </span>
+                                )}
+                                <span className="px-2.5 py-1 rounded-full bg-white/10 text-white/80 text-xs font-medium backdrop-blur-md">
+                                    {currentEvent.category || 'General'}
+                                </span>
+                            </div>
+
+                            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white leading-tight mb-2 tracking-tight line-clamp-2">
+                                {currentEvent.title}
+                            </h2>
+
+                            <p className="text-xs sm:text-sm text-white/70 line-clamp-2 mb-4 max-w-xl font-normal">
+                                {currentEvent.description || "Join us for an unforgettable live experience with talented artists and great vibes."}
+                            </p>
+
+                            <div className="flex flex-wrap items-center gap-4 text-xs text-white/80 mb-5">
+                                <span className="flex items-center gap-1.5 font-medium">
+                                    <Calendar size={14} className="text-indigo-400" />
+                                    {new Date(currentEvent.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                </span>
+                                <span className="flex items-center gap-1.5 font-medium capitalize">
+                                    <MapPin size={14} className="text-indigo-400" />
+                                    {currentEvent.location}
+                                </span>
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                                <button
+                                    onClick={() => onSelectEvent && onSelectEvent(currentEvent)}
+                                    className="px-5 py-2.5 bg-white text-black font-extrabold text-xs rounded-xl hover:bg-indigo-400 hover:text-white transition-all shadow-xl flex items-center gap-2 active:scale-95"
+                                >
+                                    View Details <ChevronRight size={16} />
+                                </button>
                             </div>
                         </div>
 
-                         <div className="flex flex-wrap gap-5">
-                            <button
-                                onClick={scrollToEvents}
-                                className="group relative px-10 py-5 bg-indigo-600 rounded-full overflow-hidden transition-all hover:bg-indigo-500 active:scale-95 shadow-2xl shadow-indigo-600/20"
-                            >
-                                <span className="relative z-10 text-white font-black text-lg flex items-center gap-2">
-                                    Find Tickets <Ticket size={20} className="group-hover:rotate-12 transition-transform" />
-                                </span>
-                            </button>
+                        {/* Navigation Arrows & Indicators */}
+                        {featuredList.length > 1 && (
+                            <>
+                                <div className="absolute right-4 bottom-4 z-20 flex items-center gap-2">
+                                    <button
+                                        onClick={handlePrev}
+                                        className="p-2 rounded-full bg-black/40 hover:bg-black/80 border border-white/10 text-white backdrop-blur-md transition-all active:scale-95"
+                                    >
+                                        <ChevronLeft size={16} />
+                                    </button>
+                                    <button
+                                        onClick={handleNext}
+                                        className="p-2 rounded-full bg-black/40 hover:bg-black/80 border border-white/10 text-white backdrop-blur-md transition-all active:scale-95"
+                                    >
+                                        <ChevronRight size={16} />
+                                    </button>
+                                </div>
 
-                            {event.trailerUrl && (
-                                <button
-                                    onClick={() => window.open(event.trailerUrl, '_blank')}
-                                    className="px-8 py-5 rounded-full bg-white/5 border border-white/10 text-white font-bold hover:bg-white/10 transition-all flex items-center gap-3 backdrop-blur-xl group"
-                                >
-                                    <div className="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                        <PlayCircle size={20} fill="currentColor" className="text-white" />
-                                    </div>
-                                    Watch Intro
-                                </button>
-                            )}
-                        </div>
-                    </motion.div>
-                </AnimatePresence>
-            </div>
-
-            <div className="absolute right-12 top-1/2 -translate-y-1/2 hidden md:flex flex-col gap-10 items-center">
-                <span className="text-white/30 [writing-mode:vertical-lr] text-xs font-bold tracking-[0.5em] uppercase">Scroll to Explore</span>
-                <div className="w-[1px] h-32 bg-gradient-to-b from-indigo-500 via-white/20 to-transparent"></div>
-            </div>
-
-             <div className="absolute bottom-12 left-6 right-6 z-20 flex justify-between items-end max-w-[1400px] mx-auto">
-                <div className="flex gap-3">
-                    {featuredList.map((_, i) => (
+                                <div className="absolute left-6 top-4 z-20 flex gap-1.5">
+                                    {featuredList.map((_, idx) => (
+                                        <button
+                                            key={idx}
+                                            onClick={() => setCurrentIndex(idx)}
+                                            className={`h-1.5 rounded-full transition-all duration-300 ${
+                                                idx === currentIndex ? 'w-8 bg-indigo-500' : 'w-2 bg-white/30'
+                                            }`}
+                                        />
+                                    ))}
+                                </div>
+                            </>
+                        )}
+                    </div>
+                ) : (
+                    <div className="w-full py-12 rounded-3xl bg-gradient-to-br from-indigo-900/20 via-[#111] to-purple-900/20 border border-white/10 text-center space-y-3">
+                        <Sparkles size={32} className="mx-auto text-indigo-400 animate-pulse" />
+                        <h3 className="text-xl font-bold text-white">Live Performing Arts & Gigs</h3>
+                        <p className="text-xs text-white/50 max-w-md mx-auto">
+                            Post a paid gig for your cafe/event or apply as an artist to perform live!
+                        </p>
                         <button
-                            key={i}
-                            onClick={() => setCurrentIndex(i)}
-                            className={`h-[2px] transition-all duration-700 ${i === currentIndex ? 'w-24 bg-indigo-500' : 'w-8 bg-white/20'}`}
-                        />
-                    ))}
-                </div>
-                <div className="text-white/20 font-black text-6xl select-none">
-                    0{currentIndex + 1}
-                </div>
+                            onClick={onOpenModal}
+                            className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all inline-flex items-center gap-2"
+                        >
+                            <Plus size={16} /> Post Your First Gig
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );

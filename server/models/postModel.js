@@ -60,4 +60,8 @@ const postSchema = new mongoose.Schema({
     }
 });
 
+postSchema.index({ createdAt: -1 });
+postSchema.index({ user: 1, createdAt: -1 });
+postSchema.index({ category: 1, createdAt: -1 });
+
 module.exports = mongoose.model('Post', postSchema);

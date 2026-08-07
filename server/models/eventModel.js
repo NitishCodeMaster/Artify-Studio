@@ -48,16 +48,52 @@ const eventSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    latitude: {
+        type: Number,
+        default: null
+    },
+    longitude: {
+        type: Number,
+        default: null
+    },
     category: {
         type: String,
         enum: ['Music', 'Dance', 'Art', 'General'],
         default: "General"
+    },
+    gigType: {
+        type: String,
+        enum: ['free', 'paid_gig', 'ticketed'],
+        default: 'free'
+    },
+    artistPayout: {
+        type: Number,
+        default: 0
     },
     organizer: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
     },
+    applicants: [{
+        artist: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
+        status: {
+            type: String,
+            enum: ['applied', 'selected', 'rejected'],
+            default: 'applied'
+        },
+        message: {
+            type: String,
+            default: ""
+        },
+        appliedAt: {
+            type: Date,
+            default: Date.now
+        }
+    }],
     isLive: {
         type: Boolean,
         default: false
@@ -98,6 +134,35 @@ const eventSchema = new mongoose.Schema({
         }
     }],
 
+    tickets: [{
+        ticketCode: {
+            type: String,
+            required: true
+        },
+        user: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+            required: true
+        },
+        qrToken: {
+            type: String,
+            required: true
+        },
+        status: {
+            type: String,
+            enum: ['valid', 'checked_in', 'cancelled'],
+            default: 'valid'
+        },
+        checkedInAt: {
+            type: Date,
+            default: null
+        },
+        createdAt: {
+            type: Date,
+            default: Date.now
+        }
+    }],
+
     reviews: [reviewSchema],
     averageRating: {
         type: Number,
@@ -108,4 +173,9 @@ const eventSchema = new mongoose.Schema({
         default: 0
     }
 }, { timestamps: true });
+
+eventSchema.index({ date: 1, status: 1 });
+eventSchema.index({ category: 1, date: 1 });
+eventSchema.index({ organizer: 1 });
+
 module.exports = mongoose.model('Event', eventSchema);

@@ -39,14 +39,14 @@ exports.startConversation = async (req, res) => {
 
         let chat = await Conversation.findOne({
             participants: { $all: [senderId, receiverId] }
-        }).populate('participants', 'name profilePic');
+        }).populate('participants', 'name profilePic role sellerProfile originLocation');
 
         if (!chat) {
             chat = await Conversation.create({
                 participants: [senderId, receiverId],
                 lastMessage: "Started a new conversation ✨"
             });
-            chat = await chat.populate('participants', 'name profilePic');
+            chat = await chat.populate('participants', 'name profilePic role sellerProfile originLocation');
         }
 
         res.status(200).json({ success: true, conversation: formatConversationForUser(chat, senderId) });
@@ -62,10 +62,9 @@ exports.getConversations = async (req, res) => {
 
         const conversations = await Conversation.find({
             participants: { $in: [userId] }
-        }).populate('participants', 'name profilePic').sort({ updatedAt: -1 });
+        }).populate('participants', 'name profilePic role sellerProfile originLocation').sort({ updatedAt: -1 });
 
         const formattedConversations = conversations.map(conv => formatConversationForUser(conv, userId));
-
         res.status(200).json({ success: true, conversations: formattedConversations });
     } catch (error) {
         console.error("Error fetching conversations:", error);

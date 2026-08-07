@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../utils/api';
 import { Footer } from '../components/Footer';
-import { Loader2, UserCircle2, MapPin, Calendar, Award, Brush, Edit3, Sparkles, Layers3, ShoppingBag } from 'lucide-react';
+import { Loader2, UserCircle2, MapPin, Calendar, Award, Brush, Edit3, Sparkles, Layers3, ShoppingBag, ExternalLink, Briefcase, History, CheckCircle2, Ticket } from 'lucide-react';
 import PostCard from '../components/Community/postCard';
 import ProductCard from '../components/MarketPlace/ProductCard';
 import { motion } from 'framer-motion';
@@ -12,6 +12,7 @@ const Profile = () => {
     const myId = currentUser.id || currentUser._id;
 
     const [profileData, setProfileData] = useState(null);
+    const [selectedGigs, setSelectedGigs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('posts');
 
@@ -28,6 +29,25 @@ const Profile = () => {
             }
         };
         fetchMyProfile();
+    }, [myId]);
+
+    useEffect(() => {
+        const fetchSelectedGigs = async () => {
+            try {
+                const res = await api.get('/events');
+                const allEvents = res.data.events || [];
+                const matched = allEvents.filter(evt =>
+                    evt.applicants?.some(a => {
+                        const artistId = a.artist?._id || a.artist;
+                        return artistId?.toString() === myId?.toString() && a.status === 'selected';
+                    })
+                );
+                setSelectedGigs(matched);
+            } catch (err) {
+                console.error("Failed to load selected gigs:", err);
+            }
+        };
+        if (myId) fetchSelectedGigs();
     }, [myId]);
 
     if (loading) {
@@ -124,14 +144,21 @@ const Profile = () => {
                             </div>
                         </div>
 
-                        <div className="w-full md:mt-1 md:w-auto">
-                            <Link to="/settings" className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/10 px-5 py-2.5 font-medium text-white transition-all hover:bg-white/20 md:w-auto">
-                                <Edit3 size={16} /> Edit Profile
+                        <div className="w-full md:mt-1 md:w-auto flex flex-wrap md:flex-col gap-2">
+                            <Link to={`/profile/${myId}`} className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 px-5 py-2.5 font-bold text-black transition-all hover:from-amber-400 hover:to-orange-500 shadow-md text-xs">
+                                <ExternalLink size={15} /> Public Creator Page
+                            </Link>
+                            <Link to="/trade-history" className="flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/10 px-5 py-2.5 font-medium text-white transition-all hover:bg-white/20 text-xs">
+                                <History size={15} /> Trade & Sales History
+                            </Link>
+                            <Link to="/settings" className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-5 py-2.5 font-medium text-white/70 transition-all hover:bg-white/10 text-xs">
+                                <Edit3 size={15} /> Edit Profile
                             </Link>
                         </div>
                     </div>
                 </div>
 
+                {/* Tabs */}
                 <div className="flex items-center gap-6 border-b border-white/10 mb-5">
                     <button
                         onClick={() => setActiveTab('posts')}
@@ -139,7 +166,7 @@ const Profile = () => {
                     >
                         <span className="inline-flex items-center gap-2">
                             <Layers3 size={14} />
-                            My Posts ({posts.length})
+                            My Posts ({posts?.length || 0})
                         </span>
                     </button>
                     <button
@@ -148,7 +175,16 @@ const Profile = () => {
                     >
                         <span className="inline-flex items-center gap-2">
                             <ShoppingBag size={14} />
-                            Marketplace ({products.length})
+                            Marketplace ({products?.length || 0})
+                        </span>
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('gigs')}
+                        className={`pb-3 px-2 text-sm font-bold transition-all border-b-2 ${activeTab === 'gigs' ? 'border-amber-500 text-amber-500' : 'border-transparent text-white/40 hover:text-white'}`}
+                    >
+                        <span className="inline-flex items-center gap-2">
+                            <Briefcase size={14} />
+                            Selected Gigs ({selectedGigs.length})
                         </span>
                     </button>
                 </div>
@@ -156,7 +192,7 @@ const Profile = () => {
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
                     {activeTab === 'posts' ? (
                         <div className="max-w-2xl mx-auto md:mx-0">
-                            {posts.length > 0 ? (
+                            {posts && posts.length > 0 ? (
                                 <div className="space-y-4">
                                     {posts.map(post => <PostCard key={post._id} post={post} />)}
                                 </div>
@@ -167,10 +203,10 @@ const Profile = () => {
                                 </div>
                             )}
                         </div>
-                    ) : (
+                    ) : activeTab === 'products' ? (
                         <div>
                             <div className="columns-1 sm:columns-2 lg:columns-3 gap-x-6">
-                                {products.length > 0 ? (
+                                {products && products.length > 0 ? (
                                     products.map(product => (
                                         <div key={product._id} className="break-inside-avoid mb-6">
                                             <ProductCard product={product} onDelete={() => { }} />
@@ -183,6 +219,59 @@ const Profile = () => {
                                     </div>
                                 )}
                             </div>
+                        </div>
+                    ) : (
+                        /* Selected Gigs & Bookings Tab */
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {selectedGigs.length > 0 ? (
+                                selectedGigs.map(gig => (
+                                    <div key={gig._id} className="bg-[#111] border border-emerald-500/30 p-5 rounded-3xl space-y-3 relative overflow-hidden shadow-xl">
+                                        <div className="flex items-center justify-between">
+                                            <span className="px-3 py-1 bg-emerald-500/20 text-emerald-300 text-xs font-black rounded-full border border-emerald-500/40 flex items-center gap-1">
+                                                <CheckCircle2 size={13} /> SELECTED & CONFIRMED
+                                            </span>
+                                            {gig.artistPayout > 0 && (
+                                                <span className="text-sm font-black text-amber-400">₹{gig.artistPayout} Payout</span>
+                                            )}
+                                        </div>
+
+                                        <div>
+                                            <h4 className="text-lg font-bold text-white leading-snug">{gig.title}</h4>
+                                            <p className="text-xs text-white/60 line-clamp-2 mt-1">{gig.description}</p>
+                                        </div>
+
+                                        <div className="space-y-1 text-xs text-white/70 pt-2 border-t border-white/10">
+                                            <p className="flex items-center gap-2">
+                                                <Calendar size={13} className="text-amber-400" /> {new Date(gig.date).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' })} at {gig.time || 'TBA'}
+                                            </p>
+                                            <p className="flex items-center gap-2">
+                                                <MapPin size={13} className="text-amber-400" /> {gig.location}
+                                            </p>
+                                        </div>
+
+                                        <div className="flex items-center gap-2 pt-2">
+                                            <Link
+                                                to={`/events`}
+                                                className="flex-1 py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs rounded-xl text-center shadow-md flex items-center justify-center gap-1.5"
+                                            >
+                                                <Ticket size={14} /> Event Pass & Details
+                                            </Link>
+                                            <Link
+                                                to="/messages"
+                                                className="flex-1 py-2.5 bg-white/10 hover:bg-white/20 text-white font-extrabold text-xs rounded-xl text-center border border-white/10 flex items-center justify-center gap-1.5"
+                                            >
+                                                Contact Organizer
+                                            </Link>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="py-12 border border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center text-white/30 bg-white/[0.02] col-span-full">
+                                    <Briefcase size={36} className="mb-2 text-amber-500/50" />
+                                    <p className="text-sm font-bold text-white/70">No Gig Selections Yet</p>
+                                    <p className="text-xs text-white/40 mt-1">Apply for live gigs under the Events page to get selected by organizers!</p>
+                                </div>
+                            )}
                         </div>
                     )}
                 </motion.div>

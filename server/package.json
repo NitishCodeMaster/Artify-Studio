@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "cloudinary": "^2.9.0",
+    "compression": "^1.8.1",
     "crypto": "^1.0.1",
     "mongodb": "^7.0.0",
     "node-cron": "^4.2.1",

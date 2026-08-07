@@ -15,7 +15,7 @@ export const footerData = {
         { name: "Contact Us", path: "/contact" }
     ],
     contact: [
-        { icon: <MapPin size={18} />, detail: "Roorkee, Uttarakhand, India" },
+        { icon: <MapPin size={18} />, detail: "Delhi, India" },
         { icon: <Phone size={18} />, detail: "+91 9523043234" },
         { icon: <Mail size={18} />, detail: "support@artify.com" }
     ],

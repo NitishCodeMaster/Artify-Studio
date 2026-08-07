@@ -59,7 +59,7 @@ export function CreativeMissions({ onUseMission, discussionRef }) {
             await navigator.clipboard.writeText(activeMission.title);
             toast.success('Mission prompt copied.');
         } catch {
-            toast.error('Prompt copy nahi ho paya.');
+            toast.error('Failed to copy prompt.');
         }
     };
 

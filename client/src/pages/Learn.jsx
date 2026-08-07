@@ -86,9 +86,9 @@ export default function Learn() {
                 await api.delete(`/learn/workshops/${workshop.id}`);
                 setWorkshops((prev) => prev.filter((item) => item.id !== workshop.id));
                 setStats((prev) => ({ ...prev, workshops: Math.max((prev.workshops || 1) - 1, 0) }));
-                toast.success('Workshop delete ho gaya.');
+                toast.success('Workshop deleted successfully.');
               } catch (error) {
-                toast.error(error.response?.data?.message || 'Workshop delete nahi ho paya.');
+                toast.error(error.response?.data?.message || 'Failed to delete workshop.');
               }
             }}
           />

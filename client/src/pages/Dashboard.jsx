@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
 import { Footer } from '../components/Footer';
-import { Package, Clock, ShieldCheck, ChevronRight, Loader2, IndianRupee } from 'lucide-react';
+import { Package, Clock, ShieldCheck, ChevronRight, Loader2, IndianRupee, History } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
@@ -24,18 +24,18 @@ const Dashboard = () => {
         fetchOrders();
     }, []);
 
-     const formatDate = (dateString) => {
+    const formatDate = (dateString) => {
         const options = { year: 'numeric', month: 'long', day: 'numeric' };
         return new Date(dateString).toLocaleDateString('en-US', options);
     };
 
     return (
         <div className="bg-[#030303] min-h-screen text-white font-sans selection:bg-amber-500/30 relative">
-             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-amber-600/10 blur-[120px] pointer-events-none rounded-full"></div>
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-amber-600/10 blur-[120px] pointer-events-none rounded-full"></div>
 
             <div className="max-w-[1000px] mx-auto px-6 pt-20 pb-14 relative z-10">
 
-                 <div className="flex items-center gap-6 mb-12 p-8 rounded-3xl bg-white/[0.02] border border-white/5 backdrop-blur-xl">
+                <div className="flex items-center gap-6 mb-10 p-8 rounded-3xl bg-white/[0.02] border border-white/5 backdrop-blur-xl">
                     <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center text-4xl font-black text-black shadow-[0_0_30px_rgba(245,158,11,0.3)]">
                         {user?.name?.charAt(0).toUpperCase() || 'U'}
                     </div>
@@ -44,14 +44,23 @@ const Dashboard = () => {
                             Welcome back, <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">{user?.name?.split(' ')[0]}</span>
                         </h1>
                         <p className="text-white/50 flex items-center gap-2">
-                            <ShieldCheck size={16} className="text-green-400" /> Verified Collector Account
+                            <ShieldCheck size={16} className="text-green-400" /> Verified Artify Account
                         </p>
                     </div>
                 </div>
 
-                 <h2 className="text-2xl font-bold flex items-center gap-3 mb-8">
-                    <Package className="text-amber-500" size={24} /> My Collection (Orders)
-                </h2>
+                <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
+                    <h2 className="text-2xl font-bold flex items-center gap-3">
+                        <Package className="text-amber-500" size={24} /> My Collection & Orders
+                    </h2>
+
+                    <Link
+                        to="/trade-history"
+                        className="px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 shadow-md"
+                    >
+                        <History size={15} /> View Full Purchases & Sales History
+                    </Link>
+                </div>
 
                 {loading ? (
                     <div className="flex flex-col items-center justify-center py-20 space-y-4">
@@ -80,7 +89,7 @@ const Dashboard = () => {
                                 key={order._id}
                                 className="bg-[#0a0a0a] border border-white/5 rounded-3xl overflow-hidden hover:border-amber-500/30 transition-colors"
                             >
-                                 <div className="bg-white/[0.03] px-6 py-4 border-b border-white/5 flex flex-wrap items-center justify-between gap-4">
+                                <div className="bg-white/[0.03] px-6 py-4 border-b border-white/5 flex flex-wrap items-center justify-between gap-4">
                                     <div className="flex items-center gap-6">
                                         <div>
                                             <p className="text-xs text-white/40 font-bold uppercase tracking-wider mb-1">Order Placed</p>
@@ -102,7 +111,7 @@ const Dashboard = () => {
                                     </div>
                                 </div>
 
-                                 <div className="p-6">
+                                <div className="p-6">
                                     {order.products?.length > 0 ? order.products.map((product) => (
                                         <div key={product._id} className="flex items-center gap-6 py-4 first:pt-0 last:pb-0 border-b border-white/5 last:border-0 group">
                                             <div className="w-24 h-24 rounded-2xl bg-black border border-white/10 overflow-hidden shrink-0 relative">

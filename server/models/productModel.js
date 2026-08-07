@@ -43,6 +43,26 @@ const productSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
+    location: {
+        type: String,
+        default: 'Chandigarh'
+    },
+    latitude: {
+        type: Number,
+        default: null
+    },
+    longitude: {
+        type: Number,
+        default: null
+    },
+    sellerStoreName: {
+        type: String,
+        default: ''
+    },
+    sellerProfession: {
+        type: String,
+        default: 'Artisan & Creator'
+    },
     createdAt: {
         type: Date,
         default: Date.now

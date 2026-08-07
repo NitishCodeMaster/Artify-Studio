@@ -173,6 +173,35 @@ const UserSchema = new mongoose.Schema({
             default: true
         }
     },
+    sellerProfile: {
+        storeName: {
+            type: String,
+            default: '',
+            trim: true
+        },
+        sellerCategory: {
+            type: String,
+            default: 'Creator & Artisan',
+            trim: true
+        },
+        location: {
+            type: String,
+            default: '',
+            trim: true
+        },
+        latitude: {
+            type: Number,
+            default: null
+        },
+        longitude: {
+            type: Number,
+            default: null
+        },
+        isVerifiedSeller: {
+            type: Boolean,
+            default: true
+        }
+    },
     savedItems: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product'

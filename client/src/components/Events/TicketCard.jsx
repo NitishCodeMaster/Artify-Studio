@@ -1,65 +1,120 @@
-import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { MapPin, Calendar, ArrowUpRight, QrCode } from 'lucide-react';
+import { calculateDistanceKm, getEventCoords, formatDistanceText } from '../../utils/geo';
 
-const TicketCard = ({ event, onOpenDetails }) => {
+const TicketCard = ({ event, onOpenDetails, userLocation = null }) => {
+    const [computedDistance, setComputedDistance] = useState(event.distanceKm || null);
+
+    useEffect(() => {
+        if (event.distanceKm !== undefined && event.distanceKm !== null) {
+            setComputedDistance(event.distanceKm);
+            return;
+        }
+
+        if (userLocation && userLocation.lat && userLocation.lng) {
+            const [eLat, eLng] = getEventCoords(event);
+            const dist = calculateDistanceKm(userLocation.lat, userLocation.lng, eLat, eLng);
+            setComputedDistance(dist);
+        } else if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    const [eLat, eLng] = getEventCoords(event);
+                    const dist = calculateDistanceKm(pos.coords.latitude, pos.coords.longitude, eLat, eLng);
+                    setComputedDistance(dist);
+                },
+                () => {}
+            );
+        }
+    }, [event, userLocation]);
+
     const formattedDate = new Date(event.date).toLocaleDateString('en-IN', {
-        day: '2-digit',
+        day: 'numeric',
         month: 'short',
+        year: 'numeric'
     });
 
     return (
         <motion.div
+            whileHover={{ y: -4 }}
             onClick={() => onOpenDetails(event)}
-            className="group relative h-[420px] w-full rounded-[2.5rem] overflow-hidden bg-[#0A0A0A] cursor-pointer border border-white/5"
+            className="group relative bg-[#0a0a0f] border border-white/10 hover:border-indigo-500/50 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 cursor-pointer flex flex-col h-full"
         >
-            <div className="absolute inset-0 z-0">
-                <motion.img
-                    src={event.bannerImage || 'https://via.placeholder.com/600x800'}
+            {/* Event Banner Image */}
+            <div className="relative h-44 w-full overflow-hidden bg-black">
+                <img
+                    src={event.bannerImage || 'https://via.placeholder.com/400x200'}
                     alt={event.title}
-                    whileHover={{ scale: 1.08 }}
-                    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                    className="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent" />
-            </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-transparent to-transparent"></div>
 
-            <div className="relative z-10 h-full p-8 flex flex-col justify-between">
-
-                <div className="flex justify-between items-center">
-                    <div className="px-4 py-2 bg-white/5 backdrop-blur-md rounded-full border border-white/10 text-[11px] font-black tracking-[0.2em] text-white uppercase">
-                        {formattedDate}
-                    </div>
-
-                    <div className="relative h-12 w-12 flex items-center justify-end">
-                        <div className="absolute right-0 text-xl font-bold text-white tracking-tighter transition-all duration-500 group-hover:opacity-0 group-hover:-translate-y-4">
-                            {event.price === 0 ? 'Free' : `₹${event.price}`}
-                        </div>
-
-                        <div className="absolute right-0 opacity-0 scale-50 group-hover:opacity-100 group-hover:scale-100 transition-all duration-500 bg-white text-black h-12 w-12 rounded-full flex items-center justify-center shadow-xl shadow-white/20">
-                            <ArrowRight size={20} />
-                        </div>
-                    </div>
+                {/* Category & Payout Tag */}
+                <div className="absolute top-3 left-3 flex items-center gap-2">
+                    <span className="px-3 py-1 rounded-full bg-black/80 backdrop-blur-md text-[10px] font-extrabold uppercase text-white border border-white/15">
+                        {event.category || 'Event'}
+                    </span>
+                    {event.artistPayout > 0 && (
+                        <span className="px-2.5 py-1 rounded-full bg-emerald-500/90 text-black text-[10px] font-black uppercase shadow-md">
+                            ₹{event.artistPayout} Payout
+                        </span>
+                    )}
                 </div>
 
-                <div className="space-y-4">
-                    <div className="space-y-1">
-                        <p className="text-indigo-500 text-[10px] font-bold uppercase tracking-[0.3em]">
-                            {event.category || 'Live Event'}
-                        </p>
-                        <h3 className="text-3xl font-bold text-white leading-[1.1] tracking-tight">
-                            {event.title}
-                        </h3>
-                        <p className="text-white/40 text-sm font-medium">
-                            {event.organizer?.name || "By Artify Artist"}
-                        </p>
+                {/* Price / Entry Badge */}
+                <div className="absolute bottom-3 right-3">
+                    {event.artistPayout > 0 ? (
+                        <span className="px-3 py-1 rounded-xl bg-emerald-500/20 backdrop-blur-md text-emerald-300 text-xs font-black border border-emerald-500/40">
+                            ⭐ Performer Gig
+                        </span>
+                    ) : event.price > 0 ? (
+                        <span className="px-3 py-1 rounded-xl bg-indigo-600 backdrop-blur-md text-white text-xs font-black shadow-lg">
+                            ₹{event.price} Ticket
+                        </span>
+                    ) : (
+                        <span className="px-3 py-1 rounded-xl bg-purple-500/30 backdrop-blur-md text-purple-200 text-xs font-black border border-purple-500/40">
+                            🎁 Free Entry
+                        </span>
+                    )}
+                </div>
+            </div>
+
+            {/* Content Body */}
+            <div className="p-4 flex flex-col justify-between flex-1 space-y-3">
+                <div className="space-y-1.5">
+                    <h3 className="text-base font-bold text-white leading-snug line-clamp-1 group-hover:text-indigo-400 transition-colors">
+                        {event.title}
+                    </h3>
+                    <p className="text-xs text-white/50 line-clamp-2 leading-relaxed">
+                        {event.description || "Join this live performance on Artify."}
+                    </p>
+                </div>
+
+                <div className="pt-3 border-t border-white/5 space-y-2">
+                    <div className="flex items-center justify-between text-xs text-white/60">
+                        <span className="flex items-center gap-1.5 font-medium">
+                            <Calendar size={12} className="text-indigo-400" /> {formattedDate}
+                        </span>
+                        <div className="flex items-center gap-2">
+                            <span className="flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px] font-bold border border-amber-500/30 hover:bg-amber-500 hover:text-black transition-colors">
+                                <QrCode size={11} /> Pass
+                            </span>
+                            <span className="flex items-center gap-1 font-semibold text-indigo-400 group-hover:text-white transition-colors">
+                                View <ArrowUpRight size={12} />
+                            </span>
+                        </div>
                     </div>
 
-                    <div className="flex items-center gap-3 pt-2">
-                        <div className="h-[1px] w-12 bg-indigo-500 transition-all duration-500 group-hover:w-20" />
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-white/20 group-hover:text-white transition-colors">
-                            View Details
-                        </span>
+                    <div className="flex items-center justify-between text-xs text-white/40 gap-2">
+                        <div className="flex items-center gap-1.5 truncate max-w-[60%]">
+                            <MapPin size={12} className="shrink-0 text-indigo-400" />
+                            <span className="truncate">{event.location}</span>
+                        </div>
+                        {computedDistance !== null && (
+                            <span className="px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 text-[10px] font-bold border border-indigo-500/30 shrink-0">
+                                📍 {formatDistanceText(computedDistance)}
+                            </span>
+                        )}
                     </div>
                 </div>
             </div>

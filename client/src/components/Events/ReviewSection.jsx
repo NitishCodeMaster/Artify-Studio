@@ -74,7 +74,7 @@ export const ReviewSection = ({ targetId, onModel }) => {
                 setReviews(prev => prev.filter(r => r._id !== reviewId));
             }
         } catch (err) {
-            toast.error("Delete fail ho gaya!");
+            toast.error("Failed to delete review!");
         }
     };
 
