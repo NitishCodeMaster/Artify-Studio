@@ -51,7 +51,7 @@ const EventHero = ({ events, onOpenModal, onSelectEvent }) => {
 
                     <button
                         onClick={onOpenModal}
-                        className="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-extrabold text-xs rounded-xl shadow-lg shadow-indigo-500/25 transition-all flex items-center gap-2 active:scale-95 shrink-0"
+                        className="w-full sm:w-auto px-5 py-3 sm:py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-extrabold text-xs rounded-xl shadow-lg shadow-indigo-500/25 transition-all flex items-center justify-center gap-2 active:scale-95 shrink-0"
                     >
                         <Plus size={16} /> Post New Gig
                     </button>

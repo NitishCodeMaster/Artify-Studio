@@ -34,6 +34,13 @@ const CartDrawer = () => {
                 description: "Purchase Unique Masterpieces",
                 order_id: order.id,
                 prefill: buildRazorpayPrefill(user),
+                config: {
+                    display: {
+                        preferences: {
+                            show_default_blocks: true
+                        }
+                    }
+                },
                 theme: { color: "#f59e0b" },
 
                 handler: async function (response) {

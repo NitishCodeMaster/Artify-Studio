@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Mail, Lock, ArrowRight, Loader2, LogIn, UserRound, GraduationCap, Sparkles, BadgeCheck } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, Loader2, LogIn, UserRound, GraduationCap, Sparkles, BadgeCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 
@@ -13,10 +13,11 @@ export default function Login() {
     email: '',
     password: ''
   });
+  const [showPassword, setShowPassword] = useState(false);
   const [loginMode, setLoginMode] = useState('artist');
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
   const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -148,13 +149,21 @@ export default function Login() {
             <div className="relative group">
               <Lock className="absolute left-4 top-3.5 text-white/30 group-focus-within:text-pink-400 transition-colors" size={20} />
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 name="password"
                 placeholder="Password"
                 required
-                className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-pink-500/50 focus:bg-white/5 transition-all"
+                className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-12 text-white focus:outline-none focus:border-pink-500/50 focus:bg-white/5 transition-all"
                 onChange={handleChange}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-3.5 text-white/30 hover:text-white transition-colors"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
             </div>
 
             <div className="flex justify-end">

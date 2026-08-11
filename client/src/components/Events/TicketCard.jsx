@@ -34,6 +34,8 @@ const TicketCard = ({ event, onOpenDetails, userLocation = null }) => {
         year: 'numeric'
     });
 
+    const isPaidArtistGig = event.gigType === 'paid_gig' || (Number(event.artistPayout) > 0 && Number(event.price) === 0);
+
     return (
         <motion.div
             whileHover={{ y: -4 }}
@@ -63,7 +65,7 @@ const TicketCard = ({ event, onOpenDetails, userLocation = null }) => {
 
                 {/* Price / Entry Badge */}
                 <div className="absolute bottom-3 right-3">
-                    {event.artistPayout > 0 ? (
+                    {isPaidArtistGig ? (
                         <span className="px-3 py-1 rounded-xl bg-emerald-500/20 backdrop-blur-md text-emerald-300 text-xs font-black border border-emerald-500/40">
                             ⭐ Performer Gig
                         </span>
@@ -96,9 +98,11 @@ const TicketCard = ({ event, onOpenDetails, userLocation = null }) => {
                             <Calendar size={12} className="text-indigo-400" /> {formattedDate}
                         </span>
                         <div className="flex items-center gap-2">
-                            <span className="flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px] font-bold border border-amber-500/30 hover:bg-amber-500 hover:text-black transition-colors">
-                                <QrCode size={11} /> Pass
-                            </span>
+                            {!isPaidArtistGig && (
+                                <span className="flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px] font-bold border border-amber-500/30 group-hover:bg-amber-500 group-hover:text-black transition-colors">
+                                    <QrCode size={11} /> Pass
+                                </span>
+                            )}
                             <span className="flex items-center gap-1 font-semibold text-indigo-400 group-hover:text-white transition-colors">
                                 View <ArrowUpRight size={12} />
                             </span>

@@ -20,7 +20,9 @@ const EventTicketModal = ({ isOpen, onClose, eventId, eventData }) => {
                 }
             } catch (error) {
                 console.error("Fetch ticket pass error:", error);
-                toast.error("Could not fetch ticket pass.");
+                const errMsg = error.response?.data?.message || "Could not fetch ticket pass.";
+                toast.error(errMsg);
+                setTicketDetails(null);
             } finally {
                 setLoading(false);
             }
@@ -32,29 +34,29 @@ const EventTicketModal = ({ isOpen, onClose, eventId, eventData }) => {
     if (!isOpen) return null;
 
     const event = ticketDetails?.event || eventData || {};
-    const ticket = ticketDetails?.ticket || {};
+    const ticket = ticketDetails?.ticket || null;
     const attendee = ticketDetails?.attendee || {};
 
-    const ticketCode = ticket.ticketCode || 'ART-EVT-PASS';
-    const isCheckedIn = ticket.status === 'checked_in';
+    const ticketCode = ticket?.ticketCode;
+    const isCheckedIn = ticket?.status === 'checked_in';
 
-    // Generate QR payload string containing ticket token & code
-    const qrDataPayload = JSON.stringify({
+    // Generate QR payload string containing ticket token & code if ticket exists
+    const qrDataPayload = ticketCode ? JSON.stringify({
         code: ticketCode,
-        token: ticket.qrToken || 'token',
+        token: ticket.qrToken || '',
         eventId: event._id || eventId,
         attendee: attendee.name || 'Attendee'
-    });
+    }) : '';
 
-    const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(qrDataPayload)}&color=000000&bgcolor=ffffff`;
+    const qrImageUrl = qrDataPayload ? `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(qrDataPayload)}&color=000000&bgcolor=ffffff` : '';
 
     const handlePrintPass = () => {
         window.print();
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-            <div className="relative w-full max-w-md bg-[#0a0a0f] border border-amber-500/30 rounded-3xl p-6 md:p-8 shadow-2xl space-y-6 overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
+            <div className="relative w-full max-w-md max-h-[90vh] overflow-y-auto custom-scrollbar bg-[#0a0a0f] border border-amber-500/30 rounded-3xl p-5 sm:p-6 md:p-8 shadow-2xl space-y-5 sm:space-y-6 my-auto">
                 {/* Background Glow */}
                 <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 blur-[90px] pointer-events-none"></div>
 
@@ -82,6 +84,14 @@ const EventTicketModal = ({ isOpen, onClose, eventId, eventData }) => {
                     <div className="flex flex-col items-center justify-center py-12 space-y-3">
                         <Loader2 className="animate-spin text-amber-500" size={36} />
                         <p className="text-xs text-white/40 font-medium">Generating your official QR Pass...</p>
+                    </div>
+                ) : !ticketCode ? (
+                    <div className="text-center py-10 space-y-4">
+                        <QrCode size={48} className="mx-auto text-amber-500/40" />
+                        <h4 className="text-lg font-bold text-white">No Ticket Pass Found</h4>
+                        <p className="text-xs text-white/50 max-w-xs mx-auto">
+                            No active ticket pass found for this event. If you haven't registered or purchased a ticket yet, please book a ticket first.
+                        </p>
                     </div>
                 ) : (
                     <div ref={passRef} className="space-y-6 relative z-10">

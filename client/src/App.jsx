@@ -8,7 +8,6 @@ import { Toaster } from 'react-hot-toast';
 import PrivateRoute from './components/PrivateRoute';
 import CreativePulse from './components/CreativePulse';
 import CreativeMode from './components/CreativeMode';
-import FloatingInspiration from './components/FloatingInspiration';
 
 const CartDrawer = lazy(() => import('./components/MarketPlace/CartDrawer'));
 const Home = lazy(() => import('./pages/Home'));
@@ -33,6 +32,7 @@ const Messages = lazy(() => import('./pages/Messages'));
 const SavedCollections = lazy(() => import('./pages/SavedCollections'));
 const Wallet = lazy(() => import('./pages/Wallet'));
 const TradeHistory = lazy(() => import('./pages/TradeHistory'));
+const Notifications = lazy(() => import('./pages/Notifications'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 const ScrollToTop = () => {
@@ -108,12 +108,12 @@ const App = () => {
                 <Route path="/saved" element={<SavedCollections />} />
                 <Route path="/wallet" element={<Wallet />} />
                 <Route path="/trade-history" element={<PrivateRoute><TradeHistory /></PrivateRoute>} />
+                <Route path="/notifications" element={<PrivateRoute><Notifications /></PrivateRoute>} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
           </div>
           <CreativeMode />
-          <FloatingInspiration />
           <CreativePulse />
         </Router>
       </CartProvider>

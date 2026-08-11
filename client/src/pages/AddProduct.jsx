@@ -224,7 +224,7 @@ const AddProduct = () => {
                     </div>
 
                     <div className="lg:col-span-7">
-                        <div className="bg-[#0a0a0a] p-8 md:p-10 rounded-3xl border border-white/10 shadow-2xl relative overflow-hidden">
+                        <div className="bg-[#0a0a0a] p-4 sm:p-8 md:p-10 rounded-3xl border border-white/10 shadow-2xl relative overflow-hidden">
                             <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/10 blur-[100px] pointer-events-none"></div>
 
                             <div className="relative z-10 mb-8">

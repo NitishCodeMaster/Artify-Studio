@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from '../../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Calendar, MapPin, Clock, Trash2, ShieldCheck, Zap, Ticket, Pencil, QrCode, Camera, User, MessageSquare, ExternalLink, Phone, Mail, Sparkles, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, Clock, Trash2, ShieldCheck, Zap, Ticket, Pencil, QrCode, Camera, User, MessageSquare, ExternalLink, Phone, Mail, Sparkles, CheckCircle2, X } from 'lucide-react';
 import api from '../../utils/api';
 import { toast } from 'react-hot-toast';
 import DeleteConfirmModal from './DeleteConfirmModal';
 import CreateEventModal from './CreateEventModal';
 import EventTicketModal from './EventTicketModal';
 import TicketScannerModal from './TicketScannerModal';
+import UpiPaymentModal from './UpiPaymentModal';
 import { ReviewSection } from './ReviewSection';
 import EventMap from './EventMap';
 import { buildRazorpayPrefill, loadRazorpay } from '../../utils/razorpay';
@@ -24,6 +25,8 @@ const EventDetails = ({ event: propEvent, onBack, refresh, viewMode }) => {
     const [showEditModal, setShowEditModal] = useState(false);
     const [showTicketModal, setShowTicketModal] = useState(false);
     const [showScannerModal, setShowScannerModal] = useState(false);
+    const [showUpiModal, setShowUpiModal] = useState(false);
+    const [showPaymentOptionModal, setShowPaymentOptionModal] = useState(false);
     const [viewingApplicant, setViewingApplicant] = useState(null);
     const [isProcessing, setIsProcessing] = useState(false);
 
@@ -56,7 +59,18 @@ const EventDetails = ({ event: propEvent, onBack, refresh, viewMode }) => {
         currentUserId.toString() === organizerId.toString()
     );
 
+    const isPaidArtistGig = event.gigType === 'paid_gig' || (Number(event.artistPayout) > 0 && Number(event.price) === 0);
+
+    const hasBookedTicket = Boolean(
+        currentUserId && (
+            event.attendees?.some(att => (att._id || att).toString() === currentUserId.toString()) ||
+            event.tickets?.some(t => (t.user?._id || t.user).toString() === currentUserId.toString())
+        )
+    );
+
     const [applyMessage, setApplyMessage] = useState('');
+    const [demoVideoUrl, setDemoVideoUrl] = useState('');
+    const [demoAudioUrl, setDemoAudioUrl] = useState('');
     const [showApplyModal, setShowApplyModal] = useState(false);
     const [isApplying, setIsApplying] = useState(false);
 
@@ -68,7 +82,11 @@ const EventDetails = ({ event: propEvent, onBack, refresh, viewMode }) => {
         e?.preventDefault();
         setIsApplying(true);
         try {
-            const res = await api.post(`/events/${event._id}/apply`, { message: applyMessage });
+            const res = await api.post(`/events/${event._id}/apply`, {
+                message: applyMessage,
+                demoVideoUrl,
+                demoAudioUrl
+            });
             if (res.data.success) {
                 toast.success(res.data.message || "Applied for Gig! 🚀");
                 if (res.data.event) setEvent(res.data.event);
@@ -109,10 +127,18 @@ const EventDetails = ({ event: propEvent, onBack, refresh, viewMode }) => {
             try {
                 setIsProcessing(true);
                 await api.post('/payments/book-free', { eventId: event._id });
-                toast.success("Free ticket booked!");
+                toast.success("Free ticket booked! Opening your VIP pass... 🎟️");
+                try {
+                    const freshRes = await api.get(`/events/${event._id}`);
+                    if (freshRes.data?.event) setEvent(freshRes.data.event);
+                } catch {
+                    setEvent(prev => ({
+                        ...prev,
+                        attendees: [...(prev.attendees || []), currentUserId]
+                    }));
+                }
                 if (refresh) refresh();
-                if (onBack) onBack();
-                else navigate("/events");
+                setShowTicketModal(true);
             } catch (error) {
                 toast.error(error.response?.data?.message || "Free booking failed");
             } finally {
@@ -121,6 +147,12 @@ const EventDetails = ({ event: propEvent, onBack, refresh, viewMode }) => {
             return;
         }
 
+        // Open Payment Choice Modal (UPI QR Code vs Razorpay)
+        setShowPaymentOptionModal(true);
+    };
+
+    const handleLaunchRazorpay = async () => {
+        setShowPaymentOptionModal(false);
         const isLoaded = await loadRazorpay();
         if (!isLoaded) {
             toast.error("Razorpay failed to load.");
@@ -143,10 +175,12 @@ const EventDetails = ({ event: propEvent, onBack, refresh, viewMode }) => {
                 description: `Ticket for ${event.title}`,
                 order_id: data.order.id,
                 prefill,
-                readonly: {
-                    contact: Boolean(prefill.contact),
-                    email: Boolean(prefill.email),
-                    name: Boolean(prefill.name)
+                config: {
+                    display: {
+                        preferences: {
+                            show_default_blocks: true
+                        }
+                    }
                 },
                 theme: { color: "#6366f1" },
                 handler: async (response) => {
@@ -157,10 +191,18 @@ const EventDetails = ({ event: propEvent, onBack, refresh, viewMode }) => {
                             totalAmount: event.price
                         });
                         if (verifyRes.data.success) {
-                            toast.success("Ticket Booked!");
+                            toast.success("Ticket Booked Successfully! 🎟️");
+                            try {
+                                const freshRes = await api.get(`/events/${event._id}`);
+                                if (freshRes.data?.event) setEvent(freshRes.data.event);
+                            } catch {
+                                setEvent(prev => ({
+                                    ...prev,
+                                    attendees: [...(prev.attendees || []), currentUserId]
+                                }));
+                            }
                             if (refresh) refresh();
-                            if (onBack) onBack();
-                            else navigate("/events");
+                            setShowTicketModal(true);
                         }
                     } catch {
                         toast.error("Verification failed!");
@@ -199,23 +241,27 @@ const EventDetails = ({ event: propEvent, onBack, refresh, viewMode }) => {
                 </button>
 
                 <div className="flex items-center gap-3">
-                    <button
-                        onClick={() => setShowTicketModal(true)}
-                        className="px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-black rounded-xl transition-all flex items-center gap-2 text-xs font-black shadow-lg shadow-amber-500/20 active:scale-95"
-                    >
-                        <QrCode size={16} />
-                        <span>My Ticket Pass</span>
-                    </button>
+                    {!isPaidArtistGig && !isOwner && hasBookedTicket && (
+                        <button
+                            onClick={() => setShowTicketModal(true)}
+                            className="px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-black rounded-xl transition-all flex items-center gap-2 text-xs font-black shadow-lg shadow-amber-500/20 active:scale-95"
+                        >
+                            <QrCode size={16} />
+                            <span>My Ticket Pass</span>
+                        </button>
+                    )}
 
                     {isOwner && (
                         <>
-                            <button
-                                onClick={() => setShowScannerModal(true)}
-                                className="px-4 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-black rounded-xl transition-all flex items-center gap-2 text-xs font-black shadow-lg shadow-cyan-500/20 active:scale-95"
-                            >
-                                <Camera size={16} />
-                                <span className="hidden sm:inline">Scan Gate Tickets</span>
-                            </button>
+                            {!isPaidArtistGig && (
+                                <button
+                                    onClick={() => setShowScannerModal(true)}
+                                    className="px-4 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-black rounded-xl transition-all flex items-center gap-2 text-xs font-black shadow-lg shadow-cyan-500/20 active:scale-95"
+                                >
+                                    <Camera size={16} />
+                                    <span className="hidden sm:inline">Scan Gate Tickets</span>
+                                </button>
+                            )}
                             <button
                                 onClick={() => setShowEditModal(true)}
                                 className="px-4 py-2.5 text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 rounded-xl transition-all flex items-center gap-2 text-xs font-bold active:scale-95"
@@ -249,7 +295,7 @@ const EventDetails = ({ event: propEvent, onBack, refresh, viewMode }) => {
                     <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent opacity-90" />
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[#050505]/40" />
 
-                    <div className="absolute bottom-16 left-12 right-12 space-y-6">
+                    <div className="absolute bottom-6 sm:bottom-12 left-4 sm:left-8 md:left-12 right-4 sm:right-8 md:right-12 space-y-3 sm:space-y-6">
                         <motion.div
                             initial={{ x: -20, opacity: 0 }}
                             animate={{ x: 0, opacity: 1 }}
@@ -257,7 +303,9 @@ const EventDetails = ({ event: propEvent, onBack, refresh, viewMode }) => {
                             className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-600 rounded-full"
                         >
                             <Zap size={12} className="fill-white" />
-                            <span className="text-[10px] font-black uppercase tracking-widest">Premium Event</span>
+                            <span className="text-[10px] font-black uppercase tracking-widest">
+                                {isPaidArtistGig ? "Paid Performer Gig" : "Audience Event"}
+                            </span>
                         </motion.div>
 
                         <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight leading-tight uppercase">
@@ -271,7 +319,7 @@ const EventDetails = ({ event: propEvent, onBack, refresh, viewMode }) => {
                                 ))}
                             </div>
                             <span className="text-xs font-semibold text-white/50 uppercase tracking-wider">
-                                {event.attendees?.length || 0} Attending
+                                {isPaidArtistGig ? `${event.applicants?.length || 0} Applicants` : `${event.attendees?.length || 0} Attending`}
                             </span>
                         </div>
                     </div>
@@ -298,7 +346,7 @@ const EventDetails = ({ event: propEvent, onBack, refresh, viewMode }) => {
                             </motion.div>
                         </div>
 
-                        {/* Commercial Gig Model Pass Card */}
+                        {/* Commercial Gig / Ticket Pass Card */}
                         <motion.div
                             initial={{ scale: 0.98, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
@@ -308,53 +356,44 @@ const EventDetails = ({ event: propEvent, onBack, refresh, viewMode }) => {
                             <div className="bg-[#0c0c0c] border border-white/10 rounded-2xl p-5 flex flex-col md:flex-row items-center justify-between gap-4 relative overflow-hidden">
                                 <div className="relative z-10 text-center md:text-left">
                                     <p className="text-[10px] font-bold text-white/50 uppercase tracking-widest mb-1 text-center md:text-left">
-                                        {event.gigType === 'paid_gig' || (Number(event.artistPayout) > 0 && event.gigType !== 'free' && event.gigType !== 'ticketed')
-                                            ? "⭐ Paid Artist Gig"
-                                            : (event.gigType === 'ticketed' || (Number(event.price) > 0 && event.gigType !== 'free')
-                                                ? "🎟️ Ticketed Event Pass"
-                                                : "🎁 Free Gig Registration")}
+                                        {isPaidArtistGig
+                                            ? "⭐ Paid Artist Performance Gig"
+                                            : (event.gigType === 'ticketed' || Number(event.price) > 0
+                                                ? "🎟️ Audience Ticketed Event"
+                                                : "🎁 Free Audience Event Pass")}
                                     </p>
                                     <div className="flex items-baseline gap-2 justify-center md:justify-start">
-                                        {event.gigType === 'paid_gig' || (Number(event.artistPayout) > 0 && event.gigType !== 'free' && event.gigType !== 'ticketed') ? (
+                                        {isPaidArtistGig ? (
                                             <>
                                                 <span className="text-3xl font-extrabold tracking-tight text-emerald-400">₹{event.artistPayout || 5000}</span>
-                                                <span className="text-xs font-semibold text-emerald-300/70 uppercase tracking-wider">/ Performer Pay</span>
+                                                <span className="text-xs font-semibold text-emerald-300/70 uppercase tracking-wider">/ Performer Payout</span>
                                             </>
-                                        ) : event.gigType === 'ticketed' || (Number(event.price) > 0 && event.gigType !== 'free') ? (
+                                        ) : event.gigType === 'ticketed' || Number(event.price) > 0 ? (
                                             <>
                                                 <span className="text-3xl font-extrabold tracking-tight text-white">₹{event.price || 500}</span>
-                                                <span className="text-xs font-semibold text-white/40 uppercase tracking-wider">/ Ticket</span>
+                                                <span className="text-xs font-semibold text-white/40 uppercase tracking-wider">/ Ticket Pass</span>
                                             </>
                                         ) : (
                                             <>
                                                 <span className="text-2xl font-extrabold tracking-tight text-purple-400">FREE</span>
-                                                <span className="text-xs font-semibold text-purple-300/70 uppercase tracking-wider">₹0 Entry & Pay</span>
+                                                <span className="text-xs font-semibold text-purple-300/70 uppercase tracking-wider">₹0 Entry Pass</span>
                                             </>
                                         )}
                                     </div>
                                 </div>
 
                                 <div className="relative z-10 w-full md:w-auto">
-                                    {event.gigType === 'ticketed' || Number(event.price) > 0 ? (
-                                        <button
-                                            onClick={handlePayment}
-                                            disabled={isProcessing}
-                                            className="w-full md:w-auto px-5 py-2.5 bg-white text-black rounded-xl font-bold text-sm hover:bg-indigo-500 hover:text-white transition-all shadow-lg flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
-                                        >
-                                            {isProcessing ? "SECURE..." : "GET TICKETS"}
-                                            <Ticket size={18} />
-                                        </button>
-                                    ) : (
+                                    {isPaidArtistGig ? (
                                         isOwner ? (
-                                             <span className="text-xs font-bold text-indigo-400 bg-indigo-500/10 px-4 py-2 rounded-xl border border-indigo-500/20 inline-block">
-                                                 Your Gig Post ({event.applicants?.length || 0} Applicants)
-                                             </span>
-                                         ) : event.applicants?.some(a => (a.artist?._id || a.artist)?.toString() === currentUserId?.toString() && a.status === 'selected') ? (
-                                             <div className="w-full md:w-auto px-5 py-2.5 bg-gradient-to-r from-emerald-500/20 via-teal-500/20 to-emerald-500/20 text-emerald-300 border border-emerald-500/50 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20">
-                                                 <Sparkles size={16} className="text-amber-400 animate-pulse" />
-                                                 <span>YOU ARE SELECTED FOR THIS GIG! 🎉</span>
-                                             </div>
-                                         ) : hasApplied ? (
+                                            <span className="text-xs font-bold text-indigo-400 bg-indigo-500/10 px-4 py-2 rounded-xl border border-indigo-500/20 inline-block">
+                                                Your Gig Post ({event.applicants?.length || 0} Applicants)
+                                            </span>
+                                        ) : event.applicants?.some(a => (a.artist?._id || a.artist)?.toString() === currentUserId?.toString() && a.status === 'selected') ? (
+                                            <div className="w-full md:w-auto px-5 py-2.5 bg-gradient-to-r from-emerald-500/20 via-teal-500/20 to-emerald-500/20 text-emerald-300 border border-emerald-500/50 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20">
+                                                <Sparkles size={16} className="text-amber-400 animate-pulse" />
+                                                <span>YOU ARE SELECTED FOR THIS GIG! 🎉</span>
+                                            </div>
+                                        ) : hasApplied ? (
                                             <button disabled className="w-full md:w-auto px-5 py-2.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 rounded-xl font-bold text-xs flex items-center justify-center gap-2">
                                                 Application Submitted ✓
                                             </button>
@@ -364,6 +403,32 @@ const EventDetails = ({ event: propEvent, onBack, refresh, viewMode }) => {
                                                 className="w-full md:w-auto px-6 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black rounded-xl font-extrabold text-sm transition-all shadow-md shadow-emerald-500/20 flex items-center justify-center gap-2 active:scale-95"
                                             >
                                                 Apply Now 🚀
+                                            </button>
+                                        )
+                                    ) : (
+                                        isOwner ? (
+                                            <button
+                                                onClick={() => setShowScannerModal(true)}
+                                                className="w-full md:w-auto px-5 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-black rounded-xl font-extrabold text-xs transition-all shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-2 active:scale-95"
+                                            >
+                                                <Camera size={16} />
+                                                <span>Scan Gate Entry Passes 📷</span>
+                                            </button>
+                                        ) : hasBookedTicket ? (
+                                            <button
+                                                onClick={() => setShowTicketModal(true)}
+                                                className="w-full md:w-auto px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-black rounded-xl font-extrabold text-xs transition-all shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 active:scale-95"
+                                            >
+                                                <QrCode size={16} />
+                                                <span>View My VIP Gate Pass 🎟️</span>
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={handlePayment}
+                                                disabled={isProcessing}
+                                                className="w-full md:w-auto px-6 py-2.5 bg-white text-black rounded-xl font-bold text-sm hover:bg-indigo-500 hover:text-white transition-all shadow-lg flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
+                                            >
+                                                {isProcessing ? "PROCESSING..." : (Number(event.price) > 0 ? "GET TICKETS 🎟️" : "RSVP FREE PASS 🎁")}
                                             </button>
                                         )
                                     )}
@@ -438,6 +503,32 @@ const EventDetails = ({ event: propEvent, onBack, refresh, viewMode }) => {
                             </div>
                         )}
 
+                        {/* Organizer / Author Card */}
+                        <div className="p-4 bg-[#12121e] border border-amber-500/20 rounded-2xl flex items-center justify-between gap-4">
+                            <div className="flex items-center gap-3">
+                                <img
+                                    src={event.organizer?.profilePic || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200"}
+                                    alt={event.organizer?.name || "Organizer"}
+                                    className="w-12 h-12 rounded-full object-cover border-2 border-amber-500/60 shadow-md shrink-0"
+                                />
+                                <div>
+                                    <p className="text-[10px] font-black uppercase text-amber-400 tracking-wider">Posted By Organizer</p>
+                                    <h5 className="font-extrabold text-white text-sm hover:text-amber-300 transition-colors">
+                                        {event.organizer?.name || "Artify Creator"}
+                                    </h5>
+                                    <p className="text-[10px] text-white/50">{event.organizer?.role || "Event Host & Creator"}</p>
+                                </div>
+                            </div>
+                            {event.organizer?._id && (
+                                <button
+                                    onClick={() => navigate(`/profile/${event.organizer._id}`)}
+                                    className="px-3.5 py-2 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 active:scale-95 cursor-pointer"
+                                >
+                                    <User size={13} /> View Author Profile ↗
+                                </button>
+                            )}
+                        </div>
+
                         <div className="space-y-3">
                             <h5 className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">The Vision</h5>
                             <p className="text-base font-light text-white/70 leading-relaxed italic">
@@ -495,43 +586,101 @@ const EventDetails = ({ event: propEvent, onBack, refresh, viewMode }) => {
                     />
                 )}
                 {showApplyModal && (
-                    <div className="fixed inset-0 z-[120] flex items-center justify-center px-4">
+                    <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
                         <motion.div
                             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                             onClick={() => setShowApplyModal(false)}
-                            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+                            className="absolute inset-0 bg-black/85 backdrop-blur-md"
                         />
                         <motion.div
-                            initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
-                            className="relative bg-[#111] border border-white/10 w-full max-w-md p-6 rounded-3xl z-10 space-y-4 shadow-2xl"
+                            initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
+                            className="relative bg-[#0e0e17] border border-white/15 w-full max-w-lg p-6 sm:p-7 rounded-3xl z-10 space-y-5 shadow-2xl text-left"
                         >
-                            <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                                🎤 Apply for Gig: <span className="text-emerald-400 font-extrabold">{event.title}</span>
-                            </h3>
-                            <p className="text-xs text-white/50">
-                                Send a quick note or pitch to the organizer to apply for this performance opportunity.
-                            </p>
-                            <form onSubmit={handleApplyGig} className="space-y-4">
-                                <textarea
-                                    required
-                                    rows="3"
-                                    placeholder="e.g. Hi! I'm an acoustic guitarist & singer with live performance experience. Would love to perform at your venue!"
-                                    className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-white text-xs outline-none focus:border-emerald-500 transition-all resize-none"
-                                    value={applyMessage}
-                                    onChange={(e) => setApplyMessage(e.target.value)}
-                                />
-                                <div className="flex justify-end gap-3">
+                            {/* Close Button */}
+                            <button
+                                onClick={() => setShowApplyModal(false)}
+                                className="absolute top-4 right-4 p-2 text-white/40 hover:text-white bg-white/5 hover:bg-white/10 rounded-full transition-colors"
+                            >
+                                <X size={16} />
+                            </button>
+
+                            {/* Header */}
+                            <div className="space-y-1.5 pr-6">
+                                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-[10px] font-black uppercase text-emerald-400 tracking-wider">
+                                    🎤 Performer Application
+                                </div>
+                                <h3 className="text-xl font-black text-white leading-snug">
+                                    Apply for <span className="text-emerald-400">{event.title}</span>
+                                </h3>
+                                <p className="text-xs text-white/50 leading-relaxed">
+                                    Send your pitch and optional video/audio demo links to the event organizer.
+                                </p>
+                            </div>
+
+                            <form onSubmit={handleApplyGig} className="space-y-4 pt-1">
+                                {/* Pitch Note */}
+                                <div className="space-y-1.5">
+                                    <label className="text-[11px] font-extrabold text-white/70 uppercase tracking-wider flex items-center gap-1.5">
+                                        📝 Pitch Note / Experience
+                                    </label>
+                                    <textarea
+                                        required
+                                        rows="3"
+                                        placeholder="e.g. Hi! I'm a vocalist & acoustic guitarist with 3+ years of live performance experience. Excited to perform at your venue!"
+                                        className="w-full bg-white/[0.04] border border-white/10 rounded-2xl p-4 text-white text-xs outline-none focus:border-emerald-500 focus:bg-black/50 transition-all resize-none placeholder:text-white/30"
+                                        value={applyMessage}
+                                        onChange={(e) => setApplyMessage(e.target.value)}
+                                    />
+                                </div>
+
+                                {/* Audition Demos Container */}
+                                <div className="p-4 bg-white/[0.02] border border-white/10 rounded-2xl space-y-3">
+                                    <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest flex items-center gap-1.5">
+                                        ✨ Performance Demos <span className="text-white/40 font-normal lowercase">(optional)</span>
+                                    </p>
+
+                                    {/* Video Demo Input */}
+                                    <div className="space-y-1">
+                                        <label className="text-[11px] font-bold text-white/80 flex items-center gap-1.5">
+                                            🎥 Singing / Performance Video URL
+                                        </label>
+                                        <input
+                                            type="url"
+                                            placeholder="YouTube, Vimeo, Instagram, or Cloudinary Video Link..."
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5 text-white text-xs outline-none focus:border-emerald-500 transition-all placeholder:text-white/30"
+                                            value={demoVideoUrl}
+                                            onChange={(e) => setDemoVideoUrl(e.target.value)}
+                                        />
+                                    </div>
+
+                                    {/* Audio Demo Input */}
+                                    <div className="space-y-1">
+                                        <label className="text-[11px] font-bold text-white/80 flex items-center gap-1.5">
+                                            🎵 Audio Vocal Sample URL
+                                        </label>
+                                        <input
+                                            type="url"
+                                            placeholder="MP3, Soundcloud, Drive, or Audio Portfolio Link..."
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5 text-white text-xs outline-none focus:border-purple-500 transition-all placeholder:text-white/30"
+                                            value={demoAudioUrl}
+                                            onChange={(e) => setDemoAudioUrl(e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Action Buttons */}
+                                <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
                                     <button
                                         type="button"
                                         onClick={() => setShowApplyModal(false)}
-                                        className="px-4 py-2 text-xs font-bold text-white/40 hover:text-white"
+                                        className="px-4 py-2.5 text-xs font-bold text-white/50 hover:text-white transition-colors"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         type="submit"
                                         disabled={isApplying}
-                                        className="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs rounded-xl shadow-lg shadow-emerald-500/20 active:scale-95 disabled:opacity-50"
+                                        className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-black font-extrabold text-xs rounded-xl shadow-lg shadow-emerald-500/25 active:scale-95 transition-all disabled:opacity-50 flex items-center gap-2 cursor-pointer"
                                     >
                                         {isApplying ? "Submitting..." : "Submit Application 🚀"}
                                     </button>
@@ -555,6 +704,101 @@ const EventDetails = ({ event: propEvent, onBack, refresh, viewMode }) => {
                 eventId={event._id}
                 eventTitle={event.title}
             />
+
+            <UpiPaymentModal
+                isOpen={showUpiModal}
+                onClose={() => setShowUpiModal(false)}
+                event={event}
+                user={user}
+                onPaymentSuccess={async () => {
+                    try {
+                        const freshRes = await api.get(`/events/${event._id}`);
+                        if (freshRes.data?.event) setEvent(freshRes.data.event);
+                    } catch {
+                        setEvent(prev => ({
+                            ...prev,
+                            attendees: [...(prev.attendees || []), currentUserId]
+                        }));
+                    }
+                    if (refresh) refresh();
+                    setShowTicketModal(true);
+                }}
+            />
+
+            {/* Payment Method Selector Modal */}
+            <AnimatePresence>
+                {showPaymentOptionModal && (
+                    <div className="fixed inset-0 z-[140] flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                            onClick={() => setShowPaymentOptionModal(false)}
+                            className="absolute inset-0 bg-black/85 backdrop-blur-md"
+                        />
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
+                            className="relative bg-[#0d0d18] border border-amber-500/30 w-full max-w-md p-6 rounded-3xl z-10 shadow-2xl space-y-4 text-left"
+                        >
+                            <button
+                                onClick={() => setShowPaymentOptionModal(false)}
+                                className="absolute top-4 right-4 p-2 text-white/40 hover:text-white bg-white/5 hover:bg-white/10 rounded-full transition-colors"
+                            >
+                                <X size={16} />
+                            </button>
+
+                            <div className="space-y-1 pr-6">
+                                <span className="text-[10px] font-black uppercase text-amber-400 tracking-wider px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30">
+                                    Secure Ticket Checkout
+                                </span>
+                                <h3 className="text-xl font-black text-white">Select Payment Method</h3>
+                                <p className="text-xs text-white/50">Ticket Fee: <strong className="text-amber-400">₹{event.price}</strong> for {event.title}</p>
+                            </div>
+
+                            <div className="space-y-3 pt-2">
+                                {/* Option 1: Instant UPI QR Scanner */}
+                                <button
+                                    onClick={() => {
+                                        setShowPaymentOptionModal(false);
+                                        setShowUpiModal(true);
+                                    }}
+                                    className="w-full p-4 bg-gradient-to-r from-amber-500/15 to-orange-500/15 hover:from-amber-500/25 hover:to-orange-500/25 border border-amber-500/40 rounded-2xl transition-all flex items-center justify-between group cursor-pointer text-left"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-amber-500 text-black flex items-center justify-center font-black shrink-0 shadow-lg">
+                                            <QrCode size={20} />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-extrabold text-white group-hover:text-amber-300 transition-colors flex items-center gap-1.5">
+                                                Pay via UPI QR Code / Scanner <Sparkles size={12} className="text-amber-400" />
+                                            </p>
+                                            <p className="text-[10px] text-white/60">GPay, PhonePe, Paytm, BHIM (Exact ₹{event.price})</p>
+                                        </div>
+                                    </div>
+                                    <span className="text-amber-400 text-xs font-bold shrink-0">Select ➔</span>
+                                </button>
+
+                                {/* Option 2: Razorpay */}
+                                <button
+                                    onClick={handleLaunchRazorpay}
+                                    className="w-full p-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl transition-all flex items-center justify-between group cursor-pointer text-left"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-black shrink-0 shadow-lg">
+                                            💳
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-extrabold text-white group-hover:text-indigo-300 transition-colors">
+                                                Cards, Netbanking & Wallets
+                                            </p>
+                                            <p className="text-[10px] text-white/50">Credit Card, Debit Card, Netbanking (Razorpay)</p>
+                                        </div>
+                                    </div>
+                                    <span className="text-white/40 group-hover:text-white text-xs font-bold shrink-0">Select ➔</span>
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
 
             {/* Artist Applicant Full Profile Dossier Modal */}
             <AnimatePresence>
@@ -607,6 +851,46 @@ const EventDetails = ({ event: propEvent, onBack, refresh, viewMode }) => {
                                     "{viewingApplicant.message || "Ready to perform for this gig!"}"
                                 </p>
                             </div>
+
+                            {/* Demo Performance Media (Video / Audio) */}
+                            {(viewingApplicant.demoVideoUrl || viewingApplicant.demoAudioUrl) && (
+                                <div className="space-y-2 p-3 bg-[#13131f] border border-indigo-500/20 rounded-2xl">
+                                    <p className="text-[10px] font-black text-indigo-300 uppercase tracking-widest flex items-center gap-1.5">
+                                        🎬 Performance Audition Samples
+                                    </p>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                                        {viewingApplicant.demoVideoUrl && (
+                                            <a
+                                                href={viewingApplicant.demoVideoUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="p-2.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 rounded-xl text-emerald-300 font-bold flex items-center gap-2 transition-colors truncate"
+                                            >
+                                                <span className="text-base shrink-0">🎥</span>
+                                                <div className="truncate text-left">
+                                                    <p className="text-[11px] font-extrabold truncate">Singing Video Demo</p>
+                                                    <p className="text-[9px] text-emerald-400/70 truncate">Watch Performance Video ↗</p>
+                                                </div>
+                                            </a>
+                                        )}
+
+                                        {viewingApplicant.demoAudioUrl && (
+                                            <a
+                                                href={viewingApplicant.demoAudioUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="p-2.5 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 rounded-xl text-purple-300 font-bold flex items-center gap-2 transition-colors truncate"
+                                            >
+                                                <span className="text-base shrink-0">🎵</span>
+                                                <div className="truncate text-left">
+                                                    <p className="text-[11px] font-extrabold truncate">Vocal Audio Sample</p>
+                                                    <p className="text-[9px] text-purple-400/70 truncate">Listen Audio Track ↗</p>
+                                                </div>
+                                            </a>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Profile Details Grid */}
                             <div className="grid grid-cols-2 gap-3 text-xs">

@@ -89,6 +89,14 @@ const eventSchema = new mongoose.Schema({
             type: String,
             default: ""
         },
+        demoVideoUrl: {
+            type: String,
+            default: ""
+        },
+        demoAudioUrl: {
+            type: String,
+            default: ""
+        },
         appliedAt: {
             type: Date,
             default: Date.now

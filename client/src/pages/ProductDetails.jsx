@@ -96,6 +96,13 @@ const ProductDetails = () => {
                 description: `Buying ${product.name}`,
                 order_id: data.order.id,
                 prefill: buildRazorpayPrefill(user),
+                config: {
+                    display: {
+                        preferences: {
+                            show_default_blocks: true
+                        }
+                    }
+                },
                 theme: { color: "#fbbf24" },
                 handler: async (response) => {
                     try {

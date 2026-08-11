@@ -26,18 +26,21 @@ exports.getAllProducts = async (req, res) => {
 
 exports.createProduct = async (req, res) => {
     try {
-        let imageUrl = req.body.images?.[0]?.url;
+        const sellerId = req.user?._id || req.user?.id || req.body.seller;
+        const productPayload = { ...req.body, seller: sellerId };
+
+        let imageUrl = productPayload.images?.[0]?.url;
 
         if (imageUrl && !imageUrl.startsWith('http')) {
             const uploadedResponse = await cloudinary.uploader.upload(imageUrl, {
                 folder: "artify_studio_products",
             });
 
-            req.body.images[0].url = uploadedResponse.secure_url;
-            req.body.images[0].public_id = uploadedResponse.public_id;
+            productPayload.images[0].url = uploadedResponse.secure_url;
+            productPayload.images[0].public_id = uploadedResponse.public_id;
         }
 
-        const videoUrl = req.body.videos?.[0]?.url;
+        const videoUrl = productPayload.videos?.[0]?.url;
 
         if (videoUrl && !videoUrl.startsWith('http')) {
             const uploadedVideo = await cloudinary.uploader.upload(videoUrl, {
@@ -45,21 +48,21 @@ exports.createProduct = async (req, res) => {
                 resource_type: "video"
             });
 
-            req.body.videos[0].url = uploadedVideo.secure_url;
-            req.body.videos[0].public_id = uploadedVideo.public_id;
-            req.body.videos[0].duration = uploadedVideo.duration;
+            productPayload.videos[0].url = uploadedVideo.secure_url;
+            productPayload.videos[0].public_id = uploadedVideo.public_id;
+            productPayload.videos[0].duration = uploadedVideo.duration;
         }
 
-        const product = await Product.create(req.body);
+        const product = await Product.create(productPayload);
 
-        if (req.body.seller && (req.body.sellerStoreName || req.body.location || req.body.sellerProfession)) {
-            await User.findByIdAndUpdate(req.body.seller, {
+        if (sellerId && (productPayload.sellerStoreName || productPayload.location || productPayload.sellerProfession)) {
+            await User.findByIdAndUpdate(sellerId, {
                 $set: {
-                    'sellerProfile.storeName': req.body.sellerStoreName || '',
-                    'sellerProfile.sellerCategory': req.body.sellerProfession || 'Creator & Artisan',
-                    'sellerProfile.location': req.body.location || '',
-                    'sellerProfile.latitude': req.body.latitude || null,
-                    'sellerProfile.longitude': req.body.longitude || null
+                    'sellerProfile.storeName': productPayload.sellerStoreName || '',
+                    'sellerProfile.sellerCategory': productPayload.sellerProfession || 'Creator & Artisan',
+                    'sellerProfile.location': productPayload.location || '',
+                    'sellerProfile.latitude': productPayload.latitude || null,
+                    'sellerProfile.longitude': productPayload.longitude || null
                 }
             }).catch(err => console.log('Seller profile sync error:', err.message));
         }
@@ -76,6 +79,11 @@ exports.deleteProduct = async (req, res) => {
         const product = await Product.findById(req.params.id);
         if (!product) {
             return res.status(404).json({ success: false, message: "Product not found!" });
+        }
+
+        const userId = (req.user?._id || req.user?.id)?.toString();
+        if (product.seller && product.seller.toString() !== userId && req.user?.role !== 'admin') {
+            return res.status(403).json({ success: false, message: "You are not authorized to delete this product" });
         }
 
         if (product.images && product.images.length > 0) {

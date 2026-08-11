@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { User, Mail, Lock, Phone, ArrowRight, Loader2, CheckCircle, GraduationCap, Sparkles, BadgeCheck, UserRound } from 'lucide-react';
+import { User, Mail, Lock, Eye, EyeOff, Phone, ArrowRight, Loader2, CheckCircle, GraduationCap, Sparkles, BadgeCheck, UserRound } from 'lucide-react';
 import api from '../utils/api';
 import { getIndianPhone10 } from '../utils/razorpay';
 
@@ -15,6 +15,8 @@ export default function Signup() {
     password: '',
     confirmPassword: ''
   });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [signupMode, setSignupMode] = useState('artist');
 
   const [loading, setLoading] = useState(false);
@@ -138,46 +140,60 @@ export default function Signup() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="relative group">
+              <User className="absolute left-4 top-3.5 text-white/30 group-focus-within:text-indigo-400 transition-colors" size={20} />
+              <input type="text" name="name" placeholder="Full Name" required
+                className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-indigo-500/50 focus:bg-white/5 transition-all"
+                onChange={handleChange} />
+            </div>
 
-          <div className="relative group">
-            <User className="absolute left-4 top-3.5 text-white/30 group-focus-within:text-indigo-400 transition-colors" size={20} />
-            <input type="text" name="name" placeholder="Full Name" required
-              className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-indigo-500/50 focus:bg-white/5 transition-all"
-              onChange={handleChange} />
-          </div>
+            <div className="relative group">
+              <Mail className="absolute left-4 top-3.5 text-white/30 group-focus-within:text-indigo-400 transition-colors" size={20} />
+              <input type="email" name="email" placeholder="Email Address" required
+                className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-indigo-500/50 focus:bg-white/5 transition-all"
+                onChange={handleChange} />
+            </div>
 
-          <div className="relative group">
-            <Mail className="absolute left-4 top-3.5 text-white/30 group-focus-within:text-indigo-400 transition-colors" size={20} />
-            <input type="email" name="email" placeholder="Email Address" required
-              className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-indigo-500/50 focus:bg-white/5 transition-all"
-              onChange={handleChange} />
-          </div>
+            <div className="relative group">
+              <Phone className="absolute left-4 top-3.5 text-white/30 group-focus-within:text-indigo-400 transition-colors" size={20} />
+              <input type="tel" name="phone" placeholder="10-digit phone number" required value={formData.phone} maxLength={10} pattern="[0-9]{10}"
+                className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-indigo-500/50 focus:bg-white/5 transition-all"
+                onChange={handleChange} />
+            </div>
 
-          <div className="relative group">
-            <Phone className="absolute left-4 top-3.5 text-white/30 group-focus-within:text-indigo-400 transition-colors" size={20} />
-            <input type="tel" name="phone" placeholder="10-digit phone number" required value={formData.phone} maxLength={10} pattern="[0-9]{10}"
-              className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-indigo-500/50 focus:bg-white/5 transition-all"
-              onChange={handleChange} />
-          </div>
+            <div className="relative group">
+              <Lock className="absolute left-4 top-3.5 text-white/30 group-focus-within:text-indigo-400 transition-colors" size={20} />
+              <input type={showPassword ? "text" : "password"} name="password" placeholder="Password (Min 6 chars)" required minLength={6}
+                className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-12 text-white focus:outline-none focus:border-indigo-500/50 focus:bg-white/5 transition-all"
+                onChange={handleChange} />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-3.5 text-white/30 hover:text-white transition-colors"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
 
-          <div className="relative group">
-            <Lock className="absolute left-4 top-3.5 text-white/30 group-focus-within:text-indigo-400 transition-colors" size={20} />
-            <input type="password" name="password" placeholder="Password (Min 6 chars)" required minLength={6}
-              className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-indigo-500/50 focus:bg-white/5 transition-all"
-              onChange={handleChange} />
-          </div>
+            <div className="relative group">
+              <CheckCircle className="absolute left-4 top-3.5 text-white/30 group-focus-within:text-indigo-400 transition-colors" size={20} />
+              <input type={showConfirmPassword ? "text" : "password"} name="confirmPassword" placeholder="Confirm Password" required
+                className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-12 text-white focus:outline-none focus:border-indigo-500/50 focus:bg-white/5 transition-all"
+                onChange={handleChange} />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-4 top-3.5 text-white/30 hover:text-white transition-colors"
+                aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+              >
+                {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
 
-          <div className="relative group">
-            <CheckCircle className="absolute left-4 top-3.5 text-white/30 group-focus-within:text-indigo-400 transition-colors" size={20} />
-            <input type="password" name="confirmPassword" placeholder="Confirm Password" required
-              className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-indigo-500/50 focus:bg-white/5 transition-all"
-              onChange={handleChange} />
-          </div>
-
-          <button disabled={loading} className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold py-3.5 rounded-xl hover:shadow-lg hover:shadow-indigo-500/20 transition-all flex items-center justify-center gap-2 mt-6 shadow-lg shadow-indigo-500/20">
-            {loading ? <Loader2 className="animate-spin" /> : <>Create {signupMode === 'mentor' ? 'Mentor' : 'Artist'} Account <ArrowRight size={20} /></>}
-          </button>
-
+            <button disabled={loading} className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold py-3.5 rounded-xl hover:shadow-lg hover:shadow-indigo-500/20 transition-all flex items-center justify-center gap-2 mt-6 shadow-lg shadow-indigo-500/20">
+              {loading ? <Loader2 className="animate-spin" /> : <>Create {signupMode === 'mentor' ? 'Mentor' : 'Artist'} Account <ArrowRight size={20} /></>}
+            </button>
           </form>
 
           <div className="mt-6 text-center text-sm text-white/40">

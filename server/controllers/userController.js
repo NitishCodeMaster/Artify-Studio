@@ -100,6 +100,7 @@ module.exports.registerUser = async (req, res) => {
             await user.save();
         }
 
+
         const token = jwt.sign(
             { id: user._id, role: 'user' },
             process.env.JWT_SECRET,
@@ -108,7 +109,7 @@ module.exports.registerUser = async (req, res) => {
 
         res.cookie("token", token, {
             httpOnly: true,
-            secure: false,
+            secure: process.env.NODE_ENV === 'production',
             sameSite: "lax",
             maxAge: 7 * 24 * 60 * 60 * 1000
         });
@@ -175,7 +176,7 @@ module.exports.loginUser = async (req, res) => {
 
         res.cookie("token", token, {
             httpOnly: true,
-            secure: true,
+            secure: process.env.NODE_ENV === 'production',
             sameSite: "lax",
             maxAge: 7 * 24 * 60 * 60 * 1000
         });
@@ -259,6 +260,20 @@ exports.updateUserProfile = async (req, res) => {
         user.artStyle = req.body.artStyle || user.artStyle;
         user.experience = req.body.experience || user.experience;
 
+        if (req.body.socialLinks) {
+            user.socialLinks = {
+                ...(user.socialLinks || {}),
+                ...req.body.socialLinks
+            };
+        }
+
+        if (req.body.portfolio) {
+            user.portfolio = {
+                ...(user.portfolio || {}),
+                ...req.body.portfolio
+            };
+        }
+
         await user.save();
 
         res.status(200).json({
@@ -292,142 +307,53 @@ module.exports.getTopCreators = async (req, res) => {
 
 module.exports.getUserProfileById = async (req, res) => {
     try {
-        const user = await userModel.findById(req.params.id).select('-password');
+        const userId = req.params.id;
+        const user = await userModel.findById(userId).select('-password');
         if (!user) {
             return res.status(404).json({ success: false, message: "User not found" });
         }
 
-        const posts = await Post.find({ user: req.params.id })
-            .populate('user', 'name profilePic')
-            .sort({ createdAt: -1 });
+        const posts = await Post.find({ user: userId }).sort({ createdAt: -1 });
+        const products = await Product.find({ seller: userId }).sort({ createdAt: -1 });
 
-        let products = [];
-        try {
-            products = await Product.find({ seller: req.params.id }).sort({ createdAt: -1 });
-        } catch (err) {
-            console.log("No products found for this user or schema mismatch");
-        }
-
-        res.status(200).json({ success: true, user, posts, products });
-    } catch (error) {
-        console.error("❌ Fetch Profile Error:", error);
-        res.status(500).json({ success: false, message: "Internal Server Error" });
-    }
-};
-
-module.exports.forgotPassword = async (req, res) => {
-    try {
-        const { email } = req.body;
-
-        const user = await userModel.findOne({ email });
-        if (!user) {
-            return res.status(404).json({ success: false, message: "No artist found with this email." });
-        }
-
-        const resetToken = crypto.randomBytes(32).toString('hex');
-
-        user.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
-        user.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
-        await user.save();
-
-        const resetUrl = `http://localhost:5173/reset-password/${resetToken}`;
-
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS
+        // Query actual Artify Event records where this artist was SELECTED by the organizer
+        const Event = require('../models/eventModel');
+        const selectedGigs = await Event.find({
+            'applicants': {
+                $elemMatch: {
+                    artist: userId,
+                    status: 'selected'
+                }
             }
-        });
+        }).populate('organizer', 'name profilePic role').sort({ date: -1 }).lean();
 
-        const mailOptions = {
-            from: `Artify Studio <${process.env.EMAIL_USER}>`,
-            to: user.email,
-            subject: '🎨 Password Reset Request - Artify Studio',
-            html: `
-                <div style="font-family: Arial, sans-serif; background-color: #0a0a0a; padding: 40px; color: #fff; text-align: center;">
-                    <h2 style="color: #f59e0b;">Password Reset Request</h2>
-                    <p style="color: #aaa; font-size: 16px;">We received a request to reset your password for Artify Studio.</p>
-                    <p style="color: #aaa; font-size: 16px;">Click the magic button below to set a new password:</p>
-                    <br/>
-                    <a href="${resetUrl}" style="background-color: #f59e0b; color: #000; padding: 12px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Reset Password ✨</a>
-                    <br/><br/>
-                    <p style="color: #555; font-size: 12px;">If you didn't request this, please ignore this email. This link will expire in 15 minutes.</p>
-                </div>
-            `
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const upcomingGigs = selectedGigs.filter(g => new Date(g.date) >= today);
+        const pastGigs = selectedGigs.filter(g => new Date(g.date) < today);
+
+        const stats = {
+            totalPerformances: pastGigs.length,
+            selectedGigsCount: selectedGigs.length,
+            upcomingGigsCount: upcomingGigs.length,
+            portfolioCount: (user.portfolio?.featuredWorks?.length || 0) + posts.length,
+            rating: user.mentorProfile?.rating || 4.8
         };
 
-        await transporter.sendMail(mailOptions);
-
-        res.status(200).json({ success: true, message: "Magic link sent to your email!" });
-
-    } catch (error) {
-        console.error("Forgot Password Error:", error);
-
-        if (req.user) {
-            const user = await userModel.findOne({ email: req.body.email });
-            if (user) {
-                user.resetPasswordToken = undefined;
-                user.resetPasswordExpire = undefined;
-                await user.save({ validateBeforeSave: false });
-            }
-        }
-        res.status(500).json({ success: false, message: "Email could not be sent. Please try again." });
-    }
-};
-
-module.exports.resetPassword = async (req, res) => {
-    try {
-        const resetPasswordToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
-
-        const user = await userModel.findOne({
-            resetPasswordToken,
-            resetPasswordExpire: { $gt: Date.now() }
-        });
-
-        if (!user) {
-            return res.status(400).json({ success: false, message: "Invalid or expired token! Please try again." });
-        }
-
-        user.password = req.body.password;
-
-        user.resetPasswordToken = undefined;
-        user.resetPasswordExpire = undefined;
-
-        await user.save();
-
-        res.status(200).json({ success: true, message: "Password updated magically! ✨ You can now login." });
-
-    } catch (error) {
-        console.error("Reset Password Error:", error);
-        res.status(500).json({ success: false, message: "Something went wrong!" });
-    }
-};
-
-module.exports.getWallet = async (req, res) => {
-    try {
         res.status(200).json({
             success: true,
-            balance: 12450,
-            transactions: [
-                { _id: "t1", title: "Sold 'Abstract Sunset'", type: "credit", amount: 4500, date: new Date(Date.now() - 86400000) },
-                { _id: "t2", title: "BoomBox 2026 Ticket", type: "debit", amount: 1499, date: new Date(Date.now() - 172800000) },
-                { _id: "t3", title: "Wallet Top-up", type: "credit", amount: 5000, date: new Date(Date.now() - 500000000) }
-            ]
+            user,
+            posts,
+            products,
+            selectedGigs,
+            upcomingGigs,
+            pastGigs,
+            stats
         });
     } catch (error) {
-        res.status(500).json({ success: false, message: "Error fetching wallet" });
-    }
-};
-
-module.exports.getSavedItems = async (req, res) => {
-    try {
-        res.status(200).json({
-            success: true,
-            savedItems: []
-        });
-    } catch (error) {
-        res.status(500).json({ success: false, message: "Error fetching saved items" });
+        console.error("❌ Get User Profile By ID Error:", error);
+        res.status(500).json({ success: false, message: "Error fetching user profile" });
     }
 };
 
@@ -471,6 +397,7 @@ module.exports.getSavedItems = async (req, res) => {
         res.status(500).json({ success: false, message: "Error fetching saved items" });
     }
 };
+
 module.exports.getWallet = async (req, res) => {
     try {
         const userId = req.user.id || req.user._id;
@@ -620,5 +547,61 @@ module.exports.updateMentorProfile = async (req, res) => {
     } catch (error) {
         console.error("Mentor Profile Update Error:", error);
         res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+module.exports.forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+        if (!email) {
+            return res.status(400).json({ success: false, message: "Email is required" });
+        }
+        const user = await userModel.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ success: false, message: "No account found with this email" });
+        }
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        user.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+        user.resetPasswordExpire = Date.now() + 30 * 60 * 1000;
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Password reset instructions generated successfully",
+            resetToken
+        });
+    } catch (error) {
+        console.error("Forgot Password Error:", error);
+        res.status(500).json({ success: false, message: "Error processing request", error: error.message });
+    }
+};
+
+module.exports.resetPassword = async (req, res) => {
+    try {
+        const { token } = req.params;
+        const { password } = req.body;
+        if (!password || password.length < 6) {
+            return res.status(400).json({ success: false, message: "Password must be at least 6 characters long" });
+        }
+        const resetPasswordToken = crypto.createHash('sha256').update(token).digest('hex');
+        const user = await userModel.findOne({
+            resetPasswordToken,
+            resetPasswordExpire: { $gt: Date.now() }
+        });
+        if (!user) {
+            return res.status(400).json({ success: false, message: "Invalid or expired reset token" });
+        }
+        user.password = await userModel.hashPassword(password);
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpire = undefined;
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Password reset successful! You can now log in."
+        });
+    } catch (error) {
+        console.error("Reset Password Error:", error);
+        res.status(500).json({ success: false, message: "Error resetting password", error: error.message });
     }
 };

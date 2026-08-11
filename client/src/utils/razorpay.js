@@ -15,12 +15,13 @@ export const getIndianPhone10 = (value) => {
 };
 
 export const buildRazorpayPrefill = (user = {}) => {
-    const contact = getIndianPhone10(user.phoneNumber || user.phone);
+    const contact = getIndianPhone10(user.phoneNumber || user.phone || '9876543210');
 
     return {
-        name: user.fullname || user.name || 'Customer',
-        email: user.email || '',
-        ...(contact.length === 10 ? { contact } : {})
+        name: user.fullname || user.name || 'Artify Customer',
+        email: user.email || 'customer@artify.com',
+        contact: contact.length === 10 ? contact : '9876543210',
+        method: 'upi'
     };
 };
 

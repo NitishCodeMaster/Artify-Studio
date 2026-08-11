@@ -18,14 +18,25 @@ const eventRoutes = require('./routes/eventRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const homeRoutes = require('./routes/homeRoutes');
 const learnRoutes = require('./routes/learnRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 
 app.use(compression());
+const allowedOrigins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "https://artify-studio-client.vercel.app",
+    process.env.CLIENT_URL
+].filter(Boolean);
+
 app.use(cors({
-    origin: [
-        "http://localhost:5173",
-        "https://artify-studio-client.vercel.app"
-    ],
-    methods: "GET,POST,PUT,DELETE",
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(null, origin);
+        }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     credentials: true
 }));
 
@@ -34,11 +45,11 @@ app.use(express.urlencoded({ limit: '80mb', extended: true }));
 app.use(cookieParser());
 
 app.get("/", (req, res) => {
-    res.send("Artify Production Backend Running 🚀");
+    res.send("Artify Production Backend Running ");
 });
 
 app.get("/api/test", (req, res) => {
-    res.json({ status: "Backend working 🚀" });
+    res.json({ status: "Backend working " });
 });
 
 app.use('/api/users', userRoutes);
@@ -53,5 +64,7 @@ app.use('/api/events', eventRoutes);
 app.use('/events', eventRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use('/api/learn', learnRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/notifications', notificationRoutes);
 
 module.exports = app;

@@ -100,8 +100,8 @@ const TicketScannerModal = ({ isOpen, onClose, eventId, eventTitle }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-            <div className="relative w-full max-w-lg bg-[#0a0a0f] border border-cyan-500/30 rounded-3xl p-6 md:p-8 shadow-2xl space-y-6 overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
+            <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto custom-scrollbar bg-[#0a0a0f] border border-cyan-500/30 rounded-3xl p-5 sm:p-6 md:p-8 shadow-2xl space-y-5 sm:space-y-6 my-auto">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 blur-[90px] pointer-events-none"></div>
 
                 {/* Header */}

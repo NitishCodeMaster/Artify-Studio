@@ -4,12 +4,14 @@ import { Briefcase, Clock, ArrowUpRight, MapPin, Trash2, Pencil } from 'lucide-r
 import api from '../../utils/api';
 import { toast } from 'react-hot-toast';
 import DeleteConfirmModal from './DeleteConfirmModal';
+import { useAuth } from '../../context/AuthContext';
 
 const GigCard = ({ event, refresh, onOpenDetails, onEdit }) => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const { user } = useAuth();
 
-    const currentUser = JSON.parse(localStorage.getItem("user")) || JSON.parse(localStorage.getItem("artify_user"));
-    const currentUserId = currentUser?._id || currentUser?.id;
+    const currentUser = user || JSON.parse(localStorage.getItem("user")) || JSON.parse(localStorage.getItem("artify_user"));
+    const currentUserId = currentUser?._id || currentUser?.id || currentUser?.userId;
     const organizerId = event.organizer?._id || event.organizer;
 
     const isOwner = Boolean(
@@ -99,7 +101,27 @@ const GigCard = ({ event, refresh, onOpenDetails, onEdit }) => {
                         </p>
                     </div>
 
-                    <div className="flex items-center justify-between pt-3 border-t border-white/5">
+                    {/* Posted By Author Badge */}
+                    <div
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            if (organizerId) {
+                                window.location.href = `/profile/${organizerId._id || organizerId}`;
+                            }
+                        }}
+                        className="flex items-center gap-2 pt-2 border-t border-white/5 hover:opacity-80 transition-opacity cursor-pointer truncate group/author"
+                    >
+                        <img
+                            src={event.organizer?.profilePic || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200"}
+                            alt={event.organizer?.name || "Organizer"}
+                            className="w-5 h-5 rounded-full object-cover border border-amber-500/50 shrink-0"
+                        />
+                        <span className="text-[11px] text-white/60 truncate">
+                            Posted by <strong className="text-white group-hover/author:text-amber-300 transition-colors font-bold">{event.organizer?.name || "Artify Creator"}</strong>
+                        </span>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-2 border-t border-white/5">
                         <div className="flex items-center gap-1.5 text-xs text-white/60 font-medium">
                             <Clock size={12} className="text-indigo-400" />
                             <span>{eventDate} • {event.time || "7:00 PM"}</span>

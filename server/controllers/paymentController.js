@@ -19,6 +19,9 @@ const resolveCheckout = async ({ eventId, workshopId, productId, products = [], 
         const event = await Event.findById(eventId).select('title price organizer attendees maxSeats status');
         if (!event) throw new Error('Event not found');
         if (event.status === 'completed' || event.status === 'cancelled') throw new Error('Event is not available for booking');
+        if (event.maxSeats && event.attendees && event.attendees.length >= event.maxSeats) {
+            throw new Error('Event is sold out! Maximum seat capacity reached.');
+        }
         return {
             type: 'ticket_booking',
             title: event.title,

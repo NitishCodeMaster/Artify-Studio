@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { Lock, ArrowRight, Loader2, CheckCircle2 } from 'lucide-react';
+import { Lock, Eye, EyeOff, ArrowRight, Loader2, CheckCircle2 } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import api from '../utils/api';
 
@@ -9,6 +9,8 @@ const bgImage = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=
 export const ResetPassword = () => {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
 
@@ -68,23 +70,39 @@ export const ResetPassword = () => {
                                 <div className="relative group">
                                     <Lock className="absolute left-4 top-3.5 text-white/30 group-focus-within:text-green-500 transition-colors" size={20} />
                                     <input
-                                        type="password"
+                                        type={showPassword ? "text" : "password"}
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         placeholder="New Password"
-                                        className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-green-500/50 focus:bg-white/5 transition-all"
+                                        className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-12 text-white focus:outline-none focus:border-green-500/50 focus:bg-white/5 transition-all"
                                     />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-4 top-3.5 text-white/30 hover:text-white transition-colors"
+                                        aria-label={showPassword ? "Hide password" : "Show password"}
+                                    >
+                                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                    </button>
                                 </div>
 
                                 <div className="relative group">
                                     <Lock className="absolute left-4 top-3.5 text-white/30 group-focus-within:text-green-500 transition-colors" size={20} />
                                     <input
-                                        type="password"
+                                        type={showConfirmPassword ? "text" : "password"}
                                         value={confirmPassword}
                                         onChange={(e) => setConfirmPassword(e.target.value)}
                                         placeholder="Confirm New Password"
-                                        className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-green-500/50 focus:bg-white/5 transition-all"
+                                        className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-12 text-white focus:outline-none focus:border-green-500/50 focus:bg-white/5 transition-all"
                                     />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        className="absolute right-4 top-3.5 text-white/30 hover:text-white transition-colors"
+                                        aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+                                    >
+                                        {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                    </button>
                                 </div>
 
                                 <button

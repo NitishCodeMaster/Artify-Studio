@@ -94,9 +94,9 @@ const ProductionNearbyMap = ({ events = [], onSelectEvent }) => {
     const cardRefs = useRef({});
 
     // Detect user GPS location
-    const handleDetectGps = () => {
+    const handleDetectGps = (isSilent = false) => {
         if (!navigator.geolocation) {
-            toast.error("Geolocation is not supported by your browser");
+            if (!isSilent) toast.error("Geolocation is not supported by your browser");
             return;
         }
 
@@ -125,20 +125,24 @@ const ProductionNearbyMap = ({ events = [], onSelectEvent }) => {
                 } catch {
                     setUserCityName('GPS Coordinates Pin');
                 }
-                toast.success("GPS Location Pinned! 🎯", { duration: 1800 });
+                if (!isSilent) {
+                    toast.success("GPS Location Pinned! 🎯", { duration: 1800 });
+                }
             },
             () => {
                 setIsLocating(false);
                 setUserCoords([30.7333, 76.7794]);
                 setUserCityName('Chandigarh (Default)');
-                toast.error("GPS access denied. Showing default region map.");
+                if (!isSilent) {
+                    toast.error("GPS access denied. Showing default region map.");
+                }
             },
             { enableHighAccuracy: true, timeout: 8000 }
         );
     };
 
     useEffect(() => {
-        handleDetectGps();
+        handleDetectGps(true);
     }, []);
 
     // Process & calculate distances
@@ -255,7 +259,7 @@ const ProductionNearbyMap = ({ events = [], onSelectEvent }) => {
 
                         <button
                             type="button"
-                            onClick={handleDetectGps}
+                            onClick={() => handleDetectGps(false)}
                             disabled={isLocating}
                             className="px-3.5 py-2 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 active:scale-95"
                         >

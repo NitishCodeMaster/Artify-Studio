@@ -15,13 +15,15 @@ const startServer = async () => {
 
         const allowedOrigins = [
             "http://localhost:5173",
-            "https://artify-studio-client.vercel.app"
-        ];
+            "http://127.0.0.1:5173",
+            "https://artify-studio-client.vercel.app",
+            process.env.CLIENT_URL
+        ].filter(Boolean);
 
         const io = new Server(server, {
             cors: {
                 origin: allowedOrigins,
-                methods: ["GET", "POST", "PUT", "DELETE"],
+                methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
                 credentials: true
             }
         });

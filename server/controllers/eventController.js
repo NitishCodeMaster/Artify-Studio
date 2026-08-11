@@ -1,3 +1,5 @@
+const mongoose = require('mongoose');
+const crypto = require('crypto');
 const Event = require('../models/eventModel');
 const Notification = require('../models/notification');
 const User = require('../models/userModel');
@@ -376,7 +378,7 @@ exports.updateEvent = async (req, res) => {
 exports.applyForGig = async (req, res) => {
     try {
         const userId = req.user._id || req.user.id;
-        const { message } = req.body;
+        const { message, demoVideoUrl, demoAudioUrl } = req.body;
         const event = await Event.findById(req.params.id);
 
         if (!event) {
@@ -394,6 +396,8 @@ exports.applyForGig = async (req, res) => {
         event.applicants.push({
             artist: userId,
             message: message || "Interested in performing for this gig!",
+            demoVideoUrl: demoVideoUrl || "",
+            demoAudioUrl: demoAudioUrl || "",
             status: 'applied'
         });
 
@@ -590,22 +594,41 @@ exports.getNearbyEvents = async (req, res) => {
 exports.generateEventTicket = async (req, res) => {
     try {
         const { id } = req.params;
-        const userId = req.user._id;
+        const userId = req.user?._id || req.user?.id;
+
+        if (!userId) {
+            return res.status(401).json({ success: false, message: "Unauthorized access - please log in." });
+        }
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(404).json({ success: false, message: "Event not found" });
+        }
 
         const event = await Event.findById(id).populate('organizer', 'name email profilePic');
         if (!event) {
             return res.status(404).json({ success: false, message: "Event not found" });
         }
 
-        const isAttendee = event.attendees.some(att => att.toString() === userId.toString());
-        const isOrganizer = event.organizer?._id?.toString() === userId.toString();
+        if (!event.attendees) event.attendees = [];
+        if (!event.tickets) event.tickets = [];
 
-        if (!isAttendee && !isOrganizer) {
+        const isAttendee = event.attendees.some(att => att && att.toString() === userId.toString());
+        const isOrganizer = event.organizer?._id?.toString() === userId.toString();
+        const isFreeEvent = event.gigType === 'free' || Number(event.price || 0) === 0;
+
+        if (!isAttendee && !isOrganizer && !isFreeEvent) {
+            return res.status(404).json({
+                success: false,
+                message: "No ticket found for this event. Please book a ticket first."
+            });
+        }
+
+        if (!isAttendee && !isOrganizer && isFreeEvent) {
             event.attendees.addToSet(userId);
             await event.save();
         }
 
-        let existingTicket = event.tickets.find(t => t.user.toString() === userId.toString());
+        let existingTicket = event.tickets.find(t => t && t.user && t.user.toString() === userId.toString());
 
         if (!existingTicket) {
             const randomCode = 'ART-' + Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -630,7 +653,7 @@ exports.generateEventTicket = async (req, res) => {
             await event.save();
         }
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             ticket: existingTicket,
             event: {
@@ -651,27 +674,37 @@ exports.generateEventTicket = async (req, res) => {
         });
     } catch (error) {
         console.error("Generate Ticket Error:", error);
-        res.status(500).json({ success: false, message: "Error generating ticket pass", error: error.message });
+        return res.status(500).json({ success: false, message: "Error generating ticket pass", error: error.message });
     }
 };
 
 exports.getMyEventTicket = async (req, res) => {
     try {
         const { id } = req.params;
-        const userId = req.user._id;
+        const userId = req.user?._id || req.user?.id;
+
+        if (!userId) {
+            return res.status(401).json({ success: false, message: "Unauthorized access - please log in." });
+        }
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(404).json({ success: false, message: "Event not found" });
+        }
 
         const event = await Event.findById(id).populate('organizer', 'name email profilePic');
         if (!event) {
             return res.status(404).json({ success: false, message: "Event not found" });
         }
 
-        let ticket = event.tickets.find(t => t.user.toString() === userId.toString());
+        if (!event.tickets) event.tickets = [];
+
+        let ticket = event.tickets.find(t => t && t.user && t.user.toString() === userId.toString());
 
         if (!ticket) {
             return exports.generateEventTicket(req, res);
         }
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             ticket,
             event: {
@@ -692,26 +725,40 @@ exports.getMyEventTicket = async (req, res) => {
         });
     } catch (error) {
         console.error("Get My Ticket Error:", error);
-        res.status(500).json({ success: false, message: "Error fetching ticket" });
+        return res.status(500).json({ success: false, message: "Error fetching ticket", error: error.message });
     }
 };
 
 exports.verifyTicketEntry = async (req, res) => {
     try {
-        const { ticketCode, qrToken, eventId } = req.body;
+        let { ticketCode, qrToken, eventId } = req.body;
+
+        if (ticketCode && typeof ticketCode === 'string' && ticketCode.trim().startsWith('{')) {
+            try {
+                const parsed = JSON.parse(ticketCode.trim());
+                if (parsed.code) ticketCode = parsed.code;
+                if (parsed.token) qrToken = parsed.token;
+                if (parsed.eventId && !eventId) eventId = parsed.eventId;
+            } catch (e) {
+                // Ignore parse error and keep original string
+            }
+        }
 
         if (!ticketCode && !qrToken) {
             return res.status(400).json({ success: false, message: "Ticket Code or QR Token is required for entry scan." });
         }
 
         let event;
-        if (eventId) {
+        if (eventId && mongoose.Types.ObjectId.isValid(eventId)) {
             event = await Event.findById(eventId).populate('tickets.user', 'name email profilePic');
         } else {
             event = await Event.findOne({
                 'tickets': {
                     $elemMatch: {
-                        $or: [{ ticketCode: ticketCode?.toUpperCase() }, { qrToken }]
+                        $or: [
+                            ...(ticketCode ? [{ ticketCode: ticketCode.toUpperCase() }] : []),
+                            ...(qrToken ? [{ qrToken }] : [])
+                        ]
                     }
                 }
             }).populate('tickets.user', 'name email profilePic');

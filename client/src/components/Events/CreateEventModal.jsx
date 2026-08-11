@@ -8,6 +8,7 @@ import api from '../../utils/api';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import CloudinaryUpload from './CloudinaryUpload';
+import LocationPickerMap from '../MarketPlace/LocationPickerMap';
 
 // Custom Leaflet DivIcon for Event Marker
 const createEventMarkerIcon = () => {
@@ -434,7 +435,7 @@ const CreateEventModal = ({ isOpen, onClose, refresh, eventToEdit = null }) => {
                                 'Content-Type': 'application/json',
                                 ...(token ? { Authorization: `Bearer ${token}` } : {})
                             };
-                            res = await axios.put(`http://localhost:5000/api/events/update/${eventId}`, payload, { headers });
+                            res = await api.put(`/events/update/${eventId}`, payload);
                         }
                     }
                 }
@@ -465,7 +466,7 @@ const CreateEventModal = ({ isOpen, onClose, refresh, eventToEdit = null }) => {
     const isEditing = Boolean(eventToEdit);
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
             <Motion.div
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                 onClick={onClose}
@@ -473,21 +474,21 @@ const CreateEventModal = ({ isOpen, onClose, refresh, eventToEdit = null }) => {
             />
 
             <Motion.div
-                initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                initial={{ scale: 0.95, opacity: 0, y: 15 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
-                className="relative bg-[#0f0f0f] border border-white/10 w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl z-10"
+                className="relative bg-[#0f0f0f] border border-white/10 w-full max-w-2xl max-h-[88vh] rounded-3xl overflow-hidden shadow-2xl z-10 my-auto flex flex-col"
             >
-                <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+                <div className="p-4 sm:p-6 border-b border-white/5 flex justify-between items-center bg-white/[0.02] shrink-0">
                     <div className="flex items-center gap-2">
                         {isEditing && <Pencil size={20} className="text-indigo-400" />}
-                        <h2 className="text-xl font-bold text-white">{isEditing ? "Edit Gig Details" : "Post New Gig"}</h2>
+                        <h2 className="text-lg sm:text-xl font-bold text-white">{isEditing ? "Edit Gig Details" : "Post New Gig"}</h2>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-full transition-colors">
+                    <button onClick={onClose} className="p-2 min-w-[40px] min-h-[40px] flex items-center justify-center hover:bg-white/5 rounded-full transition-colors">
                         <X size={20} className="text-white/50" />
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="p-8 grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                <form onSubmit={handleSubmit} className="p-4 sm:p-6 md:p-8 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 overflow-y-auto custom-scrollbar flex-1">
                     {/* Commercial Gig Model Selector */}
                     <div className="md:col-span-2 space-y-2">
                         <label className="text-xs font-bold text-white/40 uppercase tracking-wider">Select Gig Model Type</label>
@@ -645,124 +646,61 @@ const CreateEventModal = ({ isOpen, onClose, refresh, eventToEdit = null }) => {
                             <span className="font-bold">Entry Fee: ₹0 • Performer Pay: ₹0</span>
                         </div>
                     )}
-                    <div className="space-y-2">
-                        <label className="text-xs font-bold text-white/40 uppercase flex items-center gap-2"><MapPin size={12} /> Venue / Online</label>
+                    <div className="space-y-2 md:col-span-2">
+                        <label className="text-xs font-bold text-white/40 uppercase flex items-center gap-2"><MapPin size={12} /> Venue / Location Name</label>
                         <input
                             required
                             type="text"
-                            placeholder="e.g. Starbucks, Third Wave Coffee, BKC Mumbai"
+                            placeholder="e.g. Starbucks Bandra, Hard Rock Cafe, BKC Mumbai"
                             className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-indigo-500 outline-none"
                             value={formData.location}
-                            onChange={(e) => {
-                                setFormData({ ...formData, location: e.target.value });
-                                setSearchQuery(e.target.value);
-                                handleSearchLocation(e.target.value);
-                            }}
-                            onFocus={() => {
-                                if (searchResults.length > 0) setShowDropdown(true);
-                            }}
+                            onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                         />
                     </div>
 
-                    {/* Interactive Map Location Search & Picker */}
+                    {/* Interactive Map Location Search & Geocoding Picker */}
                     <div className="md:col-span-2 space-y-3">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                            <label className="text-xs font-bold text-white/40 uppercase flex items-center gap-2">
-                                <MapPin size={14} className="text-indigo-400" /> Search & Select Location on Map
-                            </label>
-                            <button
-                                type="button"
-                                onClick={handleUseCurrentLocation}
-                                disabled={isLocating}
-                                className="shrink-0 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all disabled:opacity-50 flex items-center gap-1.5 active:scale-95 self-start sm:self-auto"
-                            >
-                                <Navigation size={13} className={isLocating ? 'animate-spin' : ''} />
-                                {isLocating ? 'Locating...' : 'Use Current Location'}
-                            </button>
-                        </div>
-
-                        {/* Search Input Field */}
-                        <div className="relative z-30">
-                            <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3.5 py-2.5 focus-within:border-indigo-500 transition-all">
-                                <Search size={16} className="text-indigo-400 shrink-0" />
-                                <input
-                                    type="text"
-                                    placeholder="Search cafe, restaurant, venue, landmark (e.g. Starbucks Bandra, Hard Rock Cafe)..."
-                                    className="w-full bg-transparent text-white text-xs outline-none placeholder:text-white/30"
-                                    value={searchQuery}
-                                    onChange={(e) => {
-                                        setSearchQuery(e.target.value);
-                                        handleSearchLocation(e.target.value);
-                                    }}
-                                    onFocus={() => {
-                                        if (searchResults.length > 0) setShowDropdown(true);
-                                    }}
-                                />
-                                {isSearching && <Loader2 size={16} className="animate-spin text-indigo-400 shrink-0" />}
-                            </div>
-
-                            {/* Dropdown Suggestions */}
-                            {showDropdown && searchResults.length > 0 && (
-                                <div className="absolute left-0 right-0 top-full mt-1 bg-[#141414] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-[500] max-h-60 overflow-y-auto custom-scrollbar">
-                                    {searchResults.map((item, index) => {
-                                        const cat = getPlaceCategoryInfo(item);
-                                        const placeName = item.namedetails?.name || item.name || item.display_name.split(',')[0];
-                                        const addressSnippet = item.display_name.split(',').slice(1, 4).join(',').trim();
-
-                                        return (
-                                            <div
-                                                key={index}
-                                                onClick={() => handleSelectSearchResult(item)}
-                                                className="px-4 py-3 hover:bg-indigo-600/20 cursor-pointer border-b border-white/5 last:border-0 transition-colors flex items-start justify-between gap-3 text-left group"
-                                            >
-                                                <div className="flex items-start gap-2.5 min-w-0">
-                                                    <span className="text-base shrink-0 mt-0.5">{cat.icon}</span>
-                                                    <div className="text-xs min-w-0">
-                                                        <p className="text-white font-semibold line-clamp-1 group-hover:text-indigo-300 transition-colors">{placeName}</p>
-                                                        <p className="text-[10px] text-white/50 line-clamp-1">{addressSnippet || item.display_name}</p>
-                                                    </div>
-                                                </div>
-                                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${cat.badgeClass}`}>
-                                                    {cat.label}
-                                                </span>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            )}
-                        </div>
-
-                        <MapLocationPicker
+                        <label className="text-xs font-bold text-white/40 uppercase flex items-center gap-2">
+                            <MapPin size={14} className="text-amber-400" /> Interactive Venue Search & Map Picker
+                        </label>
+                        <LocationPickerMap
                             selectedLat={formData.latitude}
                             selectedLng={formData.longitude}
-                            onLocationPicked={handleMapLocationPicked}
+                            locationName={formData.location}
+                            placeholder="Search venue (e.g. Starbucks Bandra Mumbai, Hard Rock Cafe)..."
+                            onLocationChange={({ latitude, longitude, location }) => {
+                                setFormData(prev => ({
+                                    ...prev,
+                                    latitude: typeof latitude === 'number' ? latitude.toFixed(6) : latitude,
+                                    longitude: typeof longitude === 'number' ? longitude.toFixed(6) : longitude,
+                                    location: location || prev.location
+                                }));
+                            }}
                         />
                     </div>
 
                     <div className="space-y-2">
                         <label className="text-xs font-bold text-white/40 uppercase flex items-center gap-2">
-                            <Navigation size={12} /> Latitude
+                            <Navigation size={12} /> Latitude (Auto-Generated)
                         </label>
                         <input
-                            type="number"
-                            step="any"
+                            type="text"
+                            readOnly
                             placeholder="e.g. 19.0760"
-                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-indigo-500 outline-none"
+                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-amber-300 font-mono text-xs outline-none cursor-default"
                             value={formData.latitude}
-                            onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
                         />
                     </div>
                     <div className="space-y-2">
                         <label className="text-xs font-bold text-white/40 uppercase flex items-center gap-2">
-                            <Navigation size={12} /> Longitude
+                            <Navigation size={12} /> Longitude (Auto-Generated)
                         </label>
                         <input
-                            type="number"
-                            step="any"
+                            type="text"
+                            readOnly
                             placeholder="e.g. 72.8777"
-                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-indigo-500 outline-none"
+                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-amber-300 font-mono text-xs outline-none cursor-default"
                             value={formData.longitude}
-                            onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
                         />
                     </div>
 

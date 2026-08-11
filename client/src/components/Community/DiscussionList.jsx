@@ -3,7 +3,7 @@ import api from '../../utils/api';
 import { Send, Loader2, Trash2, Tag, Filter, Image as ImageIcon, X, MessageSquare, Mic, Square, PlayCircle } from 'lucide-react';
 import PostCard from './postCard';
 import ConfirmDeleteModal from '../ConfirmDeleteModal';
-import { io } from 'socket.io-client';
+import { socket } from '../../socket';
 import Masonry from 'react-masonry-css';
 
 const POST_CATEGORIES = ['General', 'Looking for Band', 'Art Feedback', 'Gigs'];
@@ -32,7 +32,6 @@ export function DiscussionList({ missionDraft }) {
     const [postToDelete, setPostToDelete] = useState(null);
 
     const currentUser = JSON.parse(localStorage.getItem('user'));
-    const socket = io("http://localhost:5000");
 
     const breakpointColumnsObj = {
         default: 3,
